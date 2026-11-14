@@ -44,7 +44,11 @@ except Exception as erreur:  # fichier absent, identifiants AWS absents ou expir
 
 with st.sidebar:
     st.header("Le dossier")
-    cle = st.selectbox("Investisseur (fictif)", list(PROFILS), format_func=lambda c: PROFILS[c].nom)
+    profils = list(PROFILS)
+    persona = st.query_params.get("persona")
+    index_initial = profils.index(persona) if persona in PROFILS else 0
+    cle = st.selectbox("Investisseur (fictif)", profils, index=index_initial,
+                       format_func=lambda c: PROFILS[c].nom)
     profil = PROFILS[cle]
     st.write(profil.resume)
     st.write(f"**Objectif :** {profil.objectif}")
