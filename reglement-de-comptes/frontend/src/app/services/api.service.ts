@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Actif, AnalyseComparative, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif } from '../models/proces.model';
+import { Actif, AnalyseComparative, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
 
 /** Accès HTTP à l'API Python. Les chemins sont relatifs : nginx (ou ng serve) relaie /api/. */
 @Injectable({ providedIn: 'root' })
@@ -28,6 +28,10 @@ export class ApiService {
 
   ouvrirProces(demande: DemandeProces): Observable<Proces> {
     return this.http.post<Proces>(`${this.base}/proces`, demande);
+  }
+
+  discussionProces(demande: DemandeProces): Observable<TourDiscussion[]> {
+    return this.http.post<TourDiscussion[]>(`${this.base}/proces/discussion`, demande);
   }
 
   interpreterIntention(profil: string, texte: string): Observable<IntentionResultat> {

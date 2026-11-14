@@ -1,0 +1,104 @@
+{
+  "ticker": "MSFT",
+  "nom": "Microsoft",
+  "classe_actif": "equity",
+  "marche": "NASDAQ",
+  "devise_origine": "USD",
+  "secteur": "Information Technology",
+  "prix": {
+    "dernier_prix_cad": 745.54,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 285.08,
+    "prix_max_5ans_cad": 775.95
+  },
+  "rendements": {
+    "cumule_5ans": 0.8361,
+    "cagr_annualise": 0.1246,
+    "rendement_1an": 0.1152,
+    "rendement_3ans": 0.5412,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.2754,
+    "volatilite_baisse_semi_deviation": 0.1845,
+    "pire_baisse_globale": -0.3430779787717696,
+    "pire_baisse_2022": -0.30136723261675513,
+    "creux_date": "2026-03-27",
+    "sommet_date": "2025-10-28",
+    "annees_sous_le_sommet": 0.94,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.027,
+    "cvar_95_expected_shortfall": 0.0375,
+    "var_95_cornish_fisher": 0.0228,
+    "var_99_quotidienne": 0.0419,
+    "cvar_99_expected_shortfall": 0.0551,
+    "var_95_1mois_estimee": 0.1236
+  },
+  "distribution": {
+    "skewness": 0.515,
+    "excess_kurtosis": 7.124,
+    "statistique_jb": 2814.83,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Asymétrie prononcée ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1246,
+    "volatilite_annuelle": 0.2754,
+    "volatilite_baisse_sortino": 0.1845,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.33,
+    "ratio_sortino": 0.49,
+    "ratio_calmar": 0.36
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 1.14,
+    "alpha_annuel_vs_spy": -0.03,
+    "correlation_vs_spy": 0.68,
+    "beta_xiu_canada": 0.79,
+    "alpha_annuel_vs_xiu.to": 0.0137,
+    "correlation_vs_xiu.to": 0.37,
+    "correlation_variation_usdcad": 0.03,
+    "correlation_taux_10y_canada": -0.03,
+    "correlation_taux_10y_us": 0.01,
+    "correlation_taux_directeur_boc": 0.03
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.2524,
+      "pire_baisse_pendant_regime": -0.2636
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.2194,
+      "pire_baisse_pendant_regime": -0.0453
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.1558,
+      "pire_baisse_pendant_regime": -0.1449
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 4.47,
+    "rendement_dividende_pct": 0.006,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-08-20",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Information Technology",
+    "Volatilité Élevée",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement"
+  ],
+  "synthese_agent_llm": "Microsoft (MSFT) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.5% pour une volatilité de 27.5% (ratio de Sharpe de 0.33). Sa VaR quotidienne à 95% est de 2.7%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+}

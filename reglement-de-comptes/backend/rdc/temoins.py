@@ -20,6 +20,7 @@ DESCRIPTIONS = {
                        "secteur et par devise",
     "valeurs": "preuves ESG collectées à la main par l'équipe dans des documents publics",
     "macro": "taux directeur, rendement obligataire et inflation pendant la pire baisse",
+    "action": "fiche d'identité financière avancée précalculée : VaR, Sharpe, Bêta, dividende, moments",
 }
 
 
@@ -145,4 +146,44 @@ def macro(dossier, greffier: Greffier, appele_par: str) -> Piece:
     )
 
 
-TEMOINS = {"risque": risque, "diversification": diversification, "valeurs": valeurs, "macro": macro}
+def action_temoin(dossier, greffier: Greffier, appele_par: str) -> Piece:
+    """Témoin de la fiche financière de l'action : dépose les métriques quantitatives précalculées."""
+    from . import actions_store
+    t = dossier.ticker
+    fiche = actions_store.obtenir_fiche_action(t)
+    r = fiche["rendements"]
+    rq = fiche["risque"]
+    rp = fiche["ratios_performance"]
+    sm = fiche["sensibilites_marche_et_macro"]
+    ac = fiche["actions_corporatives"]
+    faits = {
+        f"Nom et secteur de {t}": f"{fiche['nom']} ({fiche['secteur']})",
+        f"Rendement annualisé 5 ans (CAGR) de {t}": pct(r["cagr_annualise"]),
+        f"Rendement 1 an de {t}": pct(r["rendement_1an"]),
+        f"Volatilité annuelle de {t}": pct(rq["volatilite_annuelle"]),
+        f"Pire baisse observée (Max Drawdown) de {t}": pct(rq["pire_baisse_globale"]),
+        f"Value at Risk quotidienne 95 % (VaR) de {t}": pct(rq["var_95_quotidienne"]),
+        f"Conditional VaR quotidienne 95 % (Expected Shortfall) de {t}": pct(rq["cvar_95_expected_shortfall"]),
+        f"Ratio de Sharpe de {t}": nombre(rp["ratio_sharpe"]),
+        f"Ratio de Sortino de {t}": nombre(rp["ratio_sortino"]),
+        f"Bêta par rapport au S&P 500 (SPY CAD) de {t}": nombre(sm.get("beta_spy_cad", 1.0)),
+        f"Rendement du dividende estimé de {t}": pct(ac["rendement_dividende_pct"]),
+        f"Fréquence des dividendes de {t}": str(ac["frequence_dividende"]),
+        f"Diagnostic de distribution de {t}": str(fiche["distribution"]["diagnostic"]),
+    }
+    return greffier.deposer(
+        temoin="action", outil="rdc.actions_store.obtenir_fiche_action",
+        appele_par=appele_par, parametres={"ticker": t},
+        faits=faits, source="Fiche précalculée persistée S3 / Local (prices_daily.csv, corporate_actions.csv)",
+        periode=f"{r['date_debut']} au {r['date_fin']}",
+        limites="Métriques historiques basées sur le passé observé (2021-2026). Ne garantissent pas le futur.",
+    )
+
+
+TEMOINS = {
+    "risque": risque,
+    "diversification": diversification,
+    "valeurs": valeurs,
+    "macro": macro,
+    "action": action_temoin,
+}

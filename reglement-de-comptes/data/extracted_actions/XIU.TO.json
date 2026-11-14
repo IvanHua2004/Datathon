@@ -1,0 +1,110 @@
+{
+  "ticker": "XIU.TO",
+  "nom": "iShares S&P/TSX 60 Index ETF",
+  "classe_actif": "etf_equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Broad market (Canada)",
+  "prix": {
+    "dernier_prix_cad": 54.55,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 24.81,
+    "prix_max_5ans_cad": 54.82
+  },
+  "rendements": {
+    "cumule_5ans": 0.8965,
+    "cagr_annualise": 0.1317,
+    "rendement_1an": 0.209,
+    "rendement_3ans": 0.8712,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1281,
+    "volatilite_baisse_semi_deviation": 0.0894,
+    "pire_baisse_globale": -0.16360121675968808,
+    "pire_baisse_2022": -0.16360121675968908,
+    "creux_date": "2022-10-12",
+    "sommet_date": "2022-04-04",
+    "annees_sous_le_sommet": 1.73,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0133,
+    "cvar_95_expected_shortfall": 0.0185,
+    "var_95_cornish_fisher": 0.0128,
+    "var_99_quotidienne": 0.0215,
+    "cvar_99_expected_shortfall": 0.0271,
+    "var_95_1mois_estimee": 0.061
+  },
+  "distribution": {
+    "skewness": -0.219,
+    "excess_kurtosis": 3.005,
+    "statistique_jb": 500.94,
+    "p_valeur_jb": 1.6673496145895586e-109,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1317,
+    "volatilite_annuelle": 0.1281,
+    "volatilite_baisse_sortino": 0.0894,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.75,
+    "ratio_sortino": 1.08,
+    "ratio_calmar": 0.8
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.54,
+    "alpha_annuel_vs_spy": 0.0407,
+    "correlation_vs_spy": 0.68,
+    "correlation_variation_usdcad": -0.33,
+    "correlation_taux_10y_canada": -0.16,
+    "correlation_taux_10y_us": -0.11,
+    "correlation_taux_directeur_boc": 0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1174,
+      "pire_baisse_pendant_regime": -0.1636
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.029,
+      "pire_baisse_pendant_regime": -0.0576
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.175,
+      "pire_baisse_pendant_regime": -0.0491
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 1.414,
+    "rendement_dividende_pct": 0.0259,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-08-26",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {
+    "RY.TO": 0.085,
+    "TD.TO": 0.068,
+    "ENB.TO": 0.052,
+    "CNQ.TO": 0.044,
+    "CNR.TO": 0.039,
+    "SHOP.TO": 0.038,
+    "CSU.TO": 0.029,
+    "ATD.TO": 0.024
+  },
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Broad market (Canada)",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "iShares S&P/TSX 60 Index ETF (XIU.TO) est un actif de type etf_equity (Broad market (Canada)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 13.2% pour une volatilité de 12.8% (ratio de Sharpe de 0.75). Sa VaR quotidienne à 95% est de 1.3%. Son profil se caractérise par : FNB Indiciel, Broad market (Canada), Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+}

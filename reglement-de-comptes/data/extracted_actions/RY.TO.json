@@ -1,0 +1,104 @@
+{
+  "ticker": "RY.TO",
+  "nom": "Royal Bank of Canada",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Financials",
+  "prix": {
+    "dernier_prix_cad": 289.39,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 98.37,
+    "prix_max_5ans_cad": 302.02
+  },
+  "rendements": {
+    "cumule_5ans": 1.595,
+    "cagr_annualise": 0.2024,
+    "rendement_1an": 0.3835,
+    "rendement_3ans": 1.4115,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1517,
+    "volatilite_baisse_semi_deviation": 0.105,
+    "pire_baisse_globale": -0.21213828244273358,
+    "pire_baisse_2022": -0.19090449465002357,
+    "creux_date": "2023-10-27",
+    "sommet_date": "2022-01-17",
+    "annees_sous_le_sommet": 2.17,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0146,
+    "cvar_95_expected_shortfall": 0.0221,
+    "var_95_cornish_fisher": 0.0151,
+    "var_99_quotidienne": 0.026,
+    "cvar_99_expected_shortfall": 0.0334,
+    "var_95_1mois_estimee": 0.0669
+  },
+  "distribution": {
+    "skewness": -0.287,
+    "excess_kurtosis": 3.214,
+    "statistique_jb": 579.16,
+    "p_valeur_jb": 1.7261571024921868e-126,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.2024,
+    "volatilite_annuelle": 0.1517,
+    "volatilite_baisse_sortino": 0.105,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 1.1,
+    "ratio_sortino": 1.59,
+    "ratio_calmar": 0.95
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.44,
+    "alpha_annuel_vs_spy": 0.1215,
+    "correlation_vs_spy": 0.47,
+    "beta_xiu_canada": 0.86,
+    "alpha_annuel_vs_xiu.to": 0.0842,
+    "correlation_vs_xiu.to": 0.73,
+    "correlation_variation_usdcad": -0.27,
+    "correlation_taux_10y_canada": -0.1,
+    "correlation_taux_10y_us": -0.07,
+    "correlation_taux_directeur_boc": -0.04
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.0664,
+      "pire_baisse_pendant_regime": -0.1909
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": -0.0205,
+      "pire_baisse_pendant_regime": -0.0758
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.3189,
+      "pire_baisse_pendant_regime": -0.0501
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 8.34,
+    "rendement_dividende_pct": 0.0288,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-10-26",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Financials",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Royal Bank of Canada (RY.TO) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 20.2% pour une volatilité de 15.2% (ratio de Sharpe de 1.1). Sa VaR quotidienne à 95% est de 1.5%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+}

@@ -1,0 +1,114 @@
+{
+  "ticker": "ENB.TO",
+  "nom": "Enbridge",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Energy",
+  "prix": {
+    "dernier_prix_cad": 67.6,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 34.69,
+    "prix_max_5ans_cad": 78.0
+  },
+  "rendements": {
+    "cumule_5ans": 0.8264,
+    "cagr_annualise": 0.1234,
+    "rendement_1an": 0.0636,
+    "rendement_3ans": 0.7153,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1578,
+    "volatilite_baisse_semi_deviation": 0.1134,
+    "pire_baisse_globale": -0.21377560492825554,
+    "pire_baisse_2022": -0.1600241370573846,
+    "creux_date": "2023-10-04",
+    "sommet_date": "2022-06-07",
+    "annees_sous_le_sommet": 2.15,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0156,
+    "cvar_95_expected_shortfall": 0.0241,
+    "var_95_cornish_fisher": 0.0168,
+    "var_99_quotidienne": 0.0312,
+    "cvar_99_expected_shortfall": 0.0375,
+    "var_95_1mois_estimee": 0.0715
+  },
+  "distribution": {
+    "skewness": -0.562,
+    "excess_kurtosis": 2.703,
+    "statistique_jb": 465.74,
+    "p_valeur_jb": 7.340447501942825e-102,
+    "est_normale": false,
+    "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1234,
+    "volatilite_annuelle": 0.1578,
+    "volatilite_baisse_sortino": 0.1134,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.56,
+    "ratio_sortino": 0.78,
+    "ratio_calmar": 0.58
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.19,
+    "alpha_annuel_vs_spy": 0.0686,
+    "correlation_vs_spy": 0.2,
+    "beta_xiu_canada": 0.6,
+    "alpha_annuel_vs_xiu.to": 0.0308,
+    "correlation_vs_xiu.to": 0.48,
+    "correlation_variation_usdcad": -0.23,
+    "correlation_taux_10y_canada": -0.08,
+    "correlation_taux_10y_us": -0.08,
+    "correlation_taux_directeur_boc": 0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": 0.0587,
+      "pire_baisse_pendant_regime": -0.16
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0471,
+      "pire_baisse_pendant_regime": -0.0568
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2495,
+      "pire_baisse_pendant_regime": -0.0735
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 4.796,
+    "rendement_dividende_pct": 0.0709,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-08-14",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [
+    {
+      "type": "exclusion",
+      "nature": "fait_etabli",
+      "fait": "Exploitation et expansion d oléoducs majeurs (Line 3 et Line 5) transportant des sables bitumineux à forte intensité carbone.",
+      "source": "Régie de l énergie du Canada (REC) / Rapport RSE Enbridge 2023",
+      "url": "https://www.cer-rec.gc.ca",
+      "date_document": "2023-05-15"
+    }
+  ],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Energy",
+    "Queues Épaisses (Fat Tails)",
+    "Asymétrie Baissière",
+    "Fort Dividende (>4%)",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Enbridge (ENB.TO) est un actif de type equity (Energy). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.3% pour une volatilité de 15.8% (ratio de Sharpe de 0.56). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : Action Individuelle, Energy, Queues Épaisses (Fat Tails), Asymétrie Baissière, Fort Dividende (>4%), Bêta Défensif (<0.7)."
+}

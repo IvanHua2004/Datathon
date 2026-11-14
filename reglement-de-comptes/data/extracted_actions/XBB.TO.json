@@ -1,0 +1,105 @@
+{
+  "ticker": "XBB.TO",
+  "nom": "iShares Core Canadian Universe Bond Index ETF",
+  "classe_actif": "etf_bond",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Bonds (Canada aggregate)",
+  "prix": {
+    "dernier_prix_cad": 27.53,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 23.05,
+    "prix_max_5ans_cad": 27.95
+  },
+  "rendements": {
+    "cumule_5ans": 0.0361,
+    "cagr_annualise": 0.0069,
+    "rendement_1an": -0.004,
+    "rendement_3ans": 0.0714,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.0652,
+    "volatilite_baisse_semi_deviation": 0.0462,
+    "pire_baisse_globale": -0.1547973557734016,
+    "pire_baisse_2022": -0.15337637117645386,
+    "creux_date": "2022-10-20",
+    "sommet_date": "2021-12-17",
+    "annees_sous_le_sommet": 3.21,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0068,
+    "cvar_95_expected_shortfall": 0.0089,
+    "var_95_cornish_fisher": 0.0065,
+    "var_99_quotidienne": 0.0101,
+    "cvar_99_expected_shortfall": 0.0117,
+    "var_95_1mois_estimee": 0.0312
+  },
+  "distribution": {
+    "skewness": 0.053,
+    "excess_kurtosis": 1.304,
+    "statistique_jb": 93.0,
+    "p_valeur_jb": 6.39505071505565e-21,
+    "est_normale": false,
+    "diagnostic": "Distribution proche d'une loi normale"
+  },
+  "ratios_performance": {
+    "cagr": 0.0069,
+    "volatilite_annuelle": 0.0652,
+    "volatilite_baisse_sortino": 0.0462,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": -0.43,
+    "ratio_sortino": -0.61,
+    "ratio_calmar": 0.04
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.05,
+    "alpha_annuel_vs_spy": -0.0335,
+    "correlation_vs_spy": 0.13,
+    "beta_xiu_canada": 0.1,
+    "alpha_annuel_vs_xiu.to": -0.0377,
+    "correlation_vs_xiu.to": 0.19,
+    "correlation_variation_usdcad": -0.06,
+    "correlation_taux_10y_canada": -0.96,
+    "correlation_taux_10y_us": -0.81,
+    "correlation_taux_directeur_boc": -0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1409,
+      "pire_baisse_pendant_regime": -0.1481
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0196,
+      "pire_baisse_pendant_regime": -0.0209
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.0258,
+      "pire_baisse_pendant_regime": -0.0322
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 1.047,
+    "rendement_dividende_pct": 0.038,
+    "nb_paiements_total_5ans": 60,
+    "frequence_dividende": "Mensuel",
+    "derniere_date_ex": "2026-10-27",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Bonds (Canada aggregate)",
+    "Défensif / Faible Volatilité",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)",
+    "Vulnérable aux Taux d'Intérêt"
+  ],
+  "synthese_agent_llm": "iShares Core Canadian Universe Bond Index ETF (XBB.TO) est un actif de type etf_bond (Bonds (Canada aggregate)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 0.7% pour une volatilité de 6.5% (ratio de Sharpe de -0.43). Sa VaR quotidienne à 95% est de 0.7%. Son profil se caractérise par : FNB Indiciel, Bonds (Canada aggregate), Défensif / Faible Volatilité, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+}

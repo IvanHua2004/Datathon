@@ -138,6 +138,18 @@ def depositions_temoins_incarnee(proces) -> list[dict]:
                 "piece": n,
                 "texte": texte
             })
+        elif piece.temoin == "action":
+            texte = (f"En qualité d'analyste quantitatif, je dépose sous serment la fiche technique [{n}] de l'action {t}. "
+                     f"L'actif enregistre un ratio de Sharpe de {f.get(f'Ratio de Sharpe de {t}', 'N/A')}, un Bêta de {f.get(f'Bêta par rapport au S&P 500 (SPY CAD) de {t}', 'N/A')} "
+                     f"et une VaR quotidienne à 95% de {f.get(f'Value at Risk quotidienne 95 % (VaR) de {t}', 'N/A')} "
+                     f"(Expected Shortfall CVaR de {f.get(f'Conditional VaR quotidienne 95 % (Expected Shortfall) de {t}', 'N/A')}).")
+            resultats.append({
+                "temoin": "action",
+                "personnage": "Dr. Laurent (Analyste Quantitatif & Risque de Queue)",
+                "role": "Témoin Analyse Financière de l'Action",
+                "piece": n,
+                "texte": texte
+            })
     return resultats
 
 

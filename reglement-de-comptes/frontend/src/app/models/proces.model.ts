@@ -120,6 +120,24 @@ export interface Piece {
   limites: string;
 }
 
+export interface TourDiscussion {
+  ordre: number;
+  etape: string;
+  acteur: string;
+  role: 'huissier' | 'greffier' | 'avocat_defense' | 'procureur' | 'temoin' | 'juge' | string;
+  avatar: string;
+  titre: string;
+  texte: string;
+  pause_ms: number;
+  statut?: 'valide' | 'alerte' | string;
+  non_verifies?: string[];
+  pieces_associees?: string[];
+  piece?: string;
+  temoin?: string;
+  verdict?: Verdict;
+  convoques?: string[];
+}
+
 export interface Proces {
   demande: {
     profil: string;
@@ -145,4 +163,5 @@ export interface Proces {
   budgetPerte: number;
   pieces: Piece[];
   rapport_explicabilite?: string;
+  discussion?: TourDiscussion[];
 }

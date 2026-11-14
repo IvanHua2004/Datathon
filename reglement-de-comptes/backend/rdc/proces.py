@@ -253,6 +253,172 @@ def lancer_proces_stream(profil: Profil, ticker: str, taille: float, mode: str =
     }
 
 
+def construire_timeline_discussion(proces: Proces) -> list[dict]:
+    """Construit la séquence chronologique du débat pour une restitution animée côté front.
+
+    Permet à l'interface de dérouler une discussion vivante et cadencée entre :
+    1. L'Huissier (ouverture de séance)
+    2. Le Greffier (dépôt et scellé des pièces)
+    3. Les Témoins experts sous serment (dépositions incarnées)
+    4. L'Avocat de la Défense (Me Vigor - plaidoirie)
+    5. Le Greffier (contrôle factuel de la défense)
+    6. L'Autre Avocat / Le Procureur (Me Austère - réquisitoire)
+    7. Le Greffier (contrôle factuel du procureur)
+    8. Le Président du Tribunal (délibéré, verdict officiel et motivation)
+    """
+    from . import agents
+
+    dossier = proces.dossier
+    profil = dossier.profil
+    timeline: list[dict] = []
+    ordre = 1
+
+    # 1. Ouverture solennelle par l'Huissier
+    volonte = proces.intention_texte or f"Allouer {pct(dossier.taille, 0)} dans {dossier.ticker}"
+    nom_titre = dossier.donnees.univers.loc[dossier.ticker, "name"] if dossier.ticker in dossier.donnees.univers.index else dossier.ticker
+    timeline.append({
+        "ordre": ordre,
+        "etape": "HUISSIER_OUVERTURE",
+        "acteur": "L'Huissier d'audience",
+        "role": "huissier",
+        "avatar": "📢",
+        "titre": "Ouverture solennelle de la séance",
+        "texte": (f"Silence dans la salle ! Le Tribunal d'AlphaForge entre en audience solennelle. "
+                  f"Affaire en délibéré : l'investisseur {profil.nom} ({profil.resume}) soumet la volonté suivante : "
+                  f"« {volonte} ». "
+                  f"L'actif visé est {dossier.ticker} ({nom_titre}). "
+                  f"Que les témoins experts prêtent serment et déposent leurs pièces à conviction."),
+        "pause_ms": 2500,
+    })
+    ordre += 1
+
+    # 2. Dépôt des pièces par le Greffier
+    pieces_numeros = [p.numero for p in proces.greffier.pieces]
+    pieces_resume = ", ".join(f"[{p.numero}] {p.temoin.capitalize()}" for p in proces.greffier.pieces)
+    timeline.append({
+        "ordre": ordre,
+        "etape": "GREFFIER_DEPOT",
+        "acteur": "Le Greffier d'audience",
+        "role": "greffier",
+        "avatar": "📜",
+        "titre": "Enregistrement des pièces au greffe",
+        "texte": (f"Monsieur le Président, j'enregistre officiellement {len(proces.greffier.pieces)} pièces à conviction "
+                  f"au dossier de l'affaire : {pieces_resume}. "
+                  f"Toutes les données ont été calculées et scellées sous contrôle du greffe."),
+        "pieces_associees": pieces_numeros,
+        "pause_ms": 2200,
+    })
+    ordre += 1
+
+    # 3. Déposition des témoins incarnés
+    depositions = agents.depositions_temoins_incarnee(proces)
+    icones_temoins = {
+        "risque": "📊",
+        "diversification": "🧭",
+        "valeurs": "🌱",
+        "macro": "🏦",
+    }
+    for dep in depositions:
+        timeline.append({
+            "ordre": ordre,
+            "etape": "TEMOIN",
+            "acteur": dep["personnage"],
+            "role": "temoin",
+            "avatar": icones_temoins.get(dep["temoin"], "⚖️"),
+            "titre": f"Déposition sous serment — Pièce [{dep['piece']}] ({dep['role']})",
+            "temoin": dep["temoin"],
+            "piece": dep["piece"],
+            "texte": dep["texte"],
+            "pause_ms": 3200,
+        })
+        ordre += 1
+
+    # 4. Plaidoirie de la Défense (Me Vigor)
+    defense = proces.plaidoiries[0] if proces.plaidoiries else None
+    if defense:
+        timeline.append({
+            "ordre": ordre,
+            "etape": "PLAIDOIRIE_DEFENSE",
+            "acteur": defense.role,
+            "role": "avocat_defense",
+            "avatar": "💼",
+            "titre": "Plaidoirie en faveur de la demande",
+            "texte": defense.texte,
+            "convoques": defense.temoins_convoques,
+            "pause_ms": 3800,
+        })
+        ordre += 1
+
+        # 5. Audit de la Défense par le Greffier
+        non_v = defense.non_verifies
+        texte_greffier = (f"⚠️ Alerte du Greffier : chiffres absents des pièces d'instruction cités par la Défense → {', '.join(non_v)}."
+                          if non_v else "Contrôle du Greffier : tous les chiffres cités par Me Vigor sont strictement conformes aux pièces scellées.")
+        timeline.append({
+            "ordre": ordre,
+            "etape": "AUDIT_GREFFIER_DEFENSE",
+            "acteur": "Le Greffier d'audience",
+            "role": "greffier",
+            "avatar": "⚖️",
+            "titre": "Contrôle factuel de la Défense",
+            "texte": texte_greffier,
+            "statut": "alerte" if non_v else "valide",
+            "non_verifies": non_v,
+            "pause_ms": 2000,
+        })
+        ordre += 1
+
+    # 6. Réquisitoire du Procureur (Me Austère)
+    procureur = proces.plaidoiries[1] if len(proces.plaidoiries) > 1 else None
+    if procureur:
+        timeline.append({
+            "ordre": ordre,
+            "etape": "REQUISITOIRE_PROCUREUR",
+            "acteur": procureur.role,
+            "role": "procureur",
+            "avatar": "🛡️",
+            "titre": "Réquisitoire de la Gouvernance et des Risques",
+            "texte": procureur.texte,
+            "convoques": procureur.temoins_convoques,
+            "pause_ms": 4000,
+        })
+        ordre += 1
+
+        # 7. Audit du Procureur par le Greffier
+        non_v_p = procureur.non_verifies
+        texte_greffier_p = (f"⚠️ Alerte du Greffier : chiffres absents des pièces cités par le Procureur → {', '.join(non_v_p)}."
+                            if non_v_p else "Contrôle du Greffier : les objections du Procureur s'appuient fidèlement sur les relevés certifiés.")
+        timeline.append({
+            "ordre": ordre,
+            "etape": "AUDIT_GREFFIER_PROCUREUR",
+            "acteur": "Le Greffier d'audience",
+            "role": "greffier",
+            "avatar": "⚖️",
+            "titre": "Contrôle factuel du Procureur",
+            "texte": texte_greffier_p,
+            "statut": "alerte" if non_v_p else "valide",
+            "non_verifies": non_v_p,
+            "pause_ms": 2000,
+        })
+        ordre += 1
+
+    # 8. Verdict motivé du Président du Tribunal (Le Juge)
+    juge = proces.motivation
+    if juge:
+        timeline.append({
+            "ordre": ordre,
+            "etape": "VERDICT_JUGE",
+            "acteur": juge.role,
+            "role": "juge",
+            "avatar": "👨‍⚖️",
+            "titre": f"Délibéré et Verdict officiel : {proces.decision['verdict']}",
+            "verdict": proces.decision["verdict"],
+            "texte": juge.texte,
+            "pause_ms": 4500,
+        })
+
+    return timeline
+
+
 def lancer_debat(persona, demande_utilisateur, mode: str = "gabarit") -> Proces:
     """Point d'entrée de haut niveau du débat du procès.
     

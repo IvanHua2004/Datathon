@@ -1,0 +1,110 @@
+{
+  "ticker": "SPY",
+  "nom": "SPDR S&P 500 ETF Trust",
+  "classe_actif": "etf_equity",
+  "marche": "NYSE Arca",
+  "devise_origine": "USD",
+  "secteur": "Broad market (U.S.)",
+  "prix": {
+    "dernier_prix_cad": 1079.27,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 446.28,
+    "prix_max_5ans_cad": 1111.1
+  },
+  "rendements": {
+    "cumule_5ans": 0.9654,
+    "cagr_annualise": 0.1395,
+    "rendement_1an": 0.1459,
+    "rendement_3ans": 0.7855,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1635,
+    "volatilite_baisse_semi_deviation": 0.1131,
+    "pire_baisse_globale": -0.2224574292724648,
+    "pire_baisse_2022": -0.21650888407241098,
+    "creux_date": "2022-06-16",
+    "sommet_date": "2021-12-27",
+    "annees_sous_le_sommet": 1.56,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0156,
+    "cvar_95_expected_shortfall": 0.0237,
+    "var_95_cornish_fisher": 0.0138,
+    "var_99_quotidienne": 0.0277,
+    "cvar_99_expected_shortfall": 0.0385,
+    "var_95_1mois_estimee": 0.0717
+  },
+  "distribution": {
+    "skewness": 0.163,
+    "excess_kurtosis": 10.001,
+    "statistique_jb": 5439.73,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1395,
+    "volatilite_annuelle": 0.1635,
+    "volatilite_baisse_sortino": 0.1131,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.64,
+    "ratio_sortino": 0.92,
+    "ratio_calmar": 0.63
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_xiu_canada": 0.87,
+    "alpha_annuel_vs_xiu.to": 0.0202,
+    "correlation_vs_xiu.to": 0.68,
+    "correlation_variation_usdcad": 0.04,
+    "correlation_taux_10y_canada": -0.09,
+    "correlation_taux_10y_us": -0.03,
+    "correlation_taux_directeur_boc": 0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1675,
+      "pire_baisse_pendant_regime": -0.2165
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0477,
+      "pire_baisse_pendant_regime": -0.0392
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2775,
+      "pire_baisse_pendant_regime": -0.0782
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 9.414,
+    "rendement_dividende_pct": 0.0087,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-09-18",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {
+    "MSFT": 0.071,
+    "AAPL": 0.069,
+    "NVDA": 0.062,
+    "AMZN": 0.038,
+    "GOOGL": 0.023,
+    "TSLA": 0.018,
+    "JPM": 0.013,
+    "JNJ": 0.011,
+    "XOM": 0.01
+  },
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Broad market (U.S.)",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement"
+  ],
+  "synthese_agent_llm": "SPDR S&P 500 ETF Trust (SPY) est un actif de type etf_equity (Broad market (U.S.)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 14.0% pour une volatilité de 16.4% (ratio de Sharpe de 0.64). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S.), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+}

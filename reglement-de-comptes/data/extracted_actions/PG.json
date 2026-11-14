@@ -1,0 +1,104 @@
+{
+  "ticker": "PG",
+  "nom": "Procter & Gamble",
+  "classe_actif": "equity",
+  "marche": "NYSE",
+  "devise_origine": "USD",
+  "secteur": "Consumer Staples",
+  "prix": {
+    "dernier_prix_cad": 239.53,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 151.81,
+    "prix_max_5ans_cad": 242.29
+  },
+  "rendements": {
+    "cumule_5ans": 0.4796,
+    "cagr_annualise": 0.0787,
+    "rendement_1an": 0.1769,
+    "rendement_3ans": 0.3515,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1844,
+    "volatilite_baisse_semi_deviation": 0.1296,
+    "pire_baisse_globale": -0.2346817074823715,
+    "pire_baisse_2022": -0.1852584333641042,
+    "creux_date": "2026-01-07",
+    "sommet_date": "2025-03-10",
+    "annees_sous_le_sommet": 1.68,
+    "a_recupere_sommet": false,
+    "var_95_quotidienne": 0.0186,
+    "cvar_95_expected_shortfall": 0.0259,
+    "var_95_cornish_fisher": 0.0189,
+    "var_99_quotidienne": 0.0302,
+    "cvar_99_expected_shortfall": 0.0406,
+    "var_95_1mois_estimee": 0.0851
+  },
+  "distribution": {
+    "skewness": -0.221,
+    "excess_kurtosis": 2.529,
+    "statistique_jb": 358.02,
+    "p_valeur_jb": 1.8107410922494722e-78,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.0787,
+    "volatilite_annuelle": 0.1844,
+    "volatilite_baisse_sortino": 0.1296,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.24,
+    "ratio_sortino": 0.34,
+    "ratio_calmar": 0.34
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.27,
+    "alpha_annuel_vs_spy": 0.0153,
+    "correlation_vs_spy": 0.24,
+    "beta_xiu_canada": 0.19,
+    "alpha_annuel_vs_xiu.to": 0.0249,
+    "correlation_vs_xiu.to": 0.13,
+    "correlation_variation_usdcad": 0.2,
+    "correlation_taux_10y_canada": -0.17,
+    "correlation_taux_10y_us": -0.12,
+    "correlation_taux_directeur_boc": 0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1496,
+      "pire_baisse_pendant_regime": -0.1853
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.14,
+      "pire_baisse_pendant_regime": -0.0183
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2163,
+      "pire_baisse_pendant_regime": -0.0593
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 5.381,
+    "rendement_dividende_pct": 0.0225,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-10-23",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Consumer Staples",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Procter & Gamble (PG) est un actif de type equity (Consumer Staples). Sur la période observée de 5 ans, il affiche un rendement annualisé de 7.9% pour une volatilité de 18.4% (ratio de Sharpe de 0.24). Sa VaR quotidienne à 95% est de 1.9%. Son profil se caractérise par : Action Individuelle, Consumer Staples, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+}

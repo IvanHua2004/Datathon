@@ -17,7 +17,8 @@ from pydantic import BaseModel, Field
 
 from rdc import donnees, temoins, greffier
 from rdc.profils import PROFILS
-from rdc.proces import TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict
+from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
+                        construire_timeline_discussion)
 from rdc.intention import interpreter_intention
 from rdc.comparaison import comparer_decision
 from rdc.scenarios import generer_scenarios_alternatifs
@@ -67,11 +68,13 @@ class DemandePDF(BaseModel):
 
 
 def _source() -> dict:
-    bucket = os.environ.get("RDC_S3_BUCKET")
+    from rdc import s3_service
+    etat_s3 = s3_service.verifier_connexion_s3()
     return {
-        "type": "s3" if bucket else "local",
-        "bucket": bucket,
-        "region": os.environ.get("AWS_REGION") or "us-east-1",
+        "type": "s3" if etat_s3.get("connecte") else "local",
+        "s3": etat_s3,
+        "bucket": etat_s3.get("bucket"),
+        "region": etat_s3.get("region", "us-east-1"),
     }
 
 
@@ -129,6 +132,34 @@ def tailles() -> list[float]:
     return [t for t in TAILLES_COURBE if t > 0]
 
 
+@app.get("/api/actions")
+def liste_actions() -> list[dict]:
+    """Retourne la synthèse financière précalculée de chaque action pour les agents et le frontend."""
+    from rdc import actions_store
+    df = actions_store.obtenir_resume_catalogue()
+    if df.empty:
+        return []
+    return df.to_dict(orient="records")
+
+
+@app.get("/api/actions/{ticker}")
+def detail_action(ticker: str) -> dict:
+    """Retourne la fiche d'analyse quantitative complète précalculée d'une action/titre."""
+    from rdc import actions_store
+    d = _donnees()
+    ticker_clean = ticker.upper().strip()
+    if ticker_clean not in d.univers.index:
+        raise HTTPException(status_code=404, detail=f"Action '{ticker}' introuvable dans l'univers de 31 actifs.")
+    return actions_store.obtenir_fiche_action(ticker_clean)
+
+
+@app.post("/api/actions/extraire")
+def declencher_extraction(televerser_s3: bool = True) -> dict:
+    """Déclenche la ré-extraction et synchronisation S3 de toutes les fiches d'actifs."""
+    from rdc import extraire_fiches_actions
+    return extraire_fiches_actions.extraire_toutes_les_actions(televerser_s3=televerser_s3)
+
+
 @app.post("/api/intention")
 def interpreter_demande(demande: DemandeIntention) -> dict:
     profil = PROFILS.get(demande.profil)
@@ -160,6 +191,7 @@ def proces(demande: DemandeProces) -> dict:
     dossier = p.dossier
     table = courbe(dossier)
     rapport_explicabilite = greffier.generer_rapport_explicabilite(p)
+    discussion = construire_timeline_discussion(p)
 
     return {
         "demande": {
@@ -204,7 +236,51 @@ def proces(demande: DemandeProces) -> dict:
             for piece in p.greffier.pieces
         ],
         "rapport_explicabilite": rapport_explicabilite,
+        "discussion": discussion,
     }
+
+
+@app.post("/api/proces/discussion")
+def discussion_seule(demande: DemandeProces) -> list[dict]:
+    """Renvoie uniquement la chronologie théâtralisée du débat (tours de parole) pour affichage cadencé."""
+    profil = PROFILS.get(demande.profil)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    d = _donnees()
+    if demande.ticker not in d.univers.index:
+        raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
+
+    p = ouvrir_proces(profil, demande.ticker, demande.taille, demande.mode,
+                      intention_texte=demande.intention_texte or "")
+    return construire_timeline_discussion(p)
+
+
+@app.post("/api/proces/stream")
+async def stream_proces(demande: DemandeProces):
+    """Diffusion en streaming (Server-Sent Events) cadencée des prises de parole du tribunal."""
+    profil = PROFILS.get(demande.profil)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    d = _donnees()
+    if demande.ticker not in d.univers.index:
+        raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
+
+    import asyncio
+    import json
+    from fastapi.responses import StreamingResponse
+
+    p = ouvrir_proces(profil, demande.ticker, demande.taille, demande.mode,
+                      intention_texte=demande.intention_texte or "")
+    timeline = construire_timeline_discussion(p)
+
+    async def event_generator():
+        for tour in timeline:
+            yield f"data: {json.dumps(tour, ensure_ascii=False)}\n\n"
+            pause_sec = tour.get("pause_ms", 2500) / 1000.0
+            await asyncio.sleep(pause_sec)
+        yield "event: end\ndata: {}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 
 @app.post("/api/comparaison")
