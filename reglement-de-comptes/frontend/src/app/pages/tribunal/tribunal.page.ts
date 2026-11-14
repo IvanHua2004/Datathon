@@ -1,5 +1,5 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
 import { PlaidoirieComponent } from '../../components/plaidoirie/plaidoirie.component';
@@ -47,12 +47,13 @@ export class TribunalPage {
   });
 
   constructor() {
+    const persona = inject(ActivatedRoute).snapshot.queryParamMap.get('persona');
     this.tribunal.chargerReferentiels();
-    // Premier profil sélectionné dès que les référentiels arrivent.
     effect(() => {
       const profils = this.tribunal.profils();
       if (profils.length && !this.profilCle()) {
-        this.choisirProfil(profils[0].cle);
+        const profil = profils.find((p) => p.cle === persona) ?? profils[0];
+        this.choisirProfil(profil.cle);
       }
     });
   }
