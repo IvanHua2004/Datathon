@@ -15,7 +15,7 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
-from rdc import donnees, temoins
+from rdc import donnees, questions, temoins
 from rdc.profils import PROFILS
 from rdc.proces import TAILLES_COURBE, courbe, ouvrir_proces
 
@@ -30,7 +30,15 @@ class DemandeProces(BaseModel):
     profil: str = Field(description="Clé du profil : amira, mateo ou robert")
     ticker: str = Field(description="Titre de l'univers de 31 actifs, par exemple NVDA")
     taille: float = Field(gt=0, le=0.5, description="Part du portefeuille à placer, de 0,05 à 0,5")
-    mode: Literal["gabarit", "bedrock"] = "gabarit"
+    # Bedrock par défaut. « gabarit » (sans modèle) reste disponible pour les tests hors ligne.
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
+
+
+class Question(BaseModel):
+    texte: str = Field(max_length=500, description="La question telle que l'investisseur l'a écrite")
+    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    ticker: str | None = Field(default=None, description="Titre déjà connu d'un échange précédent")
+    taille: float | None = Field(default=None, description="Part déjà connue d'un échange précédent")
 
 
 def _source() -> dict:
@@ -94,6 +102,20 @@ def actifs() -> list[dict]:
 @app.get("/api/tailles")
 def tailles() -> list[float]:
     return [t for t in TAILLES_COURBE if t > 0]
+
+
+@app.post("/api/questions/analyser")
+def analyser_question(q: Question) -> dict:
+    """Le greffier dit si la question peut être jugée, et sinon pourquoi."""
+    profil = PROFILS.get(q.profil)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {q.profil}")
+    univers = {t: str(n) for t, n in _donnees().univers["name"].items()}
+    ticker = q.ticker if q.ticker in univers else None
+    analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
+                                 resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
+                                 portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues))
+    return analyse.en_json()
 
 
 @app.post("/api/proces")

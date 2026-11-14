@@ -1,5 +1,6 @@
 /** Types des réponses de l'API Python (backend/api.py). */
 
+/** « gabarit » reste accepté par l'API pour les tests hors ligne; l'interface utilise Bedrock. */
 export type Mode = 'gabarit' | 'bedrock';
 
 export type Verdict =
@@ -42,7 +43,7 @@ export interface DemandeProces {
   profil: string;
   ticker: string;
   taille: number;
-  mode: Mode;
+  mode?: Mode;
 }
 
 export interface Motif {

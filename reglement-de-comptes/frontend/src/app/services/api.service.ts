@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Actif, DemandeProces, Proces, Profil, Sante } from '../models/proces.model';
+import { AnalyseQuestion, DemandeAnalyse } from '../models/question.model';
 
 /** Accès HTTP à l'API Python. Les chemins sont relatifs : nginx (ou ng serve) relaie /api/. */
 @Injectable({ providedIn: 'root' })
@@ -24,6 +25,10 @@ export class ApiService {
 
   tailles(): Observable<number[]> {
     return this.http.get<number[]>(`${this.base}/tailles`);
+  }
+
+  analyserQuestion(demande: DemandeAnalyse): Observable<AnalyseQuestion> {
+    return this.http.post<AnalyseQuestion>(`${this.base}/questions/analyser`, demande);
   }
 
   ouvrirProces(demande: DemandeProces): Observable<Proces> {
