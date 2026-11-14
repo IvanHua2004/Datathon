@@ -45,15 +45,23 @@ Streamlit sur `http://localhost:8501`.
 
 ## Avec Docker
 
+Deux conteneurs : le menu Angular et le tribunal (Streamlit).
+
 ```bash
 cd reglement-de-comptes
-docker compose up --build        # puis ouvrir http://localhost:8501
+docker compose up --build
 docker compose run --rm tribunal pytest -q backend/tests     # les tests, dans le conteneur
 ```
 
-Le jeu de départ est monté en lecture seule depuis `../Datathon2026/alphaforge_starter`. Pour
-le mode Bedrock, exportez vos variables AWS avant `docker compose up`, ou placez-les dans un
-fichier `.env` à côté de `docker-compose.yml` (ce fichier est ignoré par git, ne le publiez pas).
+- Menu : http://localhost:4200 (le bouton **Débuter** ouvre le tribunal)
+- Tribunal : http://localhost:8501
+
+Les deux ports ne sont ouverts que sur votre ordinateur, pas sur le réseau Wi-Fi.
+Le jeu de départ est monté en lecture seule depuis `../Datathon2026/alphaforge_starter`.
+Pour le mode Bedrock, exportez vos variables AWS avant `docker compose up`, ou placez-les
+dans un fichier `.env` à côté de `docker-compose.yml` (ce fichier est ignoré par git, ne le
+publiez pas). Les identifiants du Datathon expirent : après en avoir collé de nouveaux,
+relancez `docker compose up` pour que le tribunal les reçoive.
 
 ## Les rôles
 

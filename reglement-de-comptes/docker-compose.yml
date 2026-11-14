@@ -1,10 +1,13 @@
-# Lancer :  docker compose up --build     puis ouvrir http://localhost:8501
+# Lancer :  docker compose up --build
+#   Menu Angular   : http://localhost:4200  (le bouton « Débuter » ouvre le tribunal)
+#   Tribunal       : http://localhost:8501
+# Les ports ne sont ouverts que sur votre ordinateur (127.0.0.1), pas sur le Wi-Fi.
 services:
   tribunal:
     build: .
-    image: reglement-de-comptes
+    image: reglement-de-comptes-tribunal
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     volumes:
       # Jeu de départ des organisateurs, monté en lecture seule (il n'est pas copié dans l'image)
       - ../Datathon2026/alphaforge_starter:/data:ro
@@ -24,3 +27,11 @@ services:
       - BEDROCK_MODEL_ID
       - RDC_S3_BUCKET
       - RDC_S3_PREFIX
+
+  menu:
+    build: ./frontend
+    image: reglement-de-comptes-menu
+    ports:
+      - "127.0.0.1:4200:80"
+    depends_on:
+      - tribunal
