@@ -22,10 +22,13 @@ RACINE = Path(__file__).resolve().parent.parent
 
 
 def dossier_donnees() -> Path:
-    """Dossier du jeu de départ : variable RDC_DATA_DIR, sinon le dossier des organisateurs."""
+    """Dossier du jeu de départ : variable RDC_DATA_DIR, dossier local data/, sinon Datathon2026."""
     env = os.environ.get("RDC_DATA_DIR")
-    if env:
+    if env and Path(env).exists():
         return Path(env)
+    local_data = RACINE.parent / "data"
+    if local_data.exists():
+        return local_data
     return RACINE.parent.parent / "Datathon2026" / "alphaforge_starter"
 
 
@@ -83,6 +86,14 @@ def charger() -> Donnees:
         debut=str(rendements.index[0].date()),
         fin=str(rendements.index[-1].date()),
     )
+
+
+def load_market_data() -> Donnees:
+    """Charge les données de marché (prix, univers, rendements en CAD).
+    
+    Conforme à l'Issue 1.1 de la Roadmap (chargement hybride S3/local avec cache).
+    """
+    return charger()
 
 
 @lru_cache(maxsize=1)

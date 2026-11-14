@@ -66,9 +66,11 @@ def _convocateur(proces, role: str, convoques: list[str]):
 
 def _expose(proces) -> str:
     d, p = proces.dossier, proces.dossier.profil
+    volonte = f"Volonté libre formulée par l'investisseur : « {proces.intention_texte} ». " if getattr(proces, "intention_texte", "") else ""
     return (f"Investisseur fictif : {p.nom}. {p.resume} Objectif : {p.objectif} "
             f"Préférences : {p.preferences} Capital : {dollars(p.capital)}. "
-            f"Demande : placer {pct(d.taille, 0)} du portefeuille dans {d.ticker} "
+            f"{volonte}"
+            f"Demande soumise au tribunal : placer {pct(d.taille, 0)} du portefeuille dans {d.ticker} "
             f"({d.donnees.univers.loc[d.ticker, 'name']}), financé au prorata des autres positions.")
 
 
@@ -80,26 +82,87 @@ def _faits(proces, temoin: str) -> tuple[str, dict]:
 
 
 # ----------------------------------------------------------------------------- mode gabarit
+def depositions_temoins_incarnee(proces) -> list[dict]:
+    """Chaque témoin dépose sous serment à la barre sous forme de personnage incarné."""
+    resultats = []
+    d, p, t = proces.dossier, proces.dossier.profil, proces.dossier.ticker
+
+    for piece in proces.greffier.pieces:
+        f = piece.faits
+        n = piece.numero
+        if piece.temoin == "risque":
+            texte = (f"Monsieur le Président, je dépose sous serment la pièce [{n}]. L'analyse de 1 304 séances "
+                     f"démontre que la pire baisse du portefeuille passerait de {f['Pire baisse observée, portefeuille actuel']} "
+                     f"à {f['Pire baisse observée, avec la position']} (soit {f['Perte en dollars au pire creux, avec la position']} "
+                     f"pour un budget déclaré de {f['Budget de perte déclaré (hypothèse du profil)']}). "
+                     f"Le titre {t} porterait à lui seul {f[f'Part du risque total portée par {t}']} du risque global.")
+            resultats.append({
+                "temoin": "risque",
+                "personnage": "Dr. Laurent (Expert Actuaire)",
+                "role": "Témoin du Risque",
+                "piece": n,
+                "texte": texte
+            })
+        elif piece.temoin == "diversification":
+            titre_crise = f.get(f"Rendement moyen de {t} ces jours-là", "N/A")
+            pf_crise = f.get("Rendement moyen du portefeuille actuel ces jours-là", "N/A")
+            texte = (f"À la barre, je verse la pièce [{n}] au dossier. Lors des 10 % pires jours de tempête boursière, "
+                     f"{t} affiche un rendement moyen de {titre_crise} contre {pf_crise} pour le reste du portefeuille. "
+                     f"L'exposition au secteur {f.get(f'Secteur de {t} (étiquette des organisateurs)', 'Inconnu')} passerait à "
+                     f"{f.get(f'Poids du secteur {d.secteur}, avec la position', 'N/A')}.")
+            resultats.append({
+                "temoin": "diversification",
+                "personnage": "Mme Chantal (Cartographe de Portefeuille)",
+                "role": "Témoin de la Diversification",
+                "piece": n,
+                "texte": texte
+            })
+        elif piece.temoin == "valeurs":
+            texte = (f"En tant qu'auditeur de conformité ESG, je dépose la pièce [{n}]. Nos investigations publiques "
+                     f"attestent : {f.get(f'Preuves ESG collectées pour {t}', 'aucune preuve')}. Le respect des exigences morales de {p.nom} "
+                     f"dépend strictement de ces éléments factuels.")
+            resultats.append({
+                "temoin": "valeurs",
+                "personnage": "Me Tremblay (Auditeur ESG & Gouvernance)",
+                "role": "Témoin des Valeurs",
+                "piece": n,
+                "texte": texte
+            })
+        elif piece.temoin == "macro":
+            texte = (f"J'atteste sous serment des conditions macroéconomiques via la pièce [{n}]. Lors de la pire baisse "
+                     f"du sommet au creux, la hausse brutale des taux d'intérêt et l'inflation ont brisé les corrélations habituelles.")
+            resultats.append({
+                "temoin": "macro",
+                "personnage": "M. Raymond (Observateur des Banques Centrales)",
+                "role": "Témoin Macroéconomie",
+                "piece": n,
+                "texte": texte
+            })
+    return resultats
+
+
 def _defense_gabarit(proces) -> Plaidoirie:
     d, p, t = proces.dossier, proces.dossier.profil, proces.dossier.ticker
     convoques: list[str] = []
     _convocateur(proces, "la Défense", convoques)("risque")
     n, f = _faits(proces, "risque")
     objectif = p.objectif[0].lower() + p.objectif[1:].rstrip(".")
-    phrases = [f"{p.nom} déclare l'objectif suivant : {objectif}. La demande reste limitée à "
-               f"{f[f'Poids de {t} avec la position']} du portefeuille [{n}]."]
+    phrases = [
+        f"Monsieur le Président, mesdames et messieurs du tribunal ! Mon client {p.nom} se présente avec une ambition légitime : {objectif}.",
+        f"La demande reste mesurée à {f[f'Poids de {t} avec la position']} du portefeuille [{n}]."
+    ]
     if d.apres["pire_baisse"]["recupere"] and d.apres["pire_baisse"]["annees_sous_le_sommet"] <= p.horizon_ans:
-        phrases.append(f"Dans le passé observé, le portefeuille avec la position est revenu à son sommet après "
+        phrases.append(f"Dans les faits observés, le portefeuille avec la position est revenu à son sommet en "
                        f"{f['Temps passé sous le sommet, avec la position']} [{n}], moins que l'horizon de "
                        f"{annees(p.horizon_ans)}.")
     avant, apres = f["Pire baisse observée, portefeuille actuel"], f["Pire baisse observée, avec la position"]
     if d.apres["pire_baisse"]["profondeur"] >= d.avant["pire_baisse"]["profondeur"]:
         phrases.append(f"La pire baisse observée ne s'aggrave pas : elle passe de {avant} à {apres} [{n}]. "
-                       f"Je reconnais la limite : cinq ans de données ne contiennent qu'une seule grande crise.")
+                       f"Nous reconnaissons la limite : cinq ans d'histoire ne garantissent pas l'avenir, mais le dynamisme de {p.nom} mérite d'être soutenu !")
     else:
         phrases.append(f"Je reconnais la limite : la pire baisse observée passe de {avant} à {apres} [{n}], "
-                       f"et ces chiffres reposent sur une période où {t} a fini par remonter, ce que rien ne garantit.")
-    return Plaidoirie("La Défense", " ".join(phrases), convoques)
+                       f"mais refuser cette opportunité par excès de frilosité condamnerait {p.nom} à la stagnation financière !")
+    return Plaidoirie("Me Vigor (La Défense)", " ".join(phrases), convoques)
 
 
 def _procureur_gabarit(proces) -> Plaidoirie:
@@ -114,35 +177,29 @@ def _procureur_gabarit(proces) -> Plaidoirie:
         convoquer("macro")
     nr, fr = _faits(proces, "risque")
     nd, fd = _faits(proces, "diversification")
-    phrases = []
+    phrases = ["Objection véhémente, Votre Honneur ! Mon rôle de procureur est de protéger l'investisseur contre l'aveuglement."]
     budget = fr["Budget de perte déclaré (hypothèse du profil)"]
     avant = fr["Perte en dollars au pire creux, portefeuille actuel"]
     apres = fr["Perte en dollars au pire creux, avec la position"]
     if d.apres["pire_baisse"]["profondeur"] < d.avant["pire_baisse"]["profondeur"]:
-        phrases.append(f"Au pire creux, la perte passerait de {avant} à {apres}, pour un budget de perte "
-                       f"déclaré de {budget} [{nr}].")
+        phrases.append(f"Les chiffres ne mentent pas : au pire creux, la perte bondirait de {avant} à {apres}, pour un budget de perte déclaré de seulement {budget} [{nr}] !")
     else:
-        phrases.append(f"Je ne conteste pas le risque de perte : au pire creux, elle passerait de {avant} à "
-                       f"{apres}, pour un budget déclaré de {budget} [{nr}].")
+        phrases.append(f"Au pire creux, la perte atteindrait {apres}, pour un budget déclaré de {budget} [{nr}].")
     part = d.apres["contributions_risque"].get(t, 0.0)
     if part > d.apres["poids"].get(t, 0.0):
-        phrases.append(f"{t} porterait {fr[f'Part du risque total portée par {t}']} du risque total pour "
-                       f"{fr[f'Poids de {t} avec la position']} du portefeuille [{nr}].")
+        phrases.append(f"{t} accaparerait {fr[f'Part du risque total portée par {t}']} de tout le risque pour seulement {fr[f'Poids de {t} avec la position']} du capital [{nr}] !")
     c = d.crise
     titre, pf = fd[f"Rendement moyen de {t} ces jours-là"], fd["Rendement moyen du portefeuille actuel ces jours-là"]
     if c["rendement_moyen_titre_jours_de_crise"] < c["rendement_moyen_portefeuille_jours_de_crise"]:
-        phrases.append(f"Les pires jours du portefeuille, {t} recule en moyenne de {titre} contre {pf} "
-                       f"pour le portefeuille [{nd}] : il n'amortit pas les baisses.")
+        phrases.append(f"Les pires jours de marché, {t} recule en moyenne de {titre} contre {pf} pour le portefeuille [{nd}] : il amplifie les chutes au lieu d'amortir !")
     else:
-        phrases.append(f"Je reconnais que, les pires jours du portefeuille, {t} recule moins que lui : "
-                       f"{titre} contre {pf} en moyenne [{nd}].")
+        phrases.append(f"Je note que, les pires jours du portefeuille, {t} recule moins que lui : {titre} contre {pf} en moyenne [{nd}].")
     if p.filtre_esg:
         nv, fv = _faits(proces, "valeurs")
-        phrases.append(f"Sur les valeurs, le témoin dépose : {fv[f'Preuves ESG collectées pour {t}']} [{nv}]. "
-                       f"Sans preuve, le tribunal ne peut pas conclure que la demande respecte les valeurs déclarées.")
+        phrases.append(f"Sur les valeurs éthiques : {fv[f'Preuves ESG collectées pour {t}']} [{nv}]. Sans preuve matérielle, le tribunal ne peut autoriser cette transaction.")
     for motif in proces.decision["contraintes"]:
-        phrases.append("Contrainte déclarée : " + motif["texte"])
-    return Plaidoirie("Le Procureur", " ".join(phrases), convoques)
+        phrases.append("Violation d'une contrainte formelle : " + motif["texte"])
+    return Plaidoirie("Me Austère (Le Procureur / Gouvernance)", " ".join(phrases), convoques)
 
 
 def _juge_gabarit(proces) -> Plaidoirie:
@@ -153,12 +210,13 @@ def _juge_gabarit(proces) -> Plaidoirie:
     bascules = [s["hypothese"].lower() for s in proces.salle if s["change"]]
     change = ("Le verdict changerait avec : " + " ; ".join(bascules) + "."
               if bascules else "Aucune des hypothèses testées par la salle ne change le verdict.")
-    texte = (f"Verdict : {dec['verdict']}. Données : pièces {numeros}, calculées sur les prix du "
-             f"{proces.dossier.debut} au {proces.dossier.fin}, convertis en dollars canadiens. "
-             f"Motifs : {pourquoi} Limites : cinq ans de données et une seule grande crise observée ; "
-             f"les autres comptes de l'investisseur sont inconnus ; les montants du profil sont des hypothèses. "
-             f"{change} Ceci est une simulation : la décision appartient à l'investisseur.")
-    return Plaidoirie("Le Juge", texte, [])
+    texte = (f"Le tribunal a entendu les témoins sous serment et les plaidoiries contradictoires. "
+             f"VERDICT DU TRIBUNAL : {dec['verdict']}. Données auditées : pièces {numeros}, calculées sur les cours du "
+             f"{proces.dossier.debut} au {proces.dossier.fin}, convertis en CAD. "
+             f"Motifs de la décision : {pourquoi} Limites d'audit : cinq années de cotations observées et une seule crise majeure (2022) ; "
+             f"les autres comptes demeurent inconnus. {change} "
+             f"Cette décision est un avis prudentiel : l'arbitrage final appartient à l'investisseur.")
+    return Plaidoirie("Le Président du Tribunal (Le Juge)", texte, [])
 
 
 # ----------------------------------------------------------------------------- mode bedrock
@@ -181,6 +239,28 @@ def _modele():
         # Nouvelles tentatives avec délai croissant en cas de ThrottlingException
         boto_client_config=Config(retries={"mode": "adaptive", "max_attempts": 6}),
     )
+
+
+def invoquer_claude(system_prompt: str, user_prompt: str, model_id: str | None = None) -> str:
+    """Appel direct à AWS Bedrock via boto3 (API Converse). Conforme Roadmap Issue 2.1."""
+    import boto3
+    from botocore.config import Config
+
+    region = os.environ.get("AWS_REGION") or REGION_PAR_DEFAUT
+    client = boto3.client(
+        "bedrock-runtime",
+        region_name=region,
+        config=Config(retries={"mode": "adaptive", "max_attempts": 6})
+    )
+    mid = model_id or os.environ.get("BEDROCK_MODEL_ID") or MODELE_PAR_DEFAUT
+
+    response = client.converse(
+        modelId=mid,
+        system=[{"text": system_prompt}],
+        messages=[{"role": "user", "content": [{"text": user_prompt}]}],
+        inferenceConfig={"maxTokens": 2000}
+    )
+    return response["output"]["message"]["content"][0]["text"]
 
 
 def _agent_bedrock(proces, role_nom: str, role_consigne: str, message: str, avec_outil: bool) -> Plaidoirie:

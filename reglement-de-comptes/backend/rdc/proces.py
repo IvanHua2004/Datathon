@@ -152,9 +152,11 @@ class Proces:
     salle: list = field(default_factory=list)
     mode: str = "gabarit"
     avertissement: str | None = None
+    intention_texte: str = ""
 
 
-def ouvrir_proces(profil: Profil, ticker: str, taille: float, mode: str = "gabarit") -> Proces:
+def ouvrir_proces(profil: Profil, ticker: str, taille: float, mode: str = "gabarit",
+                  intention_texte: str = "") -> Proces:
     from . import agents            # import tardif : agents dépend de ce module
 
     dossier = construire_dossier(profil, ticker, taille)
@@ -164,7 +166,116 @@ def ouvrir_proces(profil: Profil, ticker: str, taille: float, mode: str = "gabar
                       pct(profil.plafond_secteur), annees(profil.horizon_ans),
                       pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10")
     decision = regle_verdict(dossier)
-    proces = Proces(dossier=dossier, greffier=greffier, decision=decision, mode=mode)
+    proces = Proces(dossier=dossier, greffier=greffier, decision=decision, mode=mode,
+                    intention_texte=intention_texte)
     proces.salle = salle(dossier, decision["verdict"])
     agents.plaider(proces)
     return proces
+
+
+def lancer_proces_stream(profil: Profil, ticker: str, taille: float, mode: str = "gabarit",
+                         intention_texte: str = ""):
+    """Générateur de streaming du procès (avec yield) pour un affichage interactif direct.
+    
+    Conforme à l'Issue 3.1 de la Roadmap (effet machine à écrire / interaction continue).
+    """
+    from . import agents
+
+    dossier = construire_dossier(profil, ticker, taille)
+    greffier = Greffier()
+    greffier.admettre(profil.resume, f"{profil.capital:.0f}", pct(taille), pct(taille, 0),
+                      pct(profil.budget_perte), pct(profil.plafond_position),
+                      pct(profil.plafond_secteur), annees(profil.horizon_ans),
+                      pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10")
+    decision = regle_verdict(dossier)
+    proces = Proces(dossier=dossier, greffier=greffier, decision=decision, mode=mode,
+                    intention_texte=intention_texte)
+    proces.salle = salle(dossier, decision["verdict"])
+
+    # Étape 1 : Ouverture solennelle par l'Huissier
+    yield {
+        "etape": "HUISSIER",
+        "acteur": "L'Huissier d'audience",
+        "titre": "Ouverture de la séance",
+        "texte": (f"Silence dans la salle ! Le Tribunal d'AlphaForge entre en audience solennelle. "
+                  f"Affaire en délibéré : l'investisseur {profil.nom} ({profil.resume}) soumet la volonté suivante : "
+                  f"« {intention_texte or f'Allouer {pct(taille, 0)} dans {ticker}'} ». "
+                  f"L'actif visé est {ticker} ({dossier.donnees.univers.loc[ticker, 'name']}). "
+                  f"Que les témoins experts prêtent serment et déposent leurs pièces à conviction.")
+    }
+
+    # Étape 2 : Plaidoiries et convocation des témoins
+    agents.plaider(proces)
+
+    # Étape 3 : Déposition des témoins incarnés
+    depositions = agents.depositions_temoins_incarnee(proces)
+    for dep in depositions:
+        yield {
+            "etape": "TEMOIN",
+            "acteur": dep["personnage"],
+            "titre": f"Déposition sous serment — Pièce [{dep['piece']}]",
+            "temoin": dep["temoin"],
+            "piece": dep["piece"],
+            "texte": dep["texte"]
+        }
+
+    # Étape 4 : Plaidoirie de la Défense (Me Vigor)
+    defense = proces.plaidoiries[0]
+    yield {
+        "etape": "DEFENSE",
+        "acteur": defense.role,
+        "titre": "Plaidoirie en faveur de la demande",
+        "texte": defense.texte,
+        "convoques": defense.temoins_convoques,
+        "non_verifies": defense.non_verifies
+    }
+
+    # Étape 5 : Réquisitoire du Procureur / Gouvernance (Me Austère)
+    procureur = proces.plaidoiries[1]
+    yield {
+        "etape": "PROCUREUR",
+        "acteur": procureur.role,
+        "titre": "Réquisitoire de la Gouvernance et du Risque",
+        "texte": procureur.texte,
+        "convoques": procureur.temoins_convoques,
+        "non_verifies": procureur.non_verifies
+    }
+
+    # Étape 6 : Verdict motivé du Président du Tribunal (Le Juge)
+    juge = proces.motivation
+    yield {
+        "etape": "JUGE",
+        "acteur": juge.role,
+        "titre": f"Verdict officiel : {decision['verdict']}",
+        "verdict": decision["verdict"],
+        "texte": juge.texte,
+        "proces": proces
+    }
+
+
+def lancer_debat(persona, demande_utilisateur, mode: str = "gabarit") -> Proces:
+    """Point d'entrée de haut niveau du débat du procès.
+    
+    Conforme à l'Issue 3.1 de la Roadmap :
+    - `persona` : profil (instance de Profil ou clé 'amira', 'mateo', 'robert')
+    - `demande_utilisateur` : texte d'intention libre ou tuple (ticker, taille)
+    """
+    from .profils import PROFILS, Profil
+    from .intention import interpreter_intention
+
+    if isinstance(persona, str):
+        profil = PROFILS[persona.lower()]
+    elif isinstance(persona, Profil):
+        profil = persona
+    else:
+        raise TypeError("persona doit être un objet Profil ou une chaîne de caractères.")
+
+    d = dn.charger()
+    if isinstance(demande_utilisateur, str):
+        ticker, taille, _ = interpreter_intention(demande_utilisateur, d.univers, profil)
+    elif isinstance(demande_utilisateur, (tuple, list)):
+        ticker, taille = demande_utilisateur[0], float(demande_utilisateur[1])
+    else:
+        ticker, taille = profil.demande_exemple
+
+    return ouvrir_proces(profil, ticker, taille, mode=mode)
