@@ -1,0 +1,26 @@
+# Lancer :  docker compose up --build     puis ouvrir http://localhost:8501
+services:
+  tribunal:
+    build: .
+    image: reglement-de-comptes
+    ports:
+      - "8501:8501"
+    volumes:
+      # Jeu de départ des organisateurs, monté en lecture seule (il n'est pas copié dans l'image)
+      - ../Datathon2026/alphaforge_starter:/data:ro
+      # Mode Bedrock avec un profil AWS local : décommentez la ligne suivante
+      # (seulement si le dossier ~/.aws existe déjà sur votre machine)
+      # - ~/.aws:/home/app/.aws:ro
+    environment:
+      - RDC_DATA_DIR=/data
+      # Les variables ci-dessous sont transmises seulement si elles existent dans votre
+      # terminal ou dans un fichier .env placé à côté de ce fichier. Sans elles,
+      # l'application fonctionne en mode « Sans modèle ».
+      - AWS_REGION
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN
+      - AWS_PROFILE
+      - BEDROCK_MODEL_ID
+      - RDC_S3_BUCKET
+      - RDC_S3_PREFIX
