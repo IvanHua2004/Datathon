@@ -31,6 +31,10 @@
       </dl>
 
       <h2>La demande</h2>
+      <label for="intention">Volonté libre (ex: devrais acheter +30% dans des etf ?)</label>
+      <input id="intention" type="text" [value]="intentionTexte()" (input)="mettreAJourIntention($event)"
+             placeholder="Ex: devrais acheter +30% dans des etf ?" class="champ-texte" />
+
       <label for="titre">Titre à ajouter</label>
       <select id="titre" (change)="choisirTicker(valeur($event))">
         @for (a of tribunal.actifs(); track a.ticker) {
@@ -103,8 +107,90 @@
           @if (pr.motivation.non_verifies.length) {
             <p class="greffier greffier--alerte">Greffier : chiffres absents des pièces → {{ pr.motivation.non_verifies.join(', ') }}</p>
           }
+
+          <div class="actions-arbitrage">
+            <h3>Votre décision d'investisseur :</h3>
+            <div class="boutons-choix">
+              <button type="button" class="btn btn-oui" (click)="choisirArbitrage('OUI')" [disabled]="tribunal.chargementComparaison()">
+                {{ tribunal.chargementComparaison() ? 'Calcul…' : 'OUI (Investir quand même)' }}
+              </button>
+              <button type="button" class="btn btn-non" (click)="choisirArbitrage('NON')" [disabled]="tribunal.chargementComparaison()">
+                {{ tribunal.chargementComparaison() ? 'Calcul…' : 'NON (Suivre la recommandation)' }}
+              </button>
+              <button type="button" class="btn btn-scenarios" (click)="demanderScenarios()" [disabled]="tribunal.chargementScenarios()">
+                {{ tribunal.chargementScenarios() ? 'Recherche d\'alternatives…' : 'D\'autres scénarios ?' }}
+              </button>
+              <button type="button" class="btn btn-pdf" (click)="telechargerPdf()">
+                📄 Jugement Officiel (PDF)
+              </button>
+            </div>
+          </div>
         </article>
       </section>
+
+      @if (tribunal.comparaison(); as comp) {
+        <section class="carte carte-comparaison" [attr.data-statut]="comp.choix ? 'investi' : 'refuse'">
+          <h2>Analyse Comparative : {{ comp.titre_decision }}</h2>
+          <p class="statut-badge">{{ comp.statut_conformite }}</p>
+          <div class="grille-comparaison">
+            <div class="element-comp">
+              <span class="libelle">Impact sur le capital</span>
+              <span class="valeur">{{ comp.impact_capital }}</span>
+            </div>
+            <div class="element-comp">
+              <span class="libelle">Variation perte max historique</span>
+              <span class="valeur">{{ comp.delta_perte_dollars < 0 ? '-' : '+' }}{{ dollars(comp.delta_perte_dollars) }}</span>
+            </div>
+            <div class="element-comp">
+              <span class="libelle">Pire perte simulée</span>
+              <span class="valeur">{{ dollars(comp.perte_max_dollars) }}</span>
+            </div>
+            <div class="element-comp">
+              <span class="libelle">Dépassement du budget</span>
+              <span class="valeur" [class.alerte]="comp.budget_depasse">
+                {{ comp.budget_depasse ? dollars(comp.montant_depassement) + ' au-delà du budget !' : 'Respecté' }}
+              </span>
+            </div>
+            <div class="element-comp">
+              <span class="libelle">Volatilité annuelle finale</span>
+              <span class="valeur">{{ pct(comp.volatilite_finale) }} ({{ comp.delta_volatilite >= 0 ? '+' : '' }}{{ pct(comp.delta_volatilite) }})</span>
+            </div>
+            <div class="element-comp">
+              <span class="libelle">Temps de récupération</span>
+              <span class="valeur">{{ comp.temps_recuperation }}</span>
+            </div>
+          </div>
+          <p class="commentaire">{{ comp.commentaire_conseil }}</p>
+          @if (comp.recommandations.length) {
+            <ul class="liste-recommandations">
+              @for (rec of comp.recommandations; track $index) {
+                <li>{{ rec }}</li>
+              }
+            </ul>
+          }
+        </section>
+      }
+
+      @if (tribunal.scenarios(); as scenList) {
+        <section class="carte carte-scenarios">
+          <h2>Scénarios Alternatifs Préconisés par les Agents</h2>
+          <p class="note-carte">Solutions alternatives calculées sur les données réelles pour respecter votre profil et votre intention.</p>
+          <div class="grille-scenarios">
+            @for (scen of scenList; track scen.nom) {
+              <div class="scenario-carte">
+                <h3>{{ scen.nom }}</h3>
+                <p class="scenario-verdict">{{ scen.verdict }}</p>
+                <p class="scenario-desc">{{ scen.description }}</p>
+                <dl class="scenario-stats">
+                  <dt>Pire baisse historique :</dt><dd>{{ pct(scen.pire_baisse) }} ({{ dollars(scen.perte_dollars) }})</dd>
+                  <dt>Volatilité annuelle :</dt><dd>{{ pct(scen.volatilite) }}</dd>
+                </dl>
+                <p class="scenario-pourquoi"><strong>Pourquoi ce choix :</strong> {{ scen.pourquoi }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
 
       <section class="carte">
         <h2>Où votre limite est-elle franchie ?</h2>

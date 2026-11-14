@@ -181,6 +181,15 @@ rdc-menu {
   }
 }
 
+.actions-group {
+  display: flex;
+  gap: 1.25rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  z-index: 10;
+}
+
 .start {
   display: inline-grid;
   place-items: center;
@@ -193,14 +202,26 @@ rdc-menu {
   font-weight: 700;
   line-height: 1.2;
   text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .start:hover {
   background: #FBDE85;
+  transform: translateY(-2px);
 }
 
 .start:active {
   background: #FBDE85;
+  transform: translateY(0);
+}
+
+.start.secondary {
+  background: #2B6CB0;
+  color: #FFFFFF;
+}
+
+.start.secondary:hover {
+  background: #3182CE;
 }
 
 .start:focus-visible {

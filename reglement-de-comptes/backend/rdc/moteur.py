@@ -166,3 +166,95 @@ def courbe_taille(rend: pd.DataFrame, poids: dict[str, float], ticker: str,
             "part_du_risque_du_titre": contributions_risque(rend, p).get(ticker, 0.0),
         })
     return lignes
+
+
+# -----------------------------------------------------------------------------
+# Fonctions déterministes par actif (conforme Roadmap Épic 1 - Issue 1.2)
+# -----------------------------------------------------------------------------
+
+def calculer_rendement_annualise(ticker: str, rendements: pd.DataFrame | None = None) -> dict:
+    """Calcule le rendement annualisé (CAGR) et cumulé d'un actif.
+    
+    Retourne un dictionnaire simple lisible par les agents LLM.
+    """
+    if rendements is None:
+        from . import donnees
+        rendements = donnees.load_market_data().rendements
+
+    if ticker not in rendements.columns:
+        raise KeyError(f"Ticker '{ticker}' absent des données de rendement.")
+
+    r = rendements[ticker]
+    cumule = float((1 + r).prod() - 1)
+    nb_jours = len(r)
+    annees = nb_jours / JOURS_PAR_AN
+    cagr = float((1 + cumule) ** (1 / annees) - 1) if annees > 0 and (1 + cumule) > 0 else 0.0
+
+    return {
+        "ticker": ticker,
+        "rendement_annualise": cagr,
+        "rendement_cumule": cumule,
+        "nb_jours": nb_jours,
+        "debut": str(r.index[0].date()),
+        "fin": str(r.index[-1].date()),
+    }
+
+
+def calculer_max_drawdown(ticker: str, annee: int | None = None, rendements: pd.DataFrame | None = None) -> dict:
+    """Calcule la pire baisse (maximum drawdown) d'un actif, globale ou pour une année précise (ex: 2022).
+    
+    Retourne un dictionnaire simple lisible par les agents LLM.
+    """
+    if rendements is None:
+        from . import donnees
+        rendements = donnees.load_market_data().rendements
+
+    if ticker not in rendements.columns:
+        raise KeyError(f"Ticker '{ticker}' absent des données de rendement.")
+
+    r = rendements[ticker]
+    if annee is not None:
+        r = r[r.index.year == int(annee)]
+        if r.empty:
+            raise ValueError(f"Aucune donnée pour le ticker '{ticker}' en l'année {annee}.")
+
+    pb = pire_baisse(r)
+    return {
+        "ticker": ticker,
+        "annee": annee,
+        "max_drawdown": pb["profondeur"],
+        "date_sommet": pb["date_sommet"],
+        "date_creux": pb["date_creux"],
+        "date_retour": pb["date_retour"],
+        "recupere": pb["recupere"],
+        "annees_sous_le_sommet": pb["annees_sous_le_sommet"],
+    }
+
+
+def verifier_volatilite(ticker: str, rendements: pd.DataFrame | None = None) -> dict:
+    """Calcule la volatilité annualisée d'un actif et qualifie son niveau de risque.
+    
+    Retourne un dictionnaire simple lisible par les agents LLM.
+    """
+    if rendements is None:
+        from . import donnees
+        rendements = donnees.load_market_data().rendements
+
+    if ticker not in rendements.columns:
+        raise KeyError(f"Ticker '{ticker}' absent des données de rendement.")
+
+    r = rendements[ticker]
+    vol = volatilite(r)
+    if vol > 0.35:
+        niveau = "élevé"
+    elif vol > 0.15:
+        niveau = "modéré"
+    else:
+        niveau = "faible"
+
+    return {
+        "ticker": ticker,
+        "volatilite_annuelle": vol,
+        "volatilite_quotidienne": float(r.std()),
+        "niveau_risque": niveau,
+    }

@@ -1,0 +1,123 @@
+{
+  "ticker": "CNQ.TO",
+  "nom": "Canadian Natural Resources",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Energy",
+  "prix": {
+    "dernier_prix_cad": 70.04,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 19.26,
+    "prix_max_5ans_cad": 78.42
+  },
+  "rendements": {
+    "cumule_5ans": 2.5271,
+    "cagr_annualise": 0.2758,
+    "rendement_1an": 0.5588,
+    "rendement_3ans": 0.8662,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.301,
+    "volatilite_baisse_semi_deviation": 0.2136,
+    "pire_baisse_globale": -0.3311495303274399,
+    "pire_baisse_2022": -0.29125170525629107,
+    "creux_date": "2025-04-08",
+    "sommet_date": "2024-04-10",
+    "annees_sous_le_sommet": 1.82,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0327,
+    "cvar_95_expected_shortfall": 0.0455,
+    "var_95_cornish_fisher": 0.0313,
+    "var_99_quotidienne": 0.0568,
+    "cvar_99_expected_shortfall": 0.0653,
+    "var_95_1mois_estimee": 0.1499
+  },
+  "distribution": {
+    "skewness": -0.38,
+    "excess_kurtosis": 1.811,
+    "statistique_jb": 209.54,
+    "p_valeur_jb": 3.155248760308578e-46,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.2758,
+    "volatilite_annuelle": 0.301,
+    "volatilite_baisse_sortino": 0.2136,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.8,
+    "ratio_sortino": 1.13,
+    "ratio_calmar": 0.83
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.35,
+    "alpha_annuel_vs_spy": 0.2041,
+    "correlation_vs_spy": 0.19,
+    "beta_xiu_canada": 1.01,
+    "alpha_annuel_vs_xiu.to": 0.1436,
+    "correlation_vs_xiu.to": 0.43,
+    "correlation_variation_usdcad": -0.23,
+    "correlation_taux_10y_canada": 0.15,
+    "correlation_taux_10y_us": 0.13,
+    "correlation_taux_directeur_boc": 0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": 0.4795,
+      "pire_baisse_pendant_regime": -0.2913
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0721,
+      "pire_baisse_pendant_regime": -0.1504
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.1268,
+      "pire_baisse_pendant_regime": -0.2131
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 3.051,
+    "rendement_dividende_pct": 0.0436,
+    "nb_paiements_total_5ans": 21,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-09-11",
+    "splits": [
+      {
+        "date": "2022-08-22",
+        "ratio": 1.021
+      },
+      {
+        "date": "2024-06-11",
+        "ratio": 2.0
+      }
+    ],
+    "nb_splits": 2
+  },
+  "esg_preuves": [
+    {
+      "type": "exclusion",
+      "nature": "fait_etabli",
+      "fait": "Premier producteur canadien de pétrole lourd issu des sables bitumineux de l Athabasca (mines Horizon et Albian).",
+      "source": "Rapport ESG Canadian Natural Resources 2023",
+      "url": "https://www.cnrl.com/sustainability",
+      "date_document": "2023-06-30"
+    }
+  ],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Energy",
+    "Volatilité Élevée",
+    "Queues Épaisses (Fat Tails)",
+    "Fort Dividende (>4%)",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Canadian Natural Resources (CNQ.TO) est un actif de type equity (Energy). Sur la période observée de 5 ans, il affiche un rendement annualisé de 27.6% pour une volatilité de 30.1% (ratio de Sharpe de 0.8). Sa VaR quotidienne à 95% est de 3.3%. Son profil se caractérise par : Action Individuelle, Energy, Volatilité Élevée, Queues Épaisses (Fat Tails), Fort Dividende (>4%), Bêta Défensif (<0.7)."
+}

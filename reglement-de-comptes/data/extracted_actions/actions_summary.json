@@ -1,0 +1,3339 @@
+{
+  "RY.TO": {
+    "ticker": "RY.TO",
+    "nom": "Royal Bank of Canada",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Financials",
+    "prix": {
+      "dernier_prix_cad": 289.39,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 98.37,
+      "prix_max_5ans_cad": 302.02
+    },
+    "rendements": {
+      "cumule_5ans": 1.595,
+      "cagr_annualise": 0.2024,
+      "rendement_1an": 0.3835,
+      "rendement_3ans": 1.4115,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1517,
+      "volatilite_baisse_semi_deviation": 0.105,
+      "pire_baisse_globale": -0.21213828244273358,
+      "pire_baisse_2022": -0.19090449465002357,
+      "creux_date": "2023-10-27",
+      "sommet_date": "2022-01-17",
+      "annees_sous_le_sommet": 2.17,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0146,
+      "cvar_95_expected_shortfall": 0.0221,
+      "var_95_cornish_fisher": 0.0151,
+      "var_99_quotidienne": 0.026,
+      "cvar_99_expected_shortfall": 0.0334,
+      "var_95_1mois_estimee": 0.0669
+    },
+    "distribution": {
+      "skewness": -0.287,
+      "excess_kurtosis": 3.214,
+      "statistique_jb": 579.16,
+      "p_valeur_jb": 1.7261571024921868e-126,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2024,
+      "volatilite_annuelle": 0.1517,
+      "volatilite_baisse_sortino": 0.105,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 1.1,
+      "ratio_sortino": 1.59,
+      "ratio_calmar": 0.95
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.44,
+      "alpha_annuel_vs_spy": 0.1215,
+      "correlation_vs_spy": 0.47,
+      "beta_xiu_canada": 0.86,
+      "alpha_annuel_vs_xiu.to": 0.0842,
+      "correlation_vs_xiu.to": 0.73,
+      "correlation_variation_usdcad": -0.27,
+      "correlation_taux_10y_canada": -0.1,
+      "correlation_taux_10y_us": -0.07,
+      "correlation_taux_directeur_boc": -0.04
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.0664,
+        "pire_baisse_pendant_regime": -0.1909
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": -0.0205,
+        "pire_baisse_pendant_regime": -0.0758
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.3189,
+        "pire_baisse_pendant_regime": -0.0501
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 8.34,
+      "rendement_dividende_pct": 0.0288,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-10-26",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Financials",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Royal Bank of Canada (RY.TO) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 20.2% pour une volatilité de 15.2% (ratio de Sharpe de 1.1). Sa VaR quotidienne à 95% est de 1.5%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "TD.TO": {
+    "ticker": "TD.TO",
+    "nom": "Toronto-Dominion Bank",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Financials",
+    "prix": {
+      "dernier_prix_cad": 176.69,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 65.1,
+      "prix_max_5ans_cad": 178.93
+    },
+    "rendements": {
+      "cumule_5ans": 1.3377,
+      "cagr_annualise": 0.1783,
+      "rendement_1an": 0.5686,
+      "rendement_3ans": 1.404,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1736,
+      "volatilite_baisse_semi_deviation": 0.1254,
+      "pire_baisse_globale": -0.2606497934775678,
+      "pire_baisse_2022": -0.26064979347756745,
+      "creux_date": "2022-07-14",
+      "sommet_date": "2022-02-10",
+      "annees_sous_le_sommet": 3.28,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.017,
+      "cvar_95_expected_shortfall": 0.0263,
+      "var_95_cornish_fisher": 0.0185,
+      "var_99_quotidienne": 0.0335,
+      "cvar_99_expected_shortfall": 0.0421,
+      "var_95_1mois_estimee": 0.078
+    },
+    "distribution": {
+      "skewness": -0.675,
+      "excess_kurtosis": 3.677,
+      "statistique_jb": 833.55,
+      "p_valeur_jb": 9.938726264397014e-182,
+      "est_normale": false,
+      "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1783,
+      "volatilite_annuelle": 0.1736,
+      "volatilite_baisse_sortino": 0.1254,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.83,
+      "ratio_sortino": 1.14,
+      "ratio_calmar": 0.68
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.43,
+      "alpha_annuel_vs_spy": 0.0986,
+      "correlation_vs_spy": 0.4,
+      "beta_xiu_canada": 0.84,
+      "alpha_annuel_vs_xiu.to": 0.0619,
+      "correlation_vs_xiu.to": 0.62,
+      "correlation_variation_usdcad": -0.2,
+      "correlation_taux_10y_canada": -0.05,
+      "correlation_taux_10y_us": -0.01,
+      "correlation_taux_directeur_boc": -0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.0897,
+        "pire_baisse_pendant_regime": -0.2606
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": -0.0868,
+        "pire_baisse_pendant_regime": -0.147
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": -0.0577,
+        "pire_baisse_pendant_regime": -0.1286
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 5.45,
+      "rendement_dividende_pct": 0.0308,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-10-09",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Financials",
+      "Queues Épaisses (Fat Tails)",
+      "Asymétrie Baissière",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Toronto-Dominion Bank (TD.TO) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 17.8% pour une volatilité de 17.4% (ratio de Sharpe de 0.83). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Asymétrie Baissière, Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "MFC.TO": {
+    "ticker": "MFC.TO",
+    "nom": "Manulife Financial",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Financials",
+    "prix": {
+      "dernier_prix_cad": 62.65,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 17.62,
+      "prix_max_5ans_cad": 64.17
+    },
+    "rendements": {
+      "cumule_5ans": 2.1773,
+      "cagr_annualise": 0.2503,
+      "rendement_1an": 0.3046,
+      "rendement_3ans": 1.421,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2121,
+      "volatilite_baisse_semi_deviation": 0.1492,
+      "pire_baisse_globale": -0.21046507080459964,
+      "pire_baisse_2022": -0.21046507080459964,
+      "creux_date": "2022-06-23",
+      "sommet_date": "2022-02-10",
+      "annees_sous_le_sommet": 0.96,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0198,
+      "cvar_95_expected_shortfall": 0.0308,
+      "var_95_cornish_fisher": 0.0209,
+      "var_99_quotidienne": 0.0338,
+      "cvar_99_expected_shortfall": 0.0533,
+      "var_95_1mois_estimee": 0.0907
+    },
+    "distribution": {
+      "skewness": -0.552,
+      "excess_kurtosis": 7.698,
+      "statistique_jb": 3286.3,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2503,
+      "volatilite_annuelle": 0.2121,
+      "volatilite_baisse_sortino": 0.1492,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 1.02,
+      "ratio_sortino": 1.44,
+      "ratio_calmar": 1.19
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.67,
+      "alpha_annuel_vs_spy": 0.1452,
+      "correlation_vs_spy": 0.52,
+      "beta_xiu_canada": 1.11,
+      "alpha_annuel_vs_xiu.to": 0.1083,
+      "correlation_vs_xiu.to": 0.67,
+      "correlation_variation_usdcad": -0.22,
+      "correlation_taux_10y_canada": -0.02,
+      "correlation_taux_10y_us": 0.0,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.0611,
+        "pire_baisse_pendant_regime": -0.2105
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": -0.0056,
+        "pire_baisse_pendant_regime": -0.1213
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.4543,
+        "pire_baisse_pendant_regime": -0.1054
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.895,
+      "rendement_dividende_pct": 0.0302,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-21",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Financials",
+      "Queues Épaisses (Fat Tails)",
+      "Asymétrie Baissière",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Manulife Financial (MFC.TO) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 25.0% pour une volatilité de 21.2% (ratio de Sharpe de 1.02). Sa VaR quotidienne à 95% est de 2.0%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Asymétrie Baissière, Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "ENB.TO": {
+    "ticker": "ENB.TO",
+    "nom": "Enbridge",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Energy",
+    "prix": {
+      "dernier_prix_cad": 67.6,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 34.69,
+      "prix_max_5ans_cad": 78.0
+    },
+    "rendements": {
+      "cumule_5ans": 0.8264,
+      "cagr_annualise": 0.1234,
+      "rendement_1an": 0.0636,
+      "rendement_3ans": 0.7153,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1578,
+      "volatilite_baisse_semi_deviation": 0.1134,
+      "pire_baisse_globale": -0.21377560492825554,
+      "pire_baisse_2022": -0.1600241370573846,
+      "creux_date": "2023-10-04",
+      "sommet_date": "2022-06-07",
+      "annees_sous_le_sommet": 2.15,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0156,
+      "cvar_95_expected_shortfall": 0.0241,
+      "var_95_cornish_fisher": 0.0168,
+      "var_99_quotidienne": 0.0312,
+      "cvar_99_expected_shortfall": 0.0375,
+      "var_95_1mois_estimee": 0.0715
+    },
+    "distribution": {
+      "skewness": -0.562,
+      "excess_kurtosis": 2.703,
+      "statistique_jb": 465.74,
+      "p_valeur_jb": 7.340447501942825e-102,
+      "est_normale": false,
+      "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1234,
+      "volatilite_annuelle": 0.1578,
+      "volatilite_baisse_sortino": 0.1134,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.56,
+      "ratio_sortino": 0.78,
+      "ratio_calmar": 0.58
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.19,
+      "alpha_annuel_vs_spy": 0.0686,
+      "correlation_vs_spy": 0.2,
+      "beta_xiu_canada": 0.6,
+      "alpha_annuel_vs_xiu.to": 0.0308,
+      "correlation_vs_xiu.to": 0.48,
+      "correlation_variation_usdcad": -0.23,
+      "correlation_taux_10y_canada": -0.08,
+      "correlation_taux_10y_us": -0.08,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.0587,
+        "pire_baisse_pendant_regime": -0.16
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0471,
+        "pire_baisse_pendant_regime": -0.0568
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2495,
+        "pire_baisse_pendant_regime": -0.0735
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.796,
+      "rendement_dividende_pct": 0.0709,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-14",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [
+      {
+        "type": "exclusion",
+        "nature": "fait_etabli",
+        "fait": "Exploitation et expansion d oléoducs majeurs (Line 3 et Line 5) transportant des sables bitumineux à forte intensité carbone.",
+        "source": "Régie de l énergie du Canada (REC) / Rapport RSE Enbridge 2023",
+        "url": "https://www.cer-rec.gc.ca",
+        "date_document": "2023-05-15"
+      }
+    ],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Energy",
+      "Queues Épaisses (Fat Tails)",
+      "Asymétrie Baissière",
+      "Fort Dividende (>4%)",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Enbridge (ENB.TO) est un actif de type equity (Energy). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.3% pour une volatilité de 15.8% (ratio de Sharpe de 0.56). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : Action Individuelle, Energy, Queues Épaisses (Fat Tails), Asymétrie Baissière, Fort Dividende (>4%), Bêta Défensif (<0.7)."
+  },
+  "CNQ.TO": {
+    "ticker": "CNQ.TO",
+    "nom": "Canadian Natural Resources",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Energy",
+    "prix": {
+      "dernier_prix_cad": 70.04,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 19.26,
+      "prix_max_5ans_cad": 78.42
+    },
+    "rendements": {
+      "cumule_5ans": 2.5271,
+      "cagr_annualise": 0.2758,
+      "rendement_1an": 0.5588,
+      "rendement_3ans": 0.8662,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.301,
+      "volatilite_baisse_semi_deviation": 0.2136,
+      "pire_baisse_globale": -0.3311495303274399,
+      "pire_baisse_2022": -0.29125170525629107,
+      "creux_date": "2025-04-08",
+      "sommet_date": "2024-04-10",
+      "annees_sous_le_sommet": 1.82,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0327,
+      "cvar_95_expected_shortfall": 0.0455,
+      "var_95_cornish_fisher": 0.0313,
+      "var_99_quotidienne": 0.0568,
+      "cvar_99_expected_shortfall": 0.0653,
+      "var_95_1mois_estimee": 0.1499
+    },
+    "distribution": {
+      "skewness": -0.38,
+      "excess_kurtosis": 1.811,
+      "statistique_jb": 209.54,
+      "p_valeur_jb": 3.155248760308578e-46,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2758,
+      "volatilite_annuelle": 0.301,
+      "volatilite_baisse_sortino": 0.2136,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.8,
+      "ratio_sortino": 1.13,
+      "ratio_calmar": 0.83
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.35,
+      "alpha_annuel_vs_spy": 0.2041,
+      "correlation_vs_spy": 0.19,
+      "beta_xiu_canada": 1.01,
+      "alpha_annuel_vs_xiu.to": 0.1436,
+      "correlation_vs_xiu.to": 0.43,
+      "correlation_variation_usdcad": -0.23,
+      "correlation_taux_10y_canada": 0.15,
+      "correlation_taux_10y_us": 0.13,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.4795,
+        "pire_baisse_pendant_regime": -0.2913
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0721,
+        "pire_baisse_pendant_regime": -0.1504
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.1268,
+        "pire_baisse_pendant_regime": -0.2131
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 3.051,
+      "rendement_dividende_pct": 0.0436,
+      "nb_paiements_total_5ans": 21,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-11",
+      "splits": [
+        {
+          "date": "2022-08-22",
+          "ratio": 1.021
+        },
+        {
+          "date": "2024-06-11",
+          "ratio": 2.0
+        }
+      ],
+      "nb_splits": 2
+    },
+    "esg_preuves": [
+      {
+        "type": "exclusion",
+        "nature": "fait_etabli",
+        "fait": "Premier producteur canadien de pétrole lourd issu des sables bitumineux de l Athabasca (mines Horizon et Albian).",
+        "source": "Rapport ESG Canadian Natural Resources 2023",
+        "url": "https://www.cnrl.com/sustainability",
+        "date_document": "2023-06-30"
+      }
+    ],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Energy",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Fort Dividende (>4%)",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Canadian Natural Resources (CNQ.TO) est un actif de type equity (Energy). Sur la période observée de 5 ans, il affiche un rendement annualisé de 27.6% pour une volatilité de 30.1% (ratio de Sharpe de 0.8). Sa VaR quotidienne à 95% est de 3.3%. Son profil se caractérise par : Action Individuelle, Energy, Volatilité Élevée, Queues Épaisses (Fat Tails), Fort Dividende (>4%), Bêta Défensif (<0.7)."
+  },
+  "CNR.TO": {
+    "ticker": "CNR.TO",
+    "nom": "Canadian National Railway",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Industrials",
+    "prix": {
+      "dernier_prix_cad": 181.9,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 123.28,
+      "prix_max_5ans_cad": 182.93
+    },
+    "rendements": {
+      "cumule_5ans": 0.2423,
+      "cagr_annualise": 0.0428,
+      "rendement_1an": 0.4251,
+      "rendement_3ans": 0.1864,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1948,
+      "volatilite_baisse_semi_deviation": 0.1395,
+      "pire_baisse_globale": -0.27247527672555716,
+      "pire_baisse_2022": -0.180992324925212,
+      "creux_date": "2025-08-07",
+      "sommet_date": "2024-03-21",
+      "annees_sous_le_sommet": 2.26,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0197,
+      "cvar_95_expected_shortfall": 0.0288,
+      "var_95_cornish_fisher": 0.0202,
+      "var_99_quotidienne": 0.0357,
+      "cvar_99_expected_shortfall": 0.0438,
+      "var_95_1mois_estimee": 0.0903
+    },
+    "distribution": {
+      "skewness": -0.255,
+      "excess_kurtosis": 2.443,
+      "statistique_jb": 338.39,
+      "p_valeur_jb": 3.3026576594595758e-74,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.0428,
+      "volatilite_annuelle": 0.1948,
+      "volatilite_baisse_sortino": 0.1395,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.04,
+      "ratio_sortino": 0.06,
+      "ratio_calmar": 0.16
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.51,
+      "alpha_annuel_vs_spy": -0.0452,
+      "correlation_vs_spy": 0.43,
+      "beta_xiu_canada": 0.84,
+      "alpha_annuel_vs_xiu.to": -0.0735,
+      "correlation_vs_xiu.to": 0.55,
+      "correlation_variation_usdcad": -0.14,
+      "correlation_taux_10y_canada": -0.1,
+      "correlation_taux_10y_us": -0.06,
+      "correlation_taux_directeur_boc": 0.05
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.0297,
+        "pire_baisse_pendant_regime": -0.181
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0498,
+        "pire_baisse_pendant_regime": -0.0537
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": -0.0797,
+        "pire_baisse_pendant_regime": -0.1545
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.521,
+      "rendement_dividende_pct": 0.0249,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-08",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Industrials",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Canadian National Railway (CNR.TO) est un actif de type equity (Industrials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 4.3% pour une volatilité de 19.5% (ratio de Sharpe de 0.04). Sa VaR quotidienne à 95% est de 2.0%. Son profil se caractérise par : Action Individuelle, Industrials, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "FTS.TO": {
+    "ticker": "FTS.TO",
+    "nom": "Fortis",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Utilities",
+    "prix": {
+      "dernier_prix_cad": 84.43,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 41.99,
+      "prix_max_5ans_cad": 85.79
+    },
+    "rendements": {
+      "cumule_5ans": 0.8191,
+      "cagr_annualise": 0.1226,
+      "rendement_1an": 0.1816,
+      "rendement_3ans": 0.7477,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1443,
+      "volatilite_baisse_semi_deviation": 0.0967,
+      "pire_baisse_globale": -0.24010774527174017,
+      "pire_baisse_2022": -0.24010774527174017,
+      "creux_date": "2022-10-12",
+      "sommet_date": "2022-05-24",
+      "annees_sous_le_sommet": 2.23,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0136,
+      "cvar_95_expected_shortfall": 0.019,
+      "var_95_cornish_fisher": 0.014,
+      "var_99_quotidienne": 0.0221,
+      "cvar_99_expected_shortfall": 0.0268,
+      "var_95_1mois_estimee": 0.0621
+    },
+    "distribution": {
+      "skewness": 0.074,
+      "excess_kurtosis": 1.203,
+      "statistique_jb": 79.9,
+      "p_valeur_jb": 4.463599776988178e-18,
+      "est_normale": false,
+      "diagnostic": "Distribution proche d'une loi normale"
+    },
+    "ratios_performance": {
+      "cagr": 0.1226,
+      "volatilite_annuelle": 0.1443,
+      "volatilite_baisse_sortino": 0.0967,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.61,
+      "ratio_sortino": 0.91,
+      "ratio_calmar": 0.51
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.02,
+      "alpha_annuel_vs_spy": 0.0852,
+      "correlation_vs_spy": 0.03,
+      "beta_xiu_canada": 0.23,
+      "alpha_annuel_vs_xiu.to": 0.0654,
+      "correlation_vs_xiu.to": 0.2,
+      "correlation_variation_usdcad": -0.05,
+      "correlation_taux_10y_canada": -0.31,
+      "correlation_taux_10y_us": -0.29,
+      "correlation_taux_directeur_boc": 0.03
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1543,
+        "pire_baisse_pendant_regime": -0.2401
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1022,
+        "pire_baisse_pendant_regime": -0.0585
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.1313,
+        "pire_baisse_pendant_regime": -0.0743
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 3.175,
+      "rendement_dividende_pct": 0.0376,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-19",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Utilities",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)",
+      "Vulnérable aux Taux d'Intérêt"
+    ],
+    "synthese_agent_llm": "Fortis (FTS.TO) est un actif de type equity (Utilities). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.3% pour une volatilité de 14.4% (ratio de Sharpe de 0.61). Sa VaR quotidienne à 95% est de 1.4%. Son profil se caractérise par : Action Individuelle, Utilities, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+  },
+  "ATD.TO": {
+    "ticker": "ATD.TO",
+    "nom": "Alimentation Couche-Tard",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Consumer Staples",
+    "prix": {
+      "dernier_prix_cad": 82.48,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 44.23,
+      "prix_max_5ans_cad": 93.29
+    },
+    "rendements": {
+      "cumule_5ans": 0.7151,
+      "cagr_annualise": 0.1099,
+      "rendement_1an": 0.1203,
+      "rendement_3ans": 0.1351,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2362,
+      "volatilite_baisse_semi_deviation": 0.1522,
+      "pire_baisse_globale": -0.221591489120732,
+      "pire_baisse_2022": -0.15843917579842703,
+      "creux_date": "2025-03-18",
+      "sommet_date": "2024-02-23",
+      "annees_sous_le_sommet": 2.0,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0221,
+      "cvar_95_expected_shortfall": 0.0301,
+      "var_95_cornish_fisher": 0.0191,
+      "var_99_quotidienne": 0.0344,
+      "cvar_99_expected_shortfall": 0.0427,
+      "var_95_1mois_estimee": 0.1013
+    },
+    "distribution": {
+      "skewness": 0.755,
+      "excess_kurtosis": 4.857,
+      "statistique_jb": 1405.76,
+      "p_valeur_jb": 5.5288011254240253e-306,
+      "est_normale": false,
+      "diagnostic": "Asymétrie prononcée ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1099,
+      "volatilite_annuelle": 0.2362,
+      "volatilite_baisse_sortino": 0.1522,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.32,
+      "ratio_sortino": 0.49,
+      "ratio_calmar": 0.5
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.43,
+      "alpha_annuel_vs_spy": 0.0304,
+      "correlation_vs_spy": 0.29,
+      "beta_xiu_canada": 0.75,
+      "alpha_annuel_vs_xiu.to": 0.0022,
+      "correlation_vs_xiu.to": 0.41,
+      "correlation_variation_usdcad": -0.07,
+      "correlation_taux_10y_canada": -0.08,
+      "correlation_taux_10y_us": -0.03,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.0944,
+        "pire_baisse_pendant_regime": -0.1584
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0533,
+        "pire_baisse_pendant_regime": -0.0668
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": -0.0575,
+        "pire_baisse_pendant_regime": -0.1663
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.055,
+      "rendement_dividende_pct": 0.0128,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-11",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Consumer Staples",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Alimentation Couche-Tard (ATD.TO) est un actif de type equity (Consumer Staples). Sur la période observée de 5 ans, il affiche un rendement annualisé de 11.0% pour une volatilité de 23.6% (ratio de Sharpe de 0.32). Sa VaR quotidienne à 95% est de 2.2%. Son profil se caractérise par : Action Individuelle, Consumer Staples, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Bêta Défensif (<0.7)."
+  },
+  "SHOP.TO": {
+    "ticker": "SHOP.TO",
+    "nom": "Shopify",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Information Technology",
+    "prix": {
+      "dernier_prix_cad": 209.41,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 35.37,
+      "prix_max_5ans_cad": 252.53
+    },
+    "rendements": {
+      "cumule_5ans": -0.0004,
+      "cagr_annualise": -0.0001,
+      "rendement_1an": -0.0567,
+      "rendement_3ans": 1.0777,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.6319,
+      "volatilite_baisse_semi_deviation": 0.4231,
+      "pire_baisse_globale": -0.8347057237222226,
+      "pire_baisse_2022": -0.796921393695041,
+      "creux_date": "2022-10-11",
+      "sommet_date": "2021-11-19",
+      "annees_sous_le_sommet": 3.84,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0589,
+      "cvar_95_expected_shortfall": 0.0874,
+      "var_95_cornish_fisher": 0.0548,
+      "var_99_quotidienne": 0.1084,
+      "cvar_99_expected_shortfall": 0.1415,
+      "var_95_1mois_estimee": 0.2697
+    },
+    "distribution": {
+      "skewness": 0.47,
+      "excess_kurtosis": 5.425,
+      "statistique_jb": 1646.83,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": -0.0001,
+      "volatilite_annuelle": 0.6319,
+      "volatilite_baisse_sortino": 0.4231,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.06,
+      "ratio_sortino": -0.08,
+      "ratio_calmar": -0.0
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 2.09,
+      "alpha_annuel_vs_spy": -0.2539,
+      "correlation_vs_spy": 0.54,
+      "beta_xiu_canada": 2.69,
+      "alpha_annuel_vs_xiu.to": -0.2947,
+      "correlation_vs_xiu.to": 0.54,
+      "correlation_variation_usdcad": -0.12,
+      "correlation_taux_10y_canada": -0.12,
+      "correlation_taux_10y_us": -0.07,
+      "correlation_taux_directeur_boc": 0.04
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.792,
+        "pire_baisse_pendant_regime": -0.7969
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1399,
+        "pire_baisse_pendant_regime": -0.069
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0688,
+        "pire_baisse_pendant_regime": -0.3894
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_total_5ans": 0,
+      "frequence_dividende": "Aucun",
+      "derniere_date_ex": null,
+      "splits": [
+        {
+          "date": "2022-06-29",
+          "ratio": 10.0
+        }
+      ],
+      "nb_splits": 1
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Information Technology",
+      "Volatilité Extrême",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Haut Bêta (>1.3)"
+    ],
+    "synthese_agent_llm": "Shopify (SHOP.TO) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de -0.0% pour une volatilité de 63.2% (ratio de Sharpe de -0.06). Sa VaR quotidienne à 95% est de 5.9%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+  },
+  "CSU.TO": {
+    "ticker": "CSU.TO",
+    "nom": "Constellation Software",
+    "classe_actif": "equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Information Technology",
+    "prix": {
+      "dernier_prix_cad": 3496.88,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 1801.47,
+      "prix_max_5ans_cad": 5168.47
+    },
+    "rendements": {
+      "cumule_5ans": 0.6098,
+      "cagr_annualise": 0.0964,
+      "rendement_1an": 0.0317,
+      "rendement_3ans": 0.1005,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2994,
+      "volatilite_baisse_semi_deviation": 0.2094,
+      "pire_baisse_globale": -0.5637795718393234,
+      "pire_baisse_2022": -0.2256027578316071,
+      "creux_date": "2026-02-17",
+      "sommet_date": "2025-05-08",
+      "annees_sous_le_sommet": 1.51,
+      "a_recupere_sommet": false,
+      "var_95_quotidienne": 0.0306,
+      "cvar_95_expected_shortfall": 0.0431,
+      "var_95_cornish_fisher": 0.0298,
+      "var_99_quotidienne": 0.053,
+      "cvar_99_expected_shortfall": 0.0618,
+      "var_95_1mois_estimee": 0.1403
+    },
+    "distribution": {
+      "skewness": -0.035,
+      "excess_kurtosis": 2.126,
+      "statistique_jb": 245.73,
+      "p_valeur_jb": 4.3654412413901454e-54,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.0964,
+      "volatilite_annuelle": 0.2994,
+      "volatilite_baisse_sortino": 0.2094,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.21,
+      "ratio_sortino": 0.29,
+      "ratio_calmar": 0.17
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.66,
+      "alpha_annuel_vs_spy": -0.0075,
+      "correlation_vs_spy": 0.36,
+      "beta_xiu_canada": 0.98,
+      "alpha_annuel_vs_xiu.to": -0.0331,
+      "correlation_vs_xiu.to": 0.42,
+      "correlation_variation_usdcad": -0.06,
+      "correlation_taux_10y_canada": -0.12,
+      "correlation_taux_10y_us": -0.08,
+      "correlation_taux_directeur_boc": 0.0
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2188,
+        "pire_baisse_pendant_regime": -0.2256
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1493,
+        "pire_baisse_pendant_regime": -0.0224
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2974,
+        "pire_baisse_pendant_regime": -0.1145
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 6.957,
+      "rendement_dividende_pct": 0.002,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-18",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Information Technology",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Constellation Software (CSU.TO) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 9.6% pour une volatilité de 29.9% (ratio de Sharpe de 0.21). Sa VaR quotidienne à 95% est de 3.1%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Bêta Défensif (<0.7)."
+  },
+  "AAPL": {
+    "ticker": "AAPL",
+    "nom": "Apple",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Information Technology",
+    "prix": {
+      "dernier_prix_cad": 505.88,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 164.57,
+      "prix_max_5ans_cad": 505.88
+    },
+    "rendements": {
+      "cumule_5ans": 1.7501,
+      "cagr_annualise": 0.2159,
+      "rendement_1an": 0.2995,
+      "rendement_3ans": 0.973,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2729,
+      "volatilite_baisse_semi_deviation": 0.1832,
+      "pire_baisse_globale": -0.3424065114931236,
+      "pire_baisse_2022": -0.2693327084244772,
+      "creux_date": "2025-04-08",
+      "sommet_date": "2024-12-26",
+      "annees_sous_le_sommet": 0.84,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0269,
+      "cvar_95_expected_shortfall": 0.0384,
+      "var_95_cornish_fisher": 0.0232,
+      "var_99_quotidienne": 0.0475,
+      "cvar_99_expected_shortfall": 0.0583,
+      "var_95_1mois_estimee": 0.1232
+    },
+    "distribution": {
+      "skewness": 0.337,
+      "excess_kurtosis": 7.186,
+      "statistique_jb": 2830.44,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2159,
+      "volatilite_annuelle": 0.2729,
+      "volatilite_baisse_sortino": 0.1832,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.66,
+      "ratio_sortino": 0.99,
+      "ratio_calmar": 0.63
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.17,
+      "alpha_annuel_vs_spy": 0.0586,
+      "correlation_vs_spy": 0.7,
+      "beta_xiu_canada": 0.92,
+      "alpha_annuel_vs_xiu.to": 0.092,
+      "correlation_vs_xiu.to": 0.43,
+      "correlation_variation_usdcad": 0.04,
+      "correlation_taux_10y_canada": -0.1,
+      "correlation_taux_10y_us": -0.03,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1448,
+        "pire_baisse_pendant_regime": -0.2693
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1451,
+        "pire_baisse_pendant_regime": -0.0359
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2242,
+        "pire_baisse_pendant_regime": -0.1366
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.07,
+      "rendement_dividende_pct": 0.0021,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-11-12",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Information Technology",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Apple (AAPL) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 21.6% pour une volatilité de 27.3% (ratio de Sharpe de 0.66). Sa VaR quotidienne à 95% est de 2.7%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "MSFT": {
+    "ticker": "MSFT",
+    "nom": "Microsoft",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Information Technology",
+    "prix": {
+      "dernier_prix_cad": 745.54,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 285.08,
+      "prix_max_5ans_cad": 775.95
+    },
+    "rendements": {
+      "cumule_5ans": 0.8361,
+      "cagr_annualise": 0.1246,
+      "rendement_1an": 0.1152,
+      "rendement_3ans": 0.5412,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2754,
+      "volatilite_baisse_semi_deviation": 0.1845,
+      "pire_baisse_globale": -0.3430779787717696,
+      "pire_baisse_2022": -0.30136723261675513,
+      "creux_date": "2026-03-27",
+      "sommet_date": "2025-10-28",
+      "annees_sous_le_sommet": 0.94,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.027,
+      "cvar_95_expected_shortfall": 0.0375,
+      "var_95_cornish_fisher": 0.0228,
+      "var_99_quotidienne": 0.0419,
+      "cvar_99_expected_shortfall": 0.0551,
+      "var_95_1mois_estimee": 0.1236
+    },
+    "distribution": {
+      "skewness": 0.515,
+      "excess_kurtosis": 7.124,
+      "statistique_jb": 2814.83,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Asymétrie prononcée ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1246,
+      "volatilite_annuelle": 0.2754,
+      "volatilite_baisse_sortino": 0.1845,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.33,
+      "ratio_sortino": 0.49,
+      "ratio_calmar": 0.36
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.14,
+      "alpha_annuel_vs_spy": -0.03,
+      "correlation_vs_spy": 0.68,
+      "beta_xiu_canada": 0.79,
+      "alpha_annuel_vs_xiu.to": 0.0137,
+      "correlation_vs_xiu.to": 0.37,
+      "correlation_variation_usdcad": 0.03,
+      "correlation_taux_10y_canada": -0.03,
+      "correlation_taux_10y_us": 0.01,
+      "correlation_taux_directeur_boc": 0.03
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2524,
+        "pire_baisse_pendant_regime": -0.2636
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.2194,
+        "pire_baisse_pendant_regime": -0.0453
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.1558,
+        "pire_baisse_pendant_regime": -0.1449
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.47,
+      "rendement_dividende_pct": 0.006,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-20",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Information Technology",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Microsoft (MSFT) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.5% pour une volatilité de 27.5% (ratio de Sharpe de 0.33). Sa VaR quotidienne à 95% est de 2.7%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "NVDA": {
+    "ticker": "NVDA",
+    "nom": "NVIDIA",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Information Technology",
+    "prix": {
+      "dernier_prix_cad": 236.9,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 15.5,
+      "prix_max_5ans_cad": 340.53
+    },
+    "rendements": {
+      "cumule_5ans": 5.2314,
+      "cagr_annualise": 0.4241,
+      "rendement_1an": -0.0531,
+      "rendement_3ans": 2.7044,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.5015,
+      "volatilite_baisse_semi_deviation": 0.3273,
+      "pire_baisse_globale": -0.6345781942607412,
+      "pire_baisse_2022": -0.5923604605950517,
+      "creux_date": "2022-10-14",
+      "sommet_date": "2021-11-29",
+      "annees_sous_le_sommet": 1.46,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0471,
+      "cvar_95_expected_shortfall": 0.0661,
+      "var_95_cornish_fisher": 0.0417,
+      "var_99_quotidienne": 0.0728,
+      "cvar_99_expected_shortfall": 0.0912,
+      "var_95_1mois_estimee": 0.2159
+    },
+    "distribution": {
+      "skewness": 0.545,
+      "excess_kurtosis": 5.177,
+      "statistique_jb": 1520.81,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Asymétrie prononcée ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.4241,
+      "volatilite_annuelle": 0.5015,
+      "volatilite_baisse_sortino": 0.3273,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.78,
+      "ratio_sortino": 1.19,
+      "ratio_calmar": 0.67
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 2.1,
+      "alpha_annuel_vs_spy": 0.1699,
+      "correlation_vs_spy": 0.68,
+      "beta_xiu_canada": 1.63,
+      "alpha_annuel_vs_xiu.to": 0.2313,
+      "correlation_vs_xiu.to": 0.42,
+      "correlation_variation_usdcad": -0.1,
+      "correlation_taux_10y_canada": -0.0,
+      "correlation_taux_10y_us": 0.01,
+      "correlation_taux_directeur_boc": 0.05
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.5825,
+        "pire_baisse_pendant_regime": -0.5924
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.2397,
+        "pire_baisse_pendant_regime": -0.0596
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 1.8807,
+        "pire_baisse_pendant_regime": -0.2696
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.53,
+      "rendement_dividende_pct": 0.0022,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-10",
+      "splits": [
+        {
+          "date": "2024-06-10",
+          "ratio": 10.0
+        }
+      ],
+      "nb_splits": 1
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Information Technology",
+      "Volatilité Extrême",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Haut Bêta (>1.3)"
+    ],
+    "synthese_agent_llm": "NVIDIA (NVDA) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 42.4% pour une volatilité de 50.1% (ratio de Sharpe de 0.78). Sa VaR quotidienne à 95% est de 4.7%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+  },
+  "GOOGL": {
+    "ticker": "GOOGL",
+    "nom": "Alphabet (Class A)",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Communication Services",
+    "prix": {
+      "dernier_prix_cad": 425.8,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 113.63,
+      "prix_max_5ans_cad": 551.03
+    },
+    "rendements": {
+      "cumule_5ans": 1.3009,
+      "cagr_annualise": 0.1747,
+      "rendement_1an": -0.0642,
+      "rendement_3ans": 1.3308,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.3167,
+      "volatilite_baisse_semi_deviation": 0.2178,
+      "pire_baisse_globale": -0.39472141814963213,
+      "pire_baisse_2022": -0.38861449836391637,
+      "creux_date": "2022-11-03",
+      "sommet_date": "2021-12-27",
+      "annees_sous_le_sommet": 1.79,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0298,
+      "cvar_95_expected_shortfall": 0.0448,
+      "var_95_cornish_fisher": 0.0306,
+      "var_99_quotidienne": 0.0497,
+      "cvar_99_expected_shortfall": 0.0718,
+      "var_95_1mois_estimee": 0.1364
+    },
+    "distribution": {
+      "skewness": -0.071,
+      "excess_kurtosis": 4.373,
+      "statistique_jb": 1040.17,
+      "p_valeur_jb": 1.34679042876773e-226,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1747,
+      "volatilite_annuelle": 0.3167,
+      "volatilite_baisse_sortino": 0.2178,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.44,
+      "ratio_sortino": 0.64,
+      "ratio_calmar": 0.44
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.27,
+      "alpha_annuel_vs_spy": 0.0075,
+      "correlation_vs_spy": 0.65,
+      "beta_xiu_canada": 0.89,
+      "alpha_annuel_vs_xiu.to": 0.0541,
+      "correlation_vs_xiu.to": 0.36,
+      "correlation_variation_usdcad": 0.03,
+      "correlation_taux_10y_canada": -0.06,
+      "correlation_taux_10y_us": -0.01,
+      "correlation_taux_directeur_boc": -0.03
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2714,
+        "pire_baisse_pendant_regime": -0.3012
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1848,
+        "pire_baisse_pendant_regime": -0.0591
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2949,
+        "pire_baisse_pendant_regime": -0.2245
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.07,
+      "rendement_dividende_pct": 0.0025,
+      "nb_paiements_total_5ans": 10,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-04",
+      "splits": [
+        {
+          "date": "2022-07-18",
+          "ratio": 20.0
+        }
+      ],
+      "nb_splits": 1
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Communication Services",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Alphabet (Class A) (GOOGL) est un actif de type equity (Communication Services). Sur la période observée de 5 ans, il affiche un rendement annualisé de 17.5% pour une volatilité de 31.7% (ratio de Sharpe de 0.44). Sa VaR quotidienne à 95% est de 3.0%. Son profil se caractérise par : Action Individuelle, Communication Services, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "AMZN": {
+    "ticker": "AMZN",
+    "nom": "Amazon",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Consumer Discretionary",
+    "prix": {
+      "dernier_prix_cad": 381.24,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 110.99,
+      "prix_max_5ans_cad": 398.45
+    },
+    "rendements": {
+      "cumule_5ans": 0.7214,
+      "cagr_annualise": 0.1107,
+      "rendement_1an": 0.1769,
+      "rendement_3ans": 0.8799,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.3573,
+      "volatilite_baisse_semi_deviation": 0.2396,
+      "pire_baisse_globale": -0.5239166256331587,
+      "pire_baisse_2022": -0.4862551524928258,
+      "creux_date": "2022-12-28",
+      "sommet_date": "2021-11-18",
+      "annees_sous_le_sommet": 2.23,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0327,
+      "cvar_95_expected_shortfall": 0.049,
+      "var_95_cornish_fisher": 0.0309,
+      "var_99_quotidienne": 0.0545,
+      "cvar_99_expected_shortfall": 0.0771,
+      "var_95_1mois_estimee": 0.1499
+    },
+    "distribution": {
+      "skewness": 0.396,
+      "excess_kurtosis": 6.28,
+      "statistique_jb": 2176.7,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1107,
+      "volatilite_annuelle": 0.3573,
+      "volatilite_baisse_sortino": 0.2396,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.21,
+      "ratio_sortino": 0.32,
+      "ratio_calmar": 0.21
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.52,
+      "alpha_annuel_vs_spy": -0.0836,
+      "correlation_vs_spy": 0.7,
+      "beta_xiu_canada": 1.2,
+      "alpha_annuel_vs_xiu.to": -0.0405,
+      "correlation_vs_xiu.to": 0.43,
+      "correlation_variation_usdcad": 0.02,
+      "correlation_taux_10y_canada": -0.08,
+      "correlation_taux_10y_us": -0.02,
+      "correlation_taux_directeur_boc": 0.0
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2992,
+        "pire_baisse_pendant_regime": -0.3872
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.078,
+        "pire_baisse_pendant_regime": -0.0753
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.3722,
+        "pire_baisse_pendant_regime": -0.1854
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_total_5ans": 0,
+      "frequence_dividende": "Aucun",
+      "derniere_date_ex": null,
+      "splits": [
+        {
+          "date": "2022-06-06",
+          "ratio": 20.0
+        }
+      ],
+      "nb_splits": 1
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Consumer Discretionary",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Haut Bêta (>1.3)"
+    ],
+    "synthese_agent_llm": "Amazon (AMZN) est un actif de type equity (Consumer Discretionary). Sur la période observée de 5 ans, il affiche un rendement annualisé de 11.1% pour une volatilité de 35.7% (ratio de Sharpe de 0.21). Sa VaR quotidienne à 95% est de 3.3%. Son profil se caractérise par : Action Individuelle, Consumer Discretionary, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+  },
+  "TSLA": {
+    "ticker": "TSLA",
+    "nom": "Tesla",
+    "classe_actif": "equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Consumer Discretionary",
+    "prix": {
+      "dernier_prix_cad": 566.56,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 147.64,
+      "prix_max_5ans_cad": 686.44
+    },
+    "rendements": {
+      "cumule_5ans": 0.309,
+      "cagr_annualise": 0.0534,
+      "rendement_1an": -0.0422,
+      "rendement_3ans": 0.7197,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.5779,
+      "volatilite_baisse_semi_deviation": 0.3943,
+      "pire_baisse_globale": -0.7088064947998853,
+      "pire_baisse_2022": -0.7072962202583144,
+      "creux_date": "2023-01-03",
+      "sommet_date": "2022-01-03",
+      "annees_sous_le_sommet": 2.92,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0583,
+      "cvar_95_expected_shortfall": 0.0799,
+      "var_95_cornish_fisher": 0.0539,
+      "var_99_quotidienne": 0.0934,
+      "cvar_99_expected_shortfall": 0.1161,
+      "var_95_1mois_estimee": 0.2671
+    },
+    "distribution": {
+      "skewness": 0.256,
+      "excess_kurtosis": 3.263,
+      "statistique_jb": 592.86,
+      "p_valeur_jb": 1.8299193002406638e-129,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.0534,
+      "volatilite_annuelle": 0.5779,
+      "volatilite_baisse_sortino": 0.3943,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.03,
+      "ratio_sortino": 0.05,
+      "ratio_calmar": 0.08
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 2.03,
+      "alpha_annuel_vs_spy": -0.1942,
+      "correlation_vs_spy": 0.58,
+      "beta_xiu_canada": 1.72,
+      "alpha_annuel_vs_xiu.to": -0.1482,
+      "correlation_vs_xiu.to": 0.38,
+      "correlation_variation_usdcad": -0.07,
+      "correlation_taux_10y_canada": -0.05,
+      "correlation_taux_10y_us": -0.01,
+      "correlation_taux_directeur_boc": -0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.364,
+        "pire_baisse_pendant_regime": -0.4703
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": -0.217,
+        "pire_baisse_pendant_regime": -0.2539
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0555,
+        "pire_baisse_pendant_regime": -0.4111
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_total_5ans": 0,
+      "frequence_dividende": "Aucun",
+      "derniere_date_ex": null,
+      "splits": [
+        {
+          "date": "2022-08-25",
+          "ratio": 3.0
+        }
+      ],
+      "nb_splits": 1
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Consumer Discretionary",
+      "Volatilité Extrême",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Haut Bêta (>1.3)"
+    ],
+    "synthese_agent_llm": "Tesla (TSLA) est un actif de type equity (Consumer Discretionary). Sur la période observée de 5 ans, il affiche un rendement annualisé de 5.3% pour une volatilité de 57.8% (ratio de Sharpe de 0.03). Sa VaR quotidienne à 95% est de 5.8%. Son profil se caractérise par : Action Individuelle, Consumer Discretionary, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+  },
+  "JPM": {
+    "ticker": "JPM",
+    "nom": "JPMorgan Chase",
+    "classe_actif": "equity",
+    "marche": "NYSE",
+    "devise_origine": "USD",
+    "secteur": "Financials",
+    "prix": {
+      "dernier_prix_cad": 488.69,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 127.98,
+      "prix_max_5ans_cad": 506.17
+    },
+    "rendements": {
+      "cumule_5ans": 1.6388,
+      "cagr_annualise": 0.2062,
+      "rendement_1an": 0.1656,
+      "rendement_3ans": 1.3456,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2339,
+      "volatilite_baisse_semi_deviation": 0.1601,
+      "pire_baisse_globale": -0.32244951941892874,
+      "pire_baisse_2022": -0.32112640819010374,
+      "creux_date": "2022-10-11",
+      "sommet_date": "2021-11-23",
+      "annees_sous_le_sommet": 1.65,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0222,
+      "cvar_95_expected_shortfall": 0.0339,
+      "var_95_cornish_fisher": 0.0207,
+      "var_99_quotidienne": 0.0412,
+      "cvar_99_expected_shortfall": 0.0519,
+      "var_95_1mois_estimee": 0.1016
+    },
+    "distribution": {
+      "skewness": 0.161,
+      "excess_kurtosis": 6.556,
+      "statistique_jb": 2341.16,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2062,
+      "volatilite_annuelle": 0.2339,
+      "volatilite_baisse_sortino": 0.1601,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.73,
+      "ratio_sortino": 1.07,
+      "ratio_calmar": 0.64
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.85,
+      "alpha_annuel_vs_spy": 0.0826,
+      "correlation_vs_spy": 0.59,
+      "beta_xiu_canada": 0.95,
+      "alpha_annuel_vs_xiu.to": 0.0798,
+      "correlation_vs_xiu.to": 0.52,
+      "correlation_variation_usdcad": -0.0,
+      "correlation_taux_10y_canada": 0.04,
+      "correlation_taux_10y_us": 0.12,
+      "correlation_taux_directeur_boc": -0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2084,
+        "pire_baisse_pendant_regime": -0.3211
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": -0.0119,
+        "pire_baisse_pendant_regime": -0.1207
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.4136,
+        "pire_baisse_pendant_regime": -0.0938
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 7.65,
+      "rendement_dividende_pct": 0.0157,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-10-06",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Financials",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier"
+    ],
+    "synthese_agent_llm": "JPMorgan Chase (JPM) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 20.6% pour une volatilité de 23.4% (ratio de Sharpe de 0.73). Sa VaR quotidienne à 95% est de 2.2%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Dividende Régulier."
+  },
+  "JNJ": {
+    "ticker": "JNJ",
+    "nom": "Johnson & Johnson",
+    "classe_actif": "equity",
+    "marche": "NYSE",
+    "devise_origine": "USD",
+    "secteur": "Health Care",
+    "prix": {
+      "dernier_prix_cad": 404.16,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 174.61,
+      "prix_max_5ans_cad": 404.16
+    },
+    "rendements": {
+      "cumule_5ans": 1.2414,
+      "cagr_annualise": 0.1688,
+      "rendement_1an": 0.4088,
+      "rendement_3ans": 1.1369,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1802,
+      "volatilite_baisse_semi_deviation": 0.12,
+      "pire_baisse_globale": -0.15549399662240782,
+      "pire_baisse_2022": -0.10387507864756806,
+      "creux_date": "2025-05-14",
+      "sommet_date": "2025-03-10",
+      "annees_sous_le_sommet": 0.43,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.016,
+      "cvar_95_expected_shortfall": 0.0238,
+      "var_95_cornish_fisher": 0.0168,
+      "var_99_quotidienne": 0.0281,
+      "cvar_99_expected_shortfall": 0.0384,
+      "var_95_1mois_estimee": 0.0734
+    },
+    "distribution": {
+      "skewness": 0.053,
+      "excess_kurtosis": 4.45,
+      "statistique_jb": 1076.72,
+      "p_valeur_jb": 1.556799258810092e-234,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1688,
+      "volatilite_annuelle": 0.1802,
+      "volatilite_baisse_sortino": 0.12,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.74,
+      "ratio_sortino": 1.12,
+      "ratio_calmar": 1.09
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.15,
+      "alpha_annuel_vs_spy": 0.1179,
+      "correlation_vs_spy": 0.14,
+      "beta_xiu_canada": 0.1,
+      "alpha_annuel_vs_xiu.to": 0.1242,
+      "correlation_vs_xiu.to": 0.07,
+      "correlation_variation_usdcad": 0.2,
+      "correlation_taux_10y_canada": -0.12,
+      "correlation_taux_10y_us": -0.07,
+      "correlation_taux_directeur_boc": 0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.0714,
+        "pire_baisse_pendant_regime": -0.1039
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0625,
+        "pire_baisse_pendant_regime": -0.0328
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.1014,
+        "pire_baisse_pendant_regime": -0.0973
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 6.58,
+      "rendement_dividende_pct": 0.0163,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-25",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Health Care",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Johnson & Johnson (JNJ) est un actif de type equity (Health Care). Sur la période observée de 5 ans, il affiche un rendement annualisé de 16.9% pour une volatilité de 18.0% (ratio de Sharpe de 0.74). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : Action Individuelle, Health Care, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "PG": {
+    "ticker": "PG",
+    "nom": "Procter & Gamble",
+    "classe_actif": "equity",
+    "marche": "NYSE",
+    "devise_origine": "USD",
+    "secteur": "Consumer Staples",
+    "prix": {
+      "dernier_prix_cad": 239.53,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 151.81,
+      "prix_max_5ans_cad": 242.29
+    },
+    "rendements": {
+      "cumule_5ans": 0.4796,
+      "cagr_annualise": 0.0787,
+      "rendement_1an": 0.1769,
+      "rendement_3ans": 0.3515,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1844,
+      "volatilite_baisse_semi_deviation": 0.1296,
+      "pire_baisse_globale": -0.2346817074823715,
+      "pire_baisse_2022": -0.1852584333641042,
+      "creux_date": "2026-01-07",
+      "sommet_date": "2025-03-10",
+      "annees_sous_le_sommet": 1.68,
+      "a_recupere_sommet": false,
+      "var_95_quotidienne": 0.0186,
+      "cvar_95_expected_shortfall": 0.0259,
+      "var_95_cornish_fisher": 0.0189,
+      "var_99_quotidienne": 0.0302,
+      "cvar_99_expected_shortfall": 0.0406,
+      "var_95_1mois_estimee": 0.0851
+    },
+    "distribution": {
+      "skewness": -0.221,
+      "excess_kurtosis": 2.529,
+      "statistique_jb": 358.02,
+      "p_valeur_jb": 1.8107410922494722e-78,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.0787,
+      "volatilite_annuelle": 0.1844,
+      "volatilite_baisse_sortino": 0.1296,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.24,
+      "ratio_sortino": 0.34,
+      "ratio_calmar": 0.34
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.27,
+      "alpha_annuel_vs_spy": 0.0153,
+      "correlation_vs_spy": 0.24,
+      "beta_xiu_canada": 0.19,
+      "alpha_annuel_vs_xiu.to": 0.0249,
+      "correlation_vs_xiu.to": 0.13,
+      "correlation_variation_usdcad": 0.2,
+      "correlation_taux_10y_canada": -0.17,
+      "correlation_taux_10y_us": -0.12,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1496,
+        "pire_baisse_pendant_regime": -0.1853
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.14,
+        "pire_baisse_pendant_regime": -0.0183
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2163,
+        "pire_baisse_pendant_regime": -0.0593
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 5.381,
+      "rendement_dividende_pct": 0.0225,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-10-23",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Consumer Staples",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Procter & Gamble (PG) est un actif de type equity (Consumer Staples). Sur la période observée de 5 ans, il affiche un rendement annualisé de 7.9% pour une volatilité de 18.4% (ratio de Sharpe de 0.24). Sa VaR quotidienne à 95% est de 1.9%. Son profil se caractérise par : Action Individuelle, Consumer Staples, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "XOM": {
+    "ticker": "XOM",
+    "nom": "Exxon Mobil",
+    "classe_actif": "equity",
+    "marche": "NYSE",
+    "devise_origine": "USD",
+    "secteur": "Energy",
+    "prix": {
+      "dernier_prix_cad": 242.02,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 64.97,
+      "prix_max_5ans_cad": 261.4
+    },
+    "rendements": {
+      "cumule_5ans": 2.5486,
+      "cagr_annualise": 0.2773,
+      "rendement_1an": 0.5286,
+      "rendement_3ans": 0.9605,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2548,
+      "volatilite_baisse_semi_deviation": 0.1749,
+      "pire_baisse_globale": -0.19081227107098586,
+      "pire_baisse_2022": -0.1715550602228446,
+      "creux_date": "2024-01-22",
+      "sommet_date": "2023-09-27",
+      "annees_sous_le_sommet": 0.51,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0262,
+      "cvar_95_expected_shortfall": 0.0369,
+      "var_95_cornish_fisher": 0.0259,
+      "var_99_quotidienne": 0.042,
+      "cvar_99_expected_shortfall": 0.0546,
+      "var_95_1mois_estimee": 0.1201
+    },
+    "distribution": {
+      "skewness": -0.26,
+      "excess_kurtosis": 1.653,
+      "statistique_jb": 163.09,
+      "p_valeur_jb": 3.8504677518523075e-36,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.2773,
+      "volatilite_annuelle": 0.2548,
+      "volatilite_baisse_sortino": 0.1749,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.95,
+      "ratio_sortino": 1.39,
+      "ratio_calmar": 1.45
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.29,
+      "alpha_annuel_vs_spy": 0.2122,
+      "correlation_vs_spy": 0.19,
+      "beta_xiu_canada": 0.56,
+      "alpha_annuel_vs_xiu.to": 0.1878,
+      "correlation_vs_xiu.to": 0.28,
+      "correlation_variation_usdcad": -0.03,
+      "correlation_taux_10y_canada": 0.18,
+      "correlation_taux_10y_us": 0.19,
+      "correlation_taux_directeur_boc": 0.0
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.8272,
+        "pire_baisse_pendant_regime": -0.1716
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0385,
+        "pire_baisse_pendant_regime": -0.1151
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2422,
+        "pire_baisse_pendant_regime": -0.1013
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.12,
+      "rendement_dividende_pct": 0.017,
+      "nb_paiements_total_5ans": 19,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-17",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [
+      {
+        "type": "exclusion",
+        "nature": "fait_etabli",
+        "fait": "Exploitation mondiale d hydrocarbures non conventionnels et expansion de projets de forage pétrolier extracôtier (Guyane et Permien).",
+        "source": "SEC Form 10-K ExxonMobil / CDP Climate Disclosure",
+        "url": "https://www.sec.gov/edgar",
+        "date_document": "2024-02-28"
+      }
+    ],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Action Individuelle",
+      "Energy",
+      "Volatilité Élevée",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "Exxon Mobil (XOM) est un actif de type equity (Energy). Sur la période observée de 5 ans, il affiche un rendement annualisé de 27.7% pour une volatilité de 25.5% (ratio de Sharpe de 0.95). Sa VaR quotidienne à 95% est de 2.6%. Son profil se caractérise par : Action Individuelle, Energy, Volatilité Élevée, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "XIU.TO": {
+    "ticker": "XIU.TO",
+    "nom": "iShares S&P/TSX 60 Index ETF",
+    "classe_actif": "etf_equity",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Broad market (Canada)",
+    "prix": {
+      "dernier_prix_cad": 54.55,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 24.81,
+      "prix_max_5ans_cad": 54.82
+    },
+    "rendements": {
+      "cumule_5ans": 0.8965,
+      "cagr_annualise": 0.1317,
+      "rendement_1an": 0.209,
+      "rendement_3ans": 0.8712,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1281,
+      "volatilite_baisse_semi_deviation": 0.0894,
+      "pire_baisse_globale": -0.16360121675968808,
+      "pire_baisse_2022": -0.16360121675968908,
+      "creux_date": "2022-10-12",
+      "sommet_date": "2022-04-04",
+      "annees_sous_le_sommet": 1.73,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0133,
+      "cvar_95_expected_shortfall": 0.0185,
+      "var_95_cornish_fisher": 0.0128,
+      "var_99_quotidienne": 0.0215,
+      "cvar_99_expected_shortfall": 0.0271,
+      "var_95_1mois_estimee": 0.061
+    },
+    "distribution": {
+      "skewness": -0.219,
+      "excess_kurtosis": 3.005,
+      "statistique_jb": 500.94,
+      "p_valeur_jb": 1.6673496145895586e-109,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1317,
+      "volatilite_annuelle": 0.1281,
+      "volatilite_baisse_sortino": 0.0894,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.75,
+      "ratio_sortino": 1.08,
+      "ratio_calmar": 0.8
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.54,
+      "alpha_annuel_vs_spy": 0.0407,
+      "correlation_vs_spy": 0.68,
+      "correlation_variation_usdcad": -0.33,
+      "correlation_taux_10y_canada": -0.16,
+      "correlation_taux_10y_us": -0.11,
+      "correlation_taux_directeur_boc": 0.01
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1174,
+        "pire_baisse_pendant_regime": -0.1636
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.029,
+        "pire_baisse_pendant_regime": -0.0576
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.175,
+        "pire_baisse_pendant_regime": -0.0491
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.414,
+      "rendement_dividende_pct": 0.0259,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-08-26",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {
+      "RY.TO": 0.085,
+      "TD.TO": 0.068,
+      "ENB.TO": 0.052,
+      "CNQ.TO": 0.044,
+      "CNR.TO": 0.039,
+      "SHOP.TO": 0.038,
+      "CSU.TO": 0.029,
+      "ATD.TO": 0.024
+    },
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Broad market (Canada)",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "iShares S&P/TSX 60 Index ETF (XIU.TO) est un actif de type etf_equity (Broad market (Canada)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 13.2% pour une volatilité de 12.8% (ratio de Sharpe de 0.75). Sa VaR quotidienne à 95% est de 1.3%. Son profil se caractérise par : FNB Indiciel, Broad market (Canada), Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+  },
+  "SPY": {
+    "ticker": "SPY",
+    "nom": "SPDR S&P 500 ETF Trust",
+    "classe_actif": "etf_equity",
+    "marche": "NYSE Arca",
+    "devise_origine": "USD",
+    "secteur": "Broad market (U.S.)",
+    "prix": {
+      "dernier_prix_cad": 1079.27,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 446.28,
+      "prix_max_5ans_cad": 1111.1
+    },
+    "rendements": {
+      "cumule_5ans": 0.9654,
+      "cagr_annualise": 0.1395,
+      "rendement_1an": 0.1459,
+      "rendement_3ans": 0.7855,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1635,
+      "volatilite_baisse_semi_deviation": 0.1131,
+      "pire_baisse_globale": -0.2224574292724648,
+      "pire_baisse_2022": -0.21650888407241098,
+      "creux_date": "2022-06-16",
+      "sommet_date": "2021-12-27",
+      "annees_sous_le_sommet": 1.56,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0156,
+      "cvar_95_expected_shortfall": 0.0237,
+      "var_95_cornish_fisher": 0.0138,
+      "var_99_quotidienne": 0.0277,
+      "cvar_99_expected_shortfall": 0.0385,
+      "var_95_1mois_estimee": 0.0717
+    },
+    "distribution": {
+      "skewness": 0.163,
+      "excess_kurtosis": 10.001,
+      "statistique_jb": 5439.73,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1395,
+      "volatilite_annuelle": 0.1635,
+      "volatilite_baisse_sortino": 0.1131,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.64,
+      "ratio_sortino": 0.92,
+      "ratio_calmar": 0.63
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_xiu_canada": 0.87,
+      "alpha_annuel_vs_xiu.to": 0.0202,
+      "correlation_vs_xiu.to": 0.68,
+      "correlation_variation_usdcad": 0.04,
+      "correlation_taux_10y_canada": -0.09,
+      "correlation_taux_10y_us": -0.03,
+      "correlation_taux_directeur_boc": 0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1675,
+        "pire_baisse_pendant_regime": -0.2165
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0477,
+        "pire_baisse_pendant_regime": -0.0392
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2775,
+        "pire_baisse_pendant_regime": -0.0782
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 9.414,
+      "rendement_dividende_pct": 0.0087,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-18",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {
+      "MSFT": 0.071,
+      "AAPL": 0.069,
+      "NVDA": 0.062,
+      "AMZN": 0.038,
+      "GOOGL": 0.023,
+      "TSLA": 0.018,
+      "JPM": 0.013,
+      "JNJ": 0.011,
+      "XOM": 0.01
+    },
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Broad market (U.S.)",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "SPDR S&P 500 ETF Trust (SPY) est un actif de type etf_equity (Broad market (U.S.)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 14.0% pour une volatilité de 16.4% (ratio de Sharpe de 0.64). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S.), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "QQQ": {
+    "ticker": "QQQ",
+    "nom": "Invesco QQQ Trust (Nasdaq-100)",
+    "classe_actif": "etf_equity",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Broad market (U.S. growth/tech-heavy)",
+    "prix": {
+      "dernier_prix_cad": 980.99,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 341.38,
+      "prix_max_5ans_cad": 1080.69
+    },
+    "rendements": {
+      "cumule_5ans": 1.038,
+      "cagr_annualise": 0.1475,
+      "rendement_1an": 0.1477,
+      "rendement_3ans": 0.853,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.2234,
+      "volatilite_baisse_semi_deviation": 0.1555,
+      "pire_baisse_globale": -0.3205008768748686,
+      "pire_baisse_2022": -0.31018786970976675,
+      "creux_date": "2022-06-16",
+      "sommet_date": "2021-12-27",
+      "annees_sous_le_sommet": 1.68,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0218,
+      "cvar_95_expected_shortfall": 0.0323,
+      "var_95_cornish_fisher": 0.0207,
+      "var_99_quotidienne": 0.0371,
+      "cvar_99_expected_shortfall": 0.048,
+      "var_95_1mois_estimee": 0.0999
+    },
+    "distribution": {
+      "skewness": 0.075,
+      "excess_kurtosis": 5.084,
+      "statistique_jb": 1405.68,
+      "p_valeur_jb": 5.756359399376643e-306,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1475,
+      "volatilite_annuelle": 0.2234,
+      "volatilite_baisse_sortino": 0.1555,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.5,
+      "ratio_sortino": 0.72,
+      "ratio_calmar": 0.46
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.29,
+      "alpha_annuel_vs_spy": -0.0228,
+      "correlation_vs_spy": 0.95,
+      "beta_xiu_canada": 1.03,
+      "alpha_annuel_vs_xiu.to": 0.0129,
+      "correlation_vs_xiu.to": 0.59,
+      "correlation_variation_usdcad": 0.01,
+      "correlation_taux_10y_canada": -0.09,
+      "correlation_taux_10y_us": -0.03,
+      "correlation_taux_directeur_boc": 0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2802,
+        "pire_baisse_pendant_regime": -0.3102
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0941,
+        "pire_baisse_pendant_regime": -0.0308
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2592,
+        "pire_baisse_pendant_regime": -0.128
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 3.785,
+      "rendement_dividende_pct": 0.0039,
+      "nb_paiements_total_5ans": 21,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-21",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {
+      "AAPL": 0.088,
+      "MSFT": 0.084,
+      "NVDA": 0.079,
+      "AMZN": 0.052,
+      "GOOGL": 0.048,
+      "TSLA": 0.028
+    },
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Broad market (U.S. growth/tech-heavy)",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Invesco QQQ Trust (Nasdaq-100) (QQQ) est un actif de type etf_equity (Broad market (U.S. growth/tech-heavy)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 14.8% pour une volatilité de 22.3% (ratio de Sharpe de 0.5). Sa VaR quotidienne à 95% est de 2.2%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S. growth/tech-heavy), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "ESGV": {
+    "ticker": "ESGV",
+    "nom": "Vanguard ESG U.S. Stock ETF",
+    "classe_actif": "etf_equity",
+    "marche": "Cboe BZX",
+    "devise_origine": "USD",
+    "secteur": "Broad market (U.S., ESG-screened)",
+    "prix": {
+      "dernier_prix_cad": 190.0,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 78.5,
+      "prix_max_5ans_cad": 196.97
+    },
+    "rendements": {
+      "cumule_5ans": 0.8306,
+      "cagr_annualise": 0.1239,
+      "rendement_1an": 0.1363,
+      "rendement_3ans": 0.7528,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1769,
+      "volatilite_baisse_semi_deviation": 0.123,
+      "pire_baisse_globale": -0.26862861491564693,
+      "pire_baisse_2022": -0.25958534393478916,
+      "creux_date": "2022-06-16",
+      "sommet_date": "2021-12-27",
+      "annees_sous_le_sommet": 1.94,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0175,
+      "cvar_95_expected_shortfall": 0.0257,
+      "var_95_cornish_fisher": 0.0162,
+      "var_99_quotidienne": 0.0307,
+      "cvar_99_expected_shortfall": 0.0398,
+      "var_95_1mois_estimee": 0.08
+    },
+    "distribution": {
+      "skewness": 0.045,
+      "excess_kurtosis": 6.318,
+      "statistique_jb": 2169.29,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1239,
+      "volatilite_annuelle": 0.1769,
+      "volatilite_baisse_sortino": 0.123,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.5,
+      "ratio_sortino": 0.72,
+      "ratio_calmar": 0.46
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.07,
+      "alpha_annuel_vs_spy": -0.0231,
+      "correlation_vs_spy": 0.99,
+      "beta_xiu_canada": 0.93,
+      "alpha_annuel_vs_xiu.to": -0.0008,
+      "correlation_vs_xiu.to": 0.67,
+      "correlation_variation_usdcad": 0.02,
+      "correlation_taux_10y_canada": -0.11,
+      "correlation_taux_10y_us": -0.05,
+      "correlation_taux_directeur_boc": 0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.217,
+        "pire_baisse_pendant_regime": -0.2596
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0395,
+        "pire_baisse_pendant_regime": -0.0449
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.2648,
+        "pire_baisse_pendant_regime": -0.0887
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.472,
+      "rendement_dividende_pct": 0.0077,
+      "nb_paiements_total_5ans": 20,
+      "frequence_dividende": "Trimestriel",
+      "derniere_date_ex": "2026-09-18",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [
+      {
+        "type": "attestation",
+        "nature": "fait_etabli",
+        "fait": "FNB appliquant un filtrage ESG strict excluant les combustibles fossiles, le charbon thermique, les armes et le tabac.",
+        "source": "Prospectus Vanguard ESG U.S. Stock ETF (ESGV)",
+        "url": "https://investor.vanguard.com",
+        "date_document": "2024-01-15"
+      }
+    ],
+    "fnb_composition_top_holdings": {
+      "MSFT": 0.075,
+      "AAPL": 0.072,
+      "NVDA": 0.065,
+      "AMZN": 0.04,
+      "GOOGL": 0.025,
+      "TSLA": 0.019,
+      "JPM": 0.014
+    },
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Broad market (U.S., ESG-screened)",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Vanguard ESG U.S. Stock ETF (ESGV) est un actif de type etf_equity (Broad market (U.S., ESG-screened)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.4% pour une volatilité de 17.7% (ratio de Sharpe de 0.5). Sa VaR quotidienne à 95% est de 1.8%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S., ESG-screened), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "XBB.TO": {
+    "ticker": "XBB.TO",
+    "nom": "iShares Core Canadian Universe Bond Index ETF",
+    "classe_actif": "etf_bond",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Bonds (Canada aggregate)",
+    "prix": {
+      "dernier_prix_cad": 27.53,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 23.05,
+      "prix_max_5ans_cad": 27.95
+    },
+    "rendements": {
+      "cumule_5ans": 0.0361,
+      "cagr_annualise": 0.0069,
+      "rendement_1an": -0.004,
+      "rendement_3ans": 0.0714,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.0652,
+      "volatilite_baisse_semi_deviation": 0.0462,
+      "pire_baisse_globale": -0.1547973557734016,
+      "pire_baisse_2022": -0.15337637117645386,
+      "creux_date": "2022-10-20",
+      "sommet_date": "2021-12-17",
+      "annees_sous_le_sommet": 3.21,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0068,
+      "cvar_95_expected_shortfall": 0.0089,
+      "var_95_cornish_fisher": 0.0065,
+      "var_99_quotidienne": 0.0101,
+      "cvar_99_expected_shortfall": 0.0117,
+      "var_95_1mois_estimee": 0.0312
+    },
+    "distribution": {
+      "skewness": 0.053,
+      "excess_kurtosis": 1.304,
+      "statistique_jb": 93.0,
+      "p_valeur_jb": 6.39505071505565e-21,
+      "est_normale": false,
+      "diagnostic": "Distribution proche d'une loi normale"
+    },
+    "ratios_performance": {
+      "cagr": 0.0069,
+      "volatilite_annuelle": 0.0652,
+      "volatilite_baisse_sortino": 0.0462,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.43,
+      "ratio_sortino": -0.61,
+      "ratio_calmar": 0.04
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.05,
+      "alpha_annuel_vs_spy": -0.0335,
+      "correlation_vs_spy": 0.13,
+      "beta_xiu_canada": 0.1,
+      "alpha_annuel_vs_xiu.to": -0.0377,
+      "correlation_vs_xiu.to": 0.19,
+      "correlation_variation_usdcad": -0.06,
+      "correlation_taux_10y_canada": -0.96,
+      "correlation_taux_10y_us": -0.81,
+      "correlation_taux_directeur_boc": -0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.1409,
+        "pire_baisse_pendant_regime": -0.1481
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0196,
+        "pire_baisse_pendant_regime": -0.0209
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0258,
+        "pire_baisse_pendant_regime": -0.0322
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.047,
+      "rendement_dividende_pct": 0.038,
+      "nb_paiements_total_5ans": 60,
+      "frequence_dividende": "Mensuel",
+      "derniere_date_ex": "2026-10-27",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Bonds (Canada aggregate)",
+      "Défensif / Faible Volatilité",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)",
+      "Vulnérable aux Taux d'Intérêt"
+    ],
+    "synthese_agent_llm": "iShares Core Canadian Universe Bond Index ETF (XBB.TO) est un actif de type etf_bond (Bonds (Canada aggregate)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 0.7% pour une volatilité de 6.5% (ratio de Sharpe de -0.43). Sa VaR quotidienne à 95% est de 0.7%. Son profil se caractérise par : FNB Indiciel, Bonds (Canada aggregate), Défensif / Faible Volatilité, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+  },
+  "ZST.TO": {
+    "ticker": "ZST.TO",
+    "nom": "BMO Ultra Short-Term Bond ETF",
+    "classe_actif": "etf_bond",
+    "marche": "TSX",
+    "devise_origine": "CAD",
+    "secteur": "Bonds (Canada ultra short-term)",
+    "prix": {
+      "dernier_prix_cad": 49.07,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 41.34,
+      "prix_max_5ans_cad": 49.09
+    },
+    "rendements": {
+      "cumule_5ans": 0.1827,
+      "cagr_annualise": 0.033,
+      "rendement_1an": 0.0243,
+      "rendement_3ans": 0.1111,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.0055,
+      "volatilite_baisse_semi_deviation": 0.0028,
+      "pire_baisse_globale": -0.004282735592724407,
+      "pire_baisse_2022": -0.004282735592724296,
+      "creux_date": "2022-06-30",
+      "sommet_date": "2022-03-01",
+      "annees_sous_le_sommet": 0.46,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0004,
+      "cvar_95_expected_shortfall": 0.0006,
+      "var_95_cornish_fisher": 0.0004,
+      "var_99_quotidienne": 0.0008,
+      "cvar_99_expected_shortfall": 0.001,
+      "var_95_1mois_estimee": 0.0019
+    },
+    "distribution": {
+      "skewness": 0.339,
+      "excess_kurtosis": 5.452,
+      "statistique_jb": 1640.05,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.033,
+      "volatilite_annuelle": 0.0055,
+      "volatilite_baisse_sortino": 0.0028,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.37,
+      "ratio_sortino": -0.72,
+      "ratio_calmar": 7.7
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.0,
+      "alpha_annuel_vs_spy": -0.0023,
+      "correlation_vs_spy": 0.09,
+      "beta_xiu_canada": 0.01,
+      "alpha_annuel_vs_xiu.to": -0.0027,
+      "correlation_vs_xiu.to": 0.15,
+      "correlation_variation_usdcad": -0.03,
+      "correlation_taux_10y_canada": -0.34,
+      "correlation_taux_10y_us": -0.26,
+      "correlation_taux_directeur_boc": -0.0
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": 0.0033,
+        "pire_baisse_pendant_regime": -0.0043
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0072,
+        "pire_baisse_pendant_regime": -0.0012
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0454,
+        "pire_baisse_pendant_regime": -0.001
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 1.33,
+      "rendement_dividende_pct": 0.0271,
+      "nb_paiements_total_5ans": 60,
+      "frequence_dividende": "Mensuel",
+      "derniere_date_ex": "2026-10-29",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [
+      {
+        "type": "attestation",
+        "nature": "fait_etabli",
+        "fait": "FNB d obligations ultra court terme à haute notation crédit, sans exposition directe aux activités fossiles spéculatives.",
+        "source": "Fiche de fonds BMO Gestion Mondiale d Actifs",
+        "url": "https://www.bmogam.com",
+        "date_document": "2024-03-31"
+      }
+    ],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Bonds (Canada ultra short-term)",
+      "Défensif / Faible Volatilité",
+      "Queues Épaisses (Fat Tails)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)",
+      "Vulnérable aux Taux d'Intérêt"
+    ],
+    "synthese_agent_llm": "BMO Ultra Short-Term Bond ETF (ZST.TO) est un actif de type etf_bond (Bonds (Canada ultra short-term)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 3.3% pour une volatilité de 0.5% (ratio de Sharpe de -0.37). Sa VaR quotidienne à 95% est de 0.0%. Son profil se caractérise par : FNB Indiciel, Bonds (Canada ultra short-term), Défensif / Faible Volatilité, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+  },
+  "AGG": {
+    "ticker": "AGG",
+    "nom": "iShares Core U.S. Aggregate Bond ETF",
+    "classe_actif": "etf_bond",
+    "marche": "NYSE Arca",
+    "devise_origine": "USD",
+    "secteur": "Bonds (U.S. aggregate)",
+    "prix": {
+      "dernier_prix_cad": 135.74,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 109.49,
+      "prix_max_5ans_cad": 138.75
+    },
+    "rendements": {
+      "cumule_5ans": 0.1169,
+      "cagr_annualise": 0.0216,
+      "rendement_1an": -0.0059,
+      "rendement_3ans": 0.1484,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.0725,
+      "volatilite_baisse_semi_deviation": 0.05,
+      "pire_baisse_globale": -0.12751006047894575,
+      "pire_baisse_2022": -0.1032875021233075,
+      "creux_date": "2022-06-13",
+      "sommet_date": "2021-12-20",
+      "annees_sous_le_sommet": 2.61,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0074,
+      "cvar_95_expected_shortfall": 0.0098,
+      "var_95_cornish_fisher": 0.0073,
+      "var_99_quotidienne": 0.0113,
+      "cvar_99_expected_shortfall": 0.0138,
+      "var_95_1mois_estimee": 0.0338
+    },
+    "distribution": {
+      "skewness": 0.034,
+      "excess_kurtosis": 0.965,
+      "statistique_jb": 50.88,
+      "p_valeur_jb": 8.95859441248969e-12,
+      "est_normale": false,
+      "diagnostic": "Distribution proche d'une loi normale"
+    },
+    "ratios_performance": {
+      "cagr": 0.0216,
+      "volatilite_annuelle": 0.0725,
+      "volatilite_baisse_sortino": 0.05,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.18,
+      "ratio_sortino": -0.27,
+      "ratio_calmar": 0.17
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.07,
+      "alpha_annuel_vs_spy": -0.021,
+      "correlation_vs_spy": 0.16,
+      "beta_xiu_canada": -0.03,
+      "alpha_annuel_vs_xiu.to": -0.0102,
+      "correlation_vs_xiu.to": -0.06,
+      "correlation_variation_usdcad": 0.58,
+      "correlation_taux_10y_canada": -0.67,
+      "correlation_taux_10y_us": -0.68,
+      "correlation_taux_directeur_boc": -0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.0786,
+        "pire_baisse_pendant_regime": -0.1033
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.017,
+        "pire_baisse_pendant_regime": -0.0363
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0694,
+        "pire_baisse_pendant_regime": -0.0273
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.308,
+      "rendement_dividende_pct": 0.0317,
+      "nb_paiements_total_5ans": 60,
+      "frequence_dividende": "Mensuel",
+      "derniere_date_ex": "2026-11-02",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Bonds (U.S. aggregate)",
+      "Défensif / Faible Volatilité",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)",
+      "Vulnérable aux Taux d'Intérêt"
+    ],
+    "synthese_agent_llm": "iShares Core U.S. Aggregate Bond ETF (AGG) est un actif de type etf_bond (Bonds (U.S. aggregate)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 2.2% pour une volatilité de 7.2% (ratio de Sharpe de -0.18). Sa VaR quotidienne à 95% est de 0.7%. Son profil se caractérise par : FNB Indiciel, Bonds (U.S. aggregate), Défensif / Faible Volatilité, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+  },
+  "TLT": {
+    "ticker": "TLT",
+    "nom": "iShares 20+ Year Treasury Bond ETF",
+    "classe_actif": "etf_bond",
+    "marche": "NASDAQ",
+    "devise_origine": "USD",
+    "secteur": "Bonds (U.S. long Treasury)",
+    "prix": {
+      "dernier_prix_cad": 113.64,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 99.47,
+      "prix_max_5ans_cad": 165.04
+    },
+    "rendements": {
+      "cumule_5ans": -0.2635,
+      "cagr_annualise": -0.0574,
+      "rendement_1an": -0.0651,
+      "rendement_3ans": -0.0324,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1574,
+      "volatilite_baisse_semi_deviation": 0.112,
+      "pire_baisse_globale": -0.39728200151688386,
+      "pire_baisse_2022": -0.29918659838823336,
+      "creux_date": "2023-10-19",
+      "sommet_date": "2021-12-03",
+      "annees_sous_le_sommet": 4.94,
+      "a_recupere_sommet": false,
+      "var_95_quotidienne": 0.0167,
+      "cvar_95_expected_shortfall": 0.0216,
+      "var_95_cornish_fisher": 0.0162,
+      "var_99_quotidienne": 0.025,
+      "cvar_99_expected_shortfall": 0.0289,
+      "var_95_1mois_estimee": 0.0766
+    },
+    "distribution": {
+      "skewness": 0.047,
+      "excess_kurtosis": 0.723,
+      "statistique_jb": 28.88,
+      "p_valeur_jb": 5.345882034700328e-07,
+      "est_normale": false,
+      "diagnostic": "Distribution proche d'une loi normale"
+    },
+    "ratios_performance": {
+      "cagr": -0.0574,
+      "volatilite_annuelle": 0.1574,
+      "volatilite_baisse_sortino": 0.112,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.59,
+      "ratio_sortino": -0.82,
+      "ratio_calmar": -0.14
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.07,
+      "alpha_annuel_vs_spy": -0.0999,
+      "correlation_vs_spy": 0.07,
+      "beta_xiu_canada": 0.01,
+      "alpha_annuel_vs_xiu.to": -0.0938,
+      "correlation_vs_xiu.to": 0.01,
+      "correlation_variation_usdcad": 0.25,
+      "correlation_taux_10y_canada": -0.76,
+      "correlation_taux_10y_us": -0.83,
+      "correlation_taux_directeur_boc": -0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.2613,
+        "pire_baisse_pendant_regime": -0.2428
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0169,
+        "pire_baisse_pendant_regime": -0.0516
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.0001,
+        "pire_baisse_pendant_regime": -0.0816
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 4.235,
+      "rendement_dividende_pct": 0.0373,
+      "nb_paiements_total_5ans": 60,
+      "frequence_dividende": "Mensuel",
+      "derniere_date_ex": "2026-11-02",
+      "splits": [],
+      "nb_splits": 0
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Bonds (U.S. long Treasury)",
+      "Dividende Régulier",
+      "Bêta Défensif (<0.7)",
+      "Vulnérable aux Taux d'Intérêt"
+    ],
+    "synthese_agent_llm": "iShares 20+ Year Treasury Bond ETF (TLT) est un actif de type etf_bond (Bonds (U.S. long Treasury)). Sur la période observée de 5 ans, il affiche un rendement annualisé de -5.7% pour une volatilité de 15.7% (ratio de Sharpe de -0.59). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : FNB Indiciel, Bonds (U.S. long Treasury), Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+  },
+  "GLD": {
+    "ticker": "GLD",
+    "nom": "SPDR Gold Shares",
+    "classe_actif": "etf_commodity",
+    "marche": "NYSE Arca",
+    "devise_origine": "USD",
+    "secteur": "Gold",
+    "prix": {
+      "dernier_prix_cad": 505.9,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 203.62,
+      "prix_max_5ans_cad": 671.17
+    },
+    "rendements": {
+      "cumule_5ans": 1.308,
+      "cagr_annualise": 0.1754,
+      "rendement_1an": -0.0563,
+      "rendement_3ans": 1.0175,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.1806,
+      "volatilite_baisse_semi_deviation": 0.1266,
+      "pire_baisse_globale": -0.2599925169596923,
+      "pire_baisse_2022": -0.17367865365069557,
+      "creux_date": "2026-10-30",
+      "sommet_date": "2026-01-28",
+      "annees_sous_le_sommet": 0.79,
+      "a_recupere_sommet": false,
+      "var_95_quotidienne": 0.0166,
+      "cvar_95_expected_shortfall": 0.0266,
+      "var_95_cornish_fisher": 0.0184,
+      "var_99_quotidienne": 0.0319,
+      "cvar_99_expected_shortfall": 0.0434,
+      "var_95_1mois_estimee": 0.076
+    },
+    "distribution": {
+      "skewness": -0.646,
+      "excess_kurtosis": 7.065,
+      "statistique_jb": 2802.64,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.1754,
+      "volatilite_annuelle": 0.1806,
+      "volatilite_baisse_sortino": 0.1266,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.78,
+      "ratio_sortino": 1.11,
+      "ratio_calmar": 0.67
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 0.1,
+      "alpha_annuel_vs_spy": 0.1297,
+      "correlation_vs_spy": 0.09,
+      "beta_xiu_canada": 0.34,
+      "alpha_annuel_vs_xiu.to": 0.1072,
+      "correlation_vs_xiu.to": 0.24,
+      "correlation_variation_usdcad": -0.01,
+      "correlation_taux_10y_canada": -0.24,
+      "correlation_taux_10y_us": -0.24,
+      "correlation_taux_directeur_boc": -0.03
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.022,
+        "pire_baisse_pendant_regime": -0.1737
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.0786,
+        "pire_baisse_pendant_regime": -0.0241
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.3912,
+        "pire_baisse_pendant_regime": -0.05
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_dividendes": 0,
+      "frequence_dividende": "Aucun dividende",
+      "splits": []
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "FNB Indiciel",
+      "Gold",
+      "Queues Épaisses (Fat Tails)",
+      "Asymétrie Baissière",
+      "Sans Dividende / Réinvestissement",
+      "Bêta Défensif (<0.7)"
+    ],
+    "synthese_agent_llm": "SPDR Gold Shares (GLD) est un actif de type etf_commodity (Gold). Sur la période observée de 5 ans, il affiche un rendement annualisé de 17.5% pour une volatilité de 18.1% (ratio de Sharpe de 0.78). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : FNB Indiciel, Gold, Queues Épaisses (Fat Tails), Asymétrie Baissière, Sans Dividende / Réinvestissement, Bêta Défensif (<0.7)."
+  },
+  "BTC-USD": {
+    "ticker": "BTC-USD",
+    "nom": "Bitcoin",
+    "classe_actif": "crypto",
+    "marche": "Crypto (24/7)",
+    "devise_origine": "USD",
+    "secteur": "Crypto asset",
+    "prix": {
+      "dernier_prix_cad": 101699.4,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 21237.05,
+      "prix_max_5ans_cad": 174092.16
+    },
+    "rendements": {
+      "cumule_5ans": 0.2616,
+      "cagr_annualise": 0.0459,
+      "rendement_1an": -0.1744,
+      "rendement_3ans": 0.7476,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.4987,
+      "volatilite_baisse_semi_deviation": 0.3411,
+      "pire_baisse_globale": -0.7330532172178719,
+      "pire_baisse_2022": -0.6423225802490017,
+      "creux_date": "2022-11-21",
+      "sommet_date": "2021-11-15",
+      "annees_sous_le_sommet": 2.29,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0485,
+      "cvar_95_expected_shortfall": 0.0702,
+      "var_95_cornish_fisher": 0.047,
+      "var_99_quotidienne": 0.0778,
+      "cvar_99_expected_shortfall": 0.1134,
+      "var_95_1mois_estimee": 0.2225
+    },
+    "distribution": {
+      "skewness": 0.055,
+      "excess_kurtosis": 5.458,
+      "statistique_jb": 1619.28,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": 0.0459,
+      "volatilite_annuelle": 0.4987,
+      "volatilite_baisse_sortino": 0.3411,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": 0.02,
+      "ratio_sortino": 0.03,
+      "ratio_calmar": 0.06
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.17,
+      "alpha_annuel_vs_spy": -0.1111,
+      "correlation_vs_spy": 0.38,
+      "beta_xiu_canada": 1.18,
+      "alpha_annuel_vs_xiu.to": -0.1036,
+      "correlation_vs_xiu.to": 0.3,
+      "correlation_variation_usdcad": -0.07,
+      "correlation_taux_10y_canada": -0.03,
+      "correlation_taux_10y_us": -0.02,
+      "correlation_taux_directeur_boc": 0.0
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.5472,
+        "pire_baisse_pendant_regime": -0.5831
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.208,
+        "pire_baisse_pendant_regime": -0.1341
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.6571,
+        "pire_baisse_pendant_regime": -0.2578
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_dividendes": 0,
+      "frequence_dividende": "Aucun dividende",
+      "splits": []
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Cryptoactif",
+      "Crypto asset",
+      "Volatilité Extrême",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement"
+    ],
+    "synthese_agent_llm": "Bitcoin (BTC-USD) est un actif de type crypto (Crypto asset). Sur la période observée de 5 ans, il affiche un rendement annualisé de 4.6% pour une volatilité de 49.9% (ratio de Sharpe de 0.02). Sa VaR quotidienne à 95% est de 4.9%. Son profil se caractérise par : Cryptoactif, Crypto asset, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+  },
+  "ETH-USD": {
+    "ticker": "ETH-USD",
+    "nom": "Ether",
+    "classe_actif": "crypto",
+    "marche": "Crypto (24/7)",
+    "devise_origine": "USD",
+    "secteur": "Crypto asset",
+    "prix": {
+      "dernier_prix_cad": 2874.99,
+      "date_dernier_prix": "2026-11-12",
+      "prix_min_5ans_cad": 1351.21,
+      "prix_max_5ans_cad": 6693.35
+    },
+    "rendements": {
+      "cumule_5ans": -0.5097,
+      "cagr_annualise": -0.1287,
+      "rendement_1an": -0.3109,
+      "rendement_3ans": -0.0206,
+      "nb_jours_observes": 1304,
+      "date_debut": "2021-11-15",
+      "date_fin": "2026-11-12"
+    },
+    "risque": {
+      "volatilite_annuelle": 0.6671,
+      "volatilite_baisse_semi_deviation": 0.4566,
+      "pire_baisse_globale": -0.7719324203266295,
+      "pire_baisse_2022": -0.7197531835710554,
+      "creux_date": "2022-07-12",
+      "sommet_date": "2021-11-30",
+      "annees_sous_le_sommet": 3.7,
+      "a_recupere_sommet": true,
+      "var_95_quotidienne": 0.0618,
+      "cvar_95_expected_shortfall": 0.0921,
+      "var_95_cornish_fisher": 0.0614,
+      "var_99_quotidienne": 0.1187,
+      "cvar_99_expected_shortfall": 0.1524,
+      "var_95_1mois_estimee": 0.2831
+    },
+    "distribution": {
+      "skewness": 0.24,
+      "excess_kurtosis": 5.258,
+      "statistique_jb": 1514.42,
+      "p_valeur_jb": 0.0,
+      "est_normale": false,
+      "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+    },
+    "ratios_performance": {
+      "cagr": -0.1287,
+      "volatilite_annuelle": 0.6671,
+      "volatilite_baisse_sortino": 0.4566,
+      "taux_sans_risque_utilise": 0.035,
+      "ratio_sharpe": -0.25,
+      "ratio_sortino": -0.36,
+      "ratio_calmar": -0.17
+    },
+    "sensibilites_marche_et_macro": {
+      "beta_spy_cad": 1.64,
+      "alpha_annuel_vs_spy": -0.3351,
+      "correlation_vs_spy": 0.4,
+      "beta_xiu_canada": 1.74,
+      "alpha_annuel_vs_xiu.to": -0.3314,
+      "correlation_vs_xiu.to": 0.33,
+      "correlation_variation_usdcad": -0.1,
+      "correlation_taux_10y_canada": -0.03,
+      "correlation_taux_10y_us": -0.02,
+      "correlation_taux_directeur_boc": 0.02
+    },
+    "regimes_historiques": {
+      "choc_taux_et_inflation_2022": {
+        "periode": "2022-01-03 au 2022-10-14",
+        "rendement_cumule": -0.615,
+        "pire_baisse_pendant_regime": -0.7198
+      },
+      "crise_bancaire_us_2023": {
+        "periode": "2023-03-01 au 2023-05-01",
+        "rendement_cumule": 0.1355,
+        "pire_baisse_pendant_regime": -0.1285
+      },
+      "expansion_technologique_ia_2024": {
+        "periode": "2024-01-02 au 2024-11-01",
+        "rendement_cumule": 0.1248,
+        "pire_baisse_pendant_regime": -0.4509
+      }
+    },
+    "actions_corporatives": {
+      "dividende_annuel_estime": 0.0,
+      "rendement_dividende_pct": 0.0,
+      "nb_paiements_dividendes": 0,
+      "frequence_dividende": "Aucun dividende",
+      "splits": []
+    },
+    "esg_preuves": [],
+    "fnb_composition_top_holdings": {},
+    "tags_semantiques": [
+      "Cryptoactif",
+      "Crypto asset",
+      "Volatilité Extrême",
+      "Queues Épaisses (Fat Tails)",
+      "Sans Dividende / Réinvestissement",
+      "Haut Bêta (>1.3)"
+    ],
+    "synthese_agent_llm": "Ether (ETH-USD) est un actif de type crypto (Crypto asset). Sur la période observée de 5 ans, il affiche un rendement annualisé de -12.9% pour une volatilité de 66.7% (ratio de Sharpe de -0.25). Sa VaR quotidienne à 95% est de 6.2%. Son profil se caractérise par : Cryptoactif, Crypto asset, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+  }
+}

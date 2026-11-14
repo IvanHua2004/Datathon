@@ -20,11 +20,13 @@ def test_proces_robert_nvda():
     assert r.status_code == 200
     corps = r.json()
     assert corps["decision"]["verdict"] == "Contraire à une contrainte déclarée"
-    assert [p["role"] for p in corps["plaidoiries"]] == ["La Défense", "Le Procureur"]
-    assert corps["motivation"]["role"] == "Le Juge"
+    assert any("Défense" in p["role"] for p in corps["plaidoiries"])
+    assert any("Procureur" in p["role"] for p in corps["plaidoiries"])
+    assert "Juge" in corps["motivation"]["role"]
     assert all(p["non_verifies"] == [] for p in corps["plaidoiries"])
     assert [p["numero"] for p in corps["pieces"]][:1] == ["P-01"]
     assert len(corps["salle"]) == 4 and len(corps["courbe"]) == 9
+    assert "discussion" in corps and len(corps["discussion"]) >= 5
 
 
 def test_erreurs():

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Actif, DemandeProces, Proces, Profil, Sante } from '../models/proces.model';
+import { Actif, AnalyseComparative, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
 
 /** Accès HTTP à l'API Python. Les chemins sont relatifs : nginx (ou ng serve) relaie /api/. */
 @Injectable({ providedIn: 'root' })
@@ -28,5 +28,27 @@ export class ApiService {
 
   ouvrirProces(demande: DemandeProces): Observable<Proces> {
     return this.http.post<Proces>(`${this.base}/proces`, demande);
+  }
+
+  discussionProces(demande: DemandeProces): Observable<TourDiscussion[]> {
+    return this.http.post<TourDiscussion[]>(`${this.base}/proces/discussion`, demande);
+  }
+
+  interpreterIntention(profil: string, texte: string): Observable<IntentionResultat> {
+    return this.http.post<IntentionResultat>(`${this.base}/intention`, { profil, texte });
+  }
+
+  comparerDecision(profil: string, ticker: string, taille: number, choix_investisseur: 'OUI' | 'NON'): Observable<AnalyseComparative> {
+    return this.http.post<AnalyseComparative>(`${this.base}/comparaison`, { profil, ticker, taille, choix_investisseur });
+  }
+
+  demanderScenarios(profil: string, ticker: string, taille: number, intention_texte?: string): Observable<ScenarioAlternatif[]> {
+    return this.http.post<ScenarioAlternatif[]>(`${this.base}/scenarios`, { profil, ticker, taille, intention_texte });
+  }
+
+  telechargerPdf(profil: string, ticker: string, taille: number, mode: Mode, intention_texte?: string, choix_investisseur?: string): Observable<Blob> {
+    return this.http.post(`${this.base}/pdf`, { profil, ticker, taille, mode, intention_texte, choix_investisseur }, {
+      responseType: 'blob',
+    });
   }
 }
