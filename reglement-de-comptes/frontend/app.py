@@ -4,6 +4,7 @@ Lancer depuis le dossier du projet : streamlit run frontend/app.py
 """
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -28,11 +29,17 @@ st.title("Règlement de comptes")
 st.caption("Avant d'investir, faites passer votre idée en procès. "
            "Simulation pédagogique sur des profils fictifs : ce n'est pas un conseil financier.")
 
+SOURCE_S3 = os.environ.get("RDC_S3_BUCKET")
 try:
     d = donnees.charger()
-except FileNotFoundError as erreur:
-    st.error("Données introuvables. Définissez la variable RDC_DATA_DIR vers le dossier "
-             f"`alphaforge_starter`. Détail : {erreur}")
+except Exception as erreur:  # fichier absent, identifiants AWS absents ou expirés, bucket introuvable
+    if SOURCE_S3:
+        st.error(f"Lecture impossible dans S3 (bucket `{SOURCE_S3}`) : {type(erreur).__name__} : {erreur}. "
+                 "Collez des identifiants récents depuis « Get AWS CLI credentials » dans Workshop Studio, "
+                 "ou retirez RDC_S3_BUCKET pour lire les fichiers locaux.")
+    else:
+        st.error("Données introuvables. Définissez la variable RDC_DATA_DIR vers le dossier "
+                 f"`alphaforge_starter`. Détail : {erreur}")
     st.stop()
 
 with st.sidebar:
@@ -55,6 +62,8 @@ with st.sidebar:
                     format_func=lambda m: {"gabarit": "Sans modèle (gabarits)", "bedrock": "Amazon Bedrock (Strands)"}[m],
                     help="Le mode Bedrock exige des identifiants AWS et un modèle activé.")
     lancer = st.button("Ouvrir le procès", type="primary", width="stretch")
+    st.caption("Données : " + (f"Amazon S3, bucket `{SOURCE_S3}`" if SOURCE_S3 else "fichiers locaux")
+               + f" · Région AWS : {os.environ.get('AWS_REGION') or 'us-east-1'}")
 
 if lancer:
     with st.spinner("Le tribunal siège..."):
