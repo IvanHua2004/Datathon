@@ -17,8 +17,8 @@ cd reglement-de-comptes
 python -m venv .venv
 source .venv/bin/activate        # Windows : .venv\Scripts\activate
 pip install -r requirements.txt
-streamlit run app.py
-pytest -q                        # 7 tests
+streamlit run frontend/app.py
+pytest -q backend/tests          # 7 tests
 ```
 
 Les données sont lues par défaut dans `../Datathon2026/alphaforge_starter`. Pour un autre
@@ -32,7 +32,7 @@ alors écrites par des gabarits. C'est le mode pour développer, et le filet de 
 ```bash
 cd reglement-de-comptes
 docker compose up --build        # puis ouvrir http://localhost:8501
-docker compose run --rm tribunal pytest -q     # les tests, dans le conteneur
+docker compose run --rm tribunal pytest -q backend/tests     # les tests, dans le conteneur
 ```
 
 Le jeu de départ est monté en lecture seule depuis `../Datathon2026/alphaforge_starter`. Pour
@@ -43,12 +43,12 @@ fichier `.env` à côté de `docker-compose.yml` (ce fichier est ignoré par git
 
 | Rôle | Fichier | Ce qu'il fait |
 | --- | --- | --- |
-| Moteur de calcul | `rdc/moteur.py` | Tous les chiffres. Aucun modèle de langage ne calcule. |
-| Témoins | `rdc/temoins.py` | `risque`, `diversification`, `valeurs`, `macro`. Chacun lit sa source et dépose des faits, sans opinion. |
-| Greffier | `rdc/greffier.py` | Numérote chaque déposition (P-01, P-02…) et signale tout chiffre cité qui n'est dans aucune pièce. |
-| Défense, Procureur | `rdc/agents.py` | Plaident pour et contre. En mode Bedrock, ils choisissent eux-mêmes les témoins à convoquer. |
-| Juge | `rdc/agents.py` + `rdc/proces.py` | Le verdict vient d'une **règle** (`regle_verdict`). Le juge ne fait que le motiver. |
-| La salle | `rdc/proces.py` | Rejoue la règle en changeant une hypothèse à la fois : ce qui changerait le verdict. |
+| Moteur de calcul | `backend/rdc/moteur.py` | Tous les chiffres. Aucun modèle de langage ne calcule. |
+| Témoins | `backend/rdc/temoins.py` | `risque`, `diversification`, `valeurs`, `macro`. Chacun lit sa source et dépose des faits, sans opinion. |
+| Greffier | `backend/rdc/greffier.py` | Numérote chaque déposition (P-01, P-02…) et signale tout chiffre cité qui n'est dans aucune pièce. |
+| Défense, Procureur | `backend/rdc/agents.py` | Plaident pour et contre. En mode Bedrock, ils choisissent eux-mêmes les témoins à convoquer. |
+| Juge | `backend/rdc/agents.py` + `backend/rdc/proces.py` | Le verdict vient d'une **règle** (`regle_verdict`). Le juge ne fait que le motiver. |
+| La salle | `backend/rdc/proces.py` | Rejoue la règle en changeant une hypothèse à la fois : ce qui changerait le verdict. |
 
 Quatre verdicts possibles : contraire à une contrainte déclarée, en tension avec le profil
 déclaré, indécidable (information manquante), compatible avec le profil déclaré. Le tribunal
@@ -132,13 +132,13 @@ d'abord fonctionner le procès sur Bedrock.
 - Portefeuille : poids constants (rééquilibrage quotidien), sans frais ni impôt.
 - Inflation : prise avec 45 jours de délai de publication (hypothèse), pour ne pas utiliser
   une valeur avant qu'elle soit connue.
-- ESG : le jeu de départ n'en contient pas. Voir `donnees_externes/LISEZMOI.md` ; la table
+- ESG : le jeu de départ n'en contient pas. Voir `backend/donnees_externes/LISEZMOI.md` ; la table
   `esg_preuves.csv` est livrée vide et se remplit à la main.
 
 ## Hypothèses de l'équipe (à valider et à documenter)
 
 - Capital, budget de perte, plafonds et portefeuille de départ de chaque profil
-  (`rdc/profils.py`) : inventés. Seuls l'âge, l'horizon, le niveau de risque et les
+  (`backend/rdc/profils.py`) : inventés. Seuls l'âge, l'horizon, le niveau de risque et les
   préférences viennent du cas officiel.
 - Seuil « une position porte plus de 50 % du risque » (`SEUIL_PART_RISQUE`).
 - Jours de crise = les 10 % pires jours du portefeuille actuel.
@@ -158,6 +158,6 @@ d'abord fonctionner le procès sur Bedrock.
 ## À faire
 
 - [ ] Tester le mode Bedrock avec vos identifiants et ajuster les consignes des agents.
-- [ ] Remplir `donnees_externes/esg_preuves.csv` pour ENB, CNQ, XOM (procès de Mateo).
+- [ ] Remplir `backend/donnees_externes/esg_preuves.csv` pour ENB, CNQ, XOM (procès de Mateo).
 - [ ] Ajouter les dix premiers titres de SPY, QQQ et XIU pour mesurer la concentration cachée.
 - [ ] Vidéo : Robert et NVDA, puis Amira et ETH, pour montrer deux situations contrastées.

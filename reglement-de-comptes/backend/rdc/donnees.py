@@ -26,7 +26,7 @@ def dossier_donnees() -> Path:
     env = os.environ.get("RDC_DATA_DIR")
     if env:
         return Path(env)
-    return RACINE.parent / "Datathon2026" / "alphaforge_starter"
+    return RACINE.parent.parent / "Datathon2026" / "alphaforge_starter"
 
 
 def lire_csv(nom: str) -> pd.DataFrame:
