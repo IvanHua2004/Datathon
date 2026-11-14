@@ -36,7 +36,8 @@ def lire_csv(nom: str) -> pd.DataFrame:
         import boto3  # importé ici pour que le mode local n'exige pas AWS
 
         prefixe = os.environ.get("RDC_S3_PREFIX", "")
-        objet = boto3.client("s3").get_object(Bucket=bucket, Key=f"{prefixe}{nom}")
+        region = os.environ.get("AWS_REGION") or "us-east-1"
+        objet = boto3.client("s3", region_name=region).get_object(Bucket=bucket, Key=f"{prefixe}{nom}")
         return pd.read_csv(io.BytesIO(objet["Body"].read()))
     return pd.read_csv(dossier_donnees() / nom)
 

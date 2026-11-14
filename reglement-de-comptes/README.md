@@ -70,22 +70,71 @@ Quatre verdicts possibles : contraire à une contrainte déclarée, en tension a
 déclaré, indécidable (information manquante), compatible avec le profil déclaré. Le tribunal
 ne dit jamais quoi acheter : il montre la conséquence, et l'investisseur décide.
 
-## Brancher AWS
+## Brancher AWS (compte d'équipe du Datathon)
 
-AWS doit contribuer réellement au fonctionnement (critère d'admissibilité). Deux branchements
-sont prévus dans le code ; **aucun des deux n'a pu être testé sans vos identifiants**.
+Règles de l'atelier AWS du Datathon qui comptent ici :
 
-1. **Amazon Bedrock pour les agents** (mode « Amazon Bedrock » dans l'interface).
-   - Configurez vos identifiants AWS (`aws configure` ou variables d'environnement).
-   - Activez l'accès à un modèle dans la console Bedrock, dans votre région.
-   - `export AWS_REGION=...` et, si besoin, `export BEDROCK_MODEL_ID=...`
-     (sinon le modèle par défaut de Strands Agents est utilisé).
-   - Si l'appel échoue, l'application l'affiche et rejoue le procès en mode gabarit.
-2. **Amazon S3 pour les données** : téléversez les CSV du jeu de départ dans un compartiment,
-   puis `export RDC_S3_BUCKET=nom-du-compartiment` (et `RDC_S3_PREFIX=dossier/` si besoin).
+- **Tout dans us-east-1** (Virginie du Nord). Mélanger les régions donne des erreurs qui
+  ressemblent à des problèmes de permissions.
+- **Pas d'instance EC2 avec un groupe de sécurité ouvert à Internet**, pas de bucket S3
+  public. L'application tourne donc sur votre ordinateur (ou dans Docker) et appelle AWS.
+- **Jamais d'identifiants AWS dans Git.** Ceux du Datathon sont temporaires et expirent :
+  en cas de `ExpiredToken`, recopiez-en de nouveaux depuis Workshop Studio.
 
-Pistes pour la suite : déployer les agents sur Bedrock AgentCore Runtime et afficher ses
-traces d'exécution à côté des pièces du greffier ; mettre `esg_preuves.csv` dans S3.
+### 1. Identifiants
+
+Dans Workshop Studio, menu de gauche, **Get AWS CLI credentials** : copiez le bloc
+`export ...` dans votre terminal, puis vérifiez :
+
+```bash
+export AWS_REGION=us-east-1
+aws sts get-caller-identity
+```
+
+### 2. Vérifier les modèles (une fois pour l'équipe, dans AWS CloudShell)
+
+```bash
+aws bedrock-runtime converse --region us-east-1 \
+  --model-id global.anthropic.claude-sonnet-5 \
+  --messages '[{"role":"user","content":[{"text":"Répondez exactement : prêt"}]}]' \
+  --query 'output.message.content[?text].text' --output text
+```
+
+Le premier appel à un modèle Anthropic peut exiger un formulaire de première utilisation ;
+en cas d'`AccessDeniedException`, attendez quelques minutes, réessayez, puis voyez un mentor.
+
+### 3. Lancer le tribunal sur Bedrock
+
+Modèle par défaut : `global.anthropic.claude-sonnet-5`, région `us-east-1`. Pour itérer à
+faible coût pendant le développement :
+
+```bash
+export BEDROCK_MODEL_ID=global.amazon.nova-2-lite-v1:0   # facultatif
+streamlit run app.py          # ou : docker compose up --build
+```
+
+Dans la barre latérale, choisissez **Amazon Bedrock (Strands)**. Si l'appel échoue,
+l'application affiche l'erreur et rejoue le procès en mode gabarit.
+
+Pièges connus : Claude Sonnet 5, Opus 5 et 5.5 refusent `temperature` (le code n'en passe
+pas) ; Claude Sonnet 5.5, Haiku 5.5 et Fable ne sont pas disponibles dans les comptes du
+Datathon ; l'erreur « on-demand throughput isn't supported » veut dire qu'il manque le
+préfixe `global.` à l'identifiant du modèle.
+
+### 4. Les données dans S3 (bucket privé)
+
+```bash
+BUCKET=reglement-de-comptes-$(aws sts get-caller-identity --query Account --output text)
+aws s3 mb s3://$BUCKET --region us-east-1        # Block Public Access reste activé par défaut
+aws s3 sync ../Datathon2026/alphaforge_starter s3://$BUCKET/alphaforge/ --exclude "*.py"
+export RDC_S3_BUCKET=$BUCKET RDC_S3_PREFIX=alphaforge/
+```
+
+### 5. Pour aller plus loin (si le temps le permet)
+
+AgentCore Observability ou Runtime pour montrer les traces d'exécution des agents à côté des
+pièces du greffier. L'atelier rappelle que le jury n'évalue pas l'hébergement : faites
+d'abord fonctionner le procès sur Bedrock.
 
 ## Données et traitements
 
