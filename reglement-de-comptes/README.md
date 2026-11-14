@@ -27,6 +27,22 @@ emplacement : `export RDC_DATA_DIR=/chemin/vers/alphaforge_starter`.
 L'application fonctionne tout de suite en mode **« Sans modèle »** : les plaidoiries sont
 alors écrites par des gabarits. C'est le mode pour développer, et le filet de sécurité de la démo.
 
+## Menu Angular
+
+Lancez Streamlit avec la commande ci-dessus. Dans un deuxième terminal, depuis
+le dossier `reglement-de-comptes` :
+
+```bash
+cd frontend
+npm ci
+npm start
+```
+
+Dans PowerShell sous Windows, utilisez `npm.cmd ci` et `npm.cmd start`.
+
+Ouvrez `http://localhost:4200`. Le bouton **Débuter** ouvre l'application
+Streamlit sur `http://localhost:8501`.
+
 ## Avec Docker
 
 ```bash
