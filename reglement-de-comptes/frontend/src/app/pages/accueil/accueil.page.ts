@@ -28,7 +28,7 @@ import { RouterLink } from '@angular/router';
         <img class="logo-title" src="assets/logo_reglements_de.png" alt="" width="738" height="242">
         <img class="logo-comptes" src="assets/logo_comptes.png" alt="" width="624" height="136">
       </h1>
-      <a class="start" routerLink="/tribunal">Débuter</a>
+      <a class="start" routerLink="/personas">Débuter</a>
       <img class="judge-runner" src="assets/juge-course.gif" alt="" width="443" height="443">
     </main>
   `,
