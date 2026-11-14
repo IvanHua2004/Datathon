@@ -4,16 +4,6 @@ __pycache__/
 *.pyc
 .env
 .git/
-frontend/node_modules/
-frontend/.angular/
-frontend/dist/
-# Le menu Angular a sa propre image (frontend/Dockerfile) : seuls app.py et
-# graphiques.py de frontend/ servent à l'image du tribunal.
-frontend/src/
-frontend/public/
-frontend/package.json
-frontend/package-lock.json
-frontend/angular.json
-frontend/tsconfig.json
-frontend/Dockerfile
-frontend/.dockerignore
+# L'interface Angular a sa propre image (frontend/Dockerfile)
+frontend/
+rdc/

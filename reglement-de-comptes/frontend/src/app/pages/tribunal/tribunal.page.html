@@ -1,0 +1,196 @@
+<header class="barre">
+  <a class="retour" routerLink="/">← Menu</a>
+  <div class="titres">
+    <h1>Règlement de comptes</h1>
+    <p>Avant d'investir, faites passer votre idée en procès. Simulation pédagogique sur des profils fictifs : ce n'est pas un conseil financier.</p>
+  </div>
+</header>
+
+<div class="disposition">
+  <aside class="dossier" aria-label="Le dossier">
+    <h2>Le dossier</h2>
+
+    @if (tribunal.chargement()) {
+      <p class="note">Chargement des profils…</p>
+    }
+
+    @if (profil(); as p) {
+      <label for="profil">Investisseur (fictif)</label>
+      <select id="profil" (change)="choisirProfil(valeur($event))">
+        @for (x of tribunal.profils(); track x.cle) {
+          <option [value]="x.cle" [selected]="x.cle === profilCle()">{{ x.nom }}</option>
+        }
+      </select>
+
+      <p class="profil">{{ p.resume }}</p>
+      <dl class="profil-details">
+        <dt>Objectif</dt><dd>{{ p.objectif }}</dd>
+        <dt>Préférences</dt><dd>{{ p.preferences }}</dd>
+        <dt>Capital (hypothèse)</dt><dd>{{ dollars(p.capital) }}</dd>
+        <dt>Budget de perte (hypothèse)</dt><dd>{{ pct(p.budgetPerte, 0) }}</dd>
+      </dl>
+
+      <h2>La demande</h2>
+      <label for="titre">Titre à ajouter</label>
+      <select id="titre" (change)="choisirTicker(valeur($event))">
+        @for (a of tribunal.actifs(); track a.ticker) {
+          <option [value]="a.ticker" [selected]="a.ticker === ticker()">{{ a.ticker }} — {{ a.nom }}</option>
+        }
+      </select>
+
+      <label for="taille">Part du portefeuille à y placer</label>
+      <select id="taille" (change)="choisirTaille(valeur($event))">
+        @for (t of tribunal.tailles(); track t) {
+          <option [value]="t" [selected]="t === taille()">{{ pct(t, 0) }}</option>
+        }
+      </select>
+
+      <fieldset>
+        <legend>Agents</legend>
+        <label class="choix">
+          <input type="radio" name="mode" [checked]="mode() === 'gabarit'" (change)="choisirMode('gabarit')">
+          Sans modèle (gabarits)
+        </label>
+        <label class="choix">
+          <input type="radio" name="mode" [checked]="mode() === 'bedrock'" (change)="choisirMode('bedrock')">
+          Amazon Bedrock (Strands)
+        </label>
+      </fieldset>
+
+      <button type="button" class="ouvrir" (click)="ouvrir()" [disabled]="tribunal.enCours()">
+        {{ tribunal.enCours() ? 'Le tribunal siège…' : 'Ouvrir le procès' }}
+      </button>
+      <p class="note">{{ sourceTexte() }}</p>
+    }
+  </aside>
+
+  <main class="audience">
+    @if (tribunal.erreur(); as erreur) {
+      <p class="bandeau bandeau--erreur" role="alert">{{ erreur }}</p>
+    }
+
+    @if (tribunal.enCours()) {
+      <p class="bandeau" role="status">
+        Le tribunal siège… {{ mode() === 'bedrock' ? 'Avec Bedrock, un procès prend environ 30 secondes.' : '' }}
+      </p>
+    }
+
+    @if (proces(); as pr) {
+      @if (pr.avertissement) {
+        <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>
+      }
+
+      <h2 class="demande">{{ pr.demande.nom }} demande {{ pct(pr.demande.taille, 0) }} du portefeuille dans {{ pr.demande.ticker }}</h2>
+
+      <section class="audiences">
+        <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[0]" />
+        <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[1]" />
+        <article class="carte juge" [attr.data-ton]="tonVerdict(pr.decision.verdict)">
+          <h2>Le Juge</h2>
+          <p class="verdict">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              @switch (tonVerdict(pr.decision.verdict)) {
+                @case ('contraire') { <circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path> }
+                @case ('tension') { <path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path> }
+                @case ('indecidable') { <circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"></path> }
+                @default { <path d="M20 6 9 17l-5-5"></path> }
+              }
+            </svg>
+            {{ pr.decision.verdict }}
+          </p>
+          <p class="texte">{{ pr.motivation.texte }}</p>
+          @if (pr.motivation.non_verifies.length) {
+            <p class="greffier greffier--alerte">Greffier : chiffres absents des pièces → {{ pr.motivation.non_verifies.join(', ') }}</p>
+          }
+        </article>
+      </section>
+
+      <section class="carte">
+        <h2>Où votre limite est-elle franchie ?</h2>
+        <p class="note-carte">Pire baisse observée du portefeuille selon la part placée dans {{ pr.demande.ticker }} ({{ pr.periode.debut }} au {{ pr.periode.fin }}). Le passé observé, pas une prévision.</p>
+        <rdc-courbe-taille [courbe]="pr.courbe" [budget]="pr.budgetPerte" [tailleDemandee]="pr.demande.taille" [ticker]="pr.demande.ticker" />
+        <details>
+          <summary>Voir les données du graphique</summary>
+          <div class="tableau">
+            <table>
+              <thead>
+                <tr><th scope="col">Taille</th><th scope="col">Pire baisse observée</th><th scope="col">Perte en dollars</th><th scope="col">Cas défavorable sur 12 mois</th><th scope="col">Part du risque portée par {{ pr.demande.ticker }}</th></tr>
+              </thead>
+              <tbody>
+                @for (point of pr.courbe; track point.taille) {
+                  <tr>
+                    <td>{{ pct(point.taille, 0) }}</td>
+                    <td>{{ pct(point.pireBaisse) }}</td>
+                    <td>{{ dollars(point.pireBaisse * pr.demande.capital) }}</td>
+                    <td>{{ pct(point.defavorable12Mois) }}</td>
+                    <td>{{ pct(point.partDuRisque) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+
+      <section class="carte">
+        <h2>La salle : qu'est-ce qui changerait le verdict ?</h2>
+        <div class="tableau">
+          <table>
+            <thead>
+              <tr><th scope="col">Hypothèse changée</th><th scope="col">Verdict</th><th scope="col">Change le verdict</th></tr>
+            </thead>
+            <tbody>
+              @for (h of pr.salle; track h.hypothese) {
+                <tr [class.change]="h.change">
+                  <td>{{ h.hypothese }}</td>
+                  <td>{{ h.verdict }}</td>
+                  <td>{{ h.change ? 'Oui' : 'Non' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="carte">
+        <h2>Les pièces du greffier</h2>
+        @for (piece of pr.pieces; track piece.numero) {
+          <details class="piece">
+            <summary>{{ piece.numero }} — Témoin {{ piece.temoin }} ({{ piece.description }})</summary>
+            <p class="note-carte">Convoqué par {{ piece.appelePar }} · outil : <code>{{ piece.outil }}</code> · {{ piece.horodatage }}</p>
+            <div class="tableau">
+              <table>
+                <tbody>
+                  @for (f of piece.faits; track f.libelle) {
+                    <tr><th scope="row">{{ f.libelle }}</th><td>{{ f.valeur }}</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            <p><strong>Source :</strong> {{ piece.source }}</p>
+            <p><strong>Période :</strong> {{ piece.periode }}</p>
+            <p><strong>Limites :</strong> {{ piece.limites }}</p>
+          </details>
+        }
+      </section>
+    } @else if (!tribunal.enCours()) {
+      @if (profil(); as p) {
+        <p class="bandeau">Choisissez un investisseur et une demande, puis ouvrez le procès.</p>
+        <section class="carte">
+          <h2>Portefeuille actuel de {{ p.nom }} (fictif)</h2>
+          <div class="tableau">
+            <table>
+              <thead><tr><th scope="col">Titre</th><th scope="col">Poids</th></tr></thead>
+              <tbody>
+                @for (position of p.portefeuille; track position.ticker) {
+                  <tr><td>{{ position.ticker }}</td><td>{{ pct(position.poids) }}</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+    }
+  </main>
+</div>

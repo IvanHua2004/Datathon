@@ -1,13 +1,14 @@
-# Lancer :  docker compose up --build
-#   Menu Angular   : http://localhost:4200  (le bouton « Débuter » ouvre le tribunal)
-#   Tribunal       : http://localhost:8501
-# Les ports ne sont ouverts que sur votre ordinateur (127.0.0.1), pas sur le Wi-Fi.
+# Lancer :  docker compose up --build     puis ouvrir http://localhost:4200
+#   /           : menu ;  /tribunal : le tribunal (interface Angular)
+#   /api/       : l'API Python, relayée par nginx
+# Un seul port est ouvert, et seulement sur votre ordinateur (127.0.0.1), pas sur le Wi-Fi.
 services:
-  tribunal:
+  api:
     build: .
-    image: reglement-de-comptes-tribunal
-    ports:
-      - "127.0.0.1:8501:8501"
+    image: reglement-de-comptes-api
+    # Aucun port publié : seule l'interface (nginx) parle à l'API, à l'intérieur de Docker.
+    expose:
+      - "8000"
     volumes:
       # Jeu de départ des organisateurs, monté en lecture seule (il n'est pas copié dans l'image)
       - ../Datathon2026/alphaforge_starter:/data:ro
@@ -28,10 +29,10 @@ services:
       - RDC_S3_BUCKET
       - RDC_S3_PREFIX
 
-  menu:
+  interface:
     build: ./frontend
-    image: reglement-de-comptes-menu
+    image: reglement-de-comptes-interface
     ports:
       - "127.0.0.1:4200:80"
     depends_on:
-      - tribunal
+      - api
