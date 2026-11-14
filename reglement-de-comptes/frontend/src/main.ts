@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 
+import { AppComponent } from './app/app.component';
+import { appConfig } from './app/app.config';
 @Component({
   selector: 'rdc-menu',
   template: `
@@ -97,4 +98,4 @@ class MenuComponent {
   }
 }
 
-bootstrapApplication(MenuComponent).catch(console.error);
+bootstrapApplication(AppComponent, appConfig).catch(console.error);

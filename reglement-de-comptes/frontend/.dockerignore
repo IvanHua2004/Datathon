@@ -3,5 +3,3 @@ node_modules/
 dist/
 __pycache__/
 *.pyc
-app.py
-graphiques.py

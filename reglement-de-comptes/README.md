@@ -10,27 +10,41 @@ des pièces vérifiables.
 > Simulation pédagogique. Aucune transaction réelle, aucun conseil financier personnalisé,
 > aucune prédiction de rendement. Les profils et leurs montants sont fictifs.
 
-## Démarrer
+## Architecture
+
+```
+reglement-de-comptes/
+├── backend/                 API Python (FastAPI) + tribunal
+│   ├── api.py               routes /api/... : profils, actifs, procès
+│   ├── rdc/                 moteur, témoins, greffier, agents, règle du verdict
+│   ├── donnees_externes/    preuves ESG collectées à la main
+│   └── tests/
+└── frontend/                interface Angular
+    ├── nginx.conf           sert l'interface et relaie /api/ (Docker)
+    ├── proxy.conf.json      relaie /api/ en développement (ng serve)
+    └── src/app/
+        ├── pages/           accueil (menu), tribunal
+        ├── services/        api.service (HTTP), proces.service (état du tribunal)
+        ├── components/      plaidoirie, courbe-taille (graphique SVG)
+        ├── models/          types des réponses de l'API
+        └── shared/          mise en forme des chiffres
+```
+
+Angular n'exécute aucun calcul : il appelle l'API, qui appelle le tribunal Python.
+
+## Démarrer (développement)
+
+Premier terminal, l'API, depuis `reglement-de-comptes` :
 
 ```bash
-cd reglement-de-comptes
 python -m venv .venv
 source .venv/bin/activate        # Windows : .venv\Scripts\activate
 pip install -r requirements.txt
-streamlit run frontend/app.py
-pytest -q backend/tests          # 7 tests
+uvicorn api:app --app-dir backend --reload --port 8000
+pytest -q backend/tests          # 10 tests
 ```
 
-Les données sont lues par défaut dans `../Datathon2026/alphaforge_starter`. Pour un autre
-emplacement : `export RDC_DATA_DIR=/chemin/vers/alphaforge_starter`.
-
-L'application fonctionne tout de suite en mode **« Sans modèle »** : les plaidoiries sont
-alors écrites par des gabarits. C'est le mode pour développer, et le filet de sécurité de la démo.
-
-## Menu Angular
-
-Lancez Streamlit avec la commande ci-dessus. Dans un deuxième terminal, depuis
-le dossier `reglement-de-comptes` :
+Deuxième terminal, l'interface :
 
 ```bash
 cd frontend
@@ -40,28 +54,36 @@ npm start
 
 Dans PowerShell sous Windows, utilisez `npm.cmd ci` et `npm.cmd start`.
 
-Ouvrez `http://localhost:4200`. Le bouton **Débuter** ouvre l'application
-Streamlit sur `http://localhost:8501`.
+Ouvrez `http://localhost:4200` : le menu, puis **Débuter** pour le tribunal
+(`/tribunal`). `ng serve` relaie `/api/` vers le port 8000. La documentation interactive
+de l'API est sur `http://localhost:8000/docs`.
+
+Les données sont lues par défaut dans `../Datathon2026/alphaforge_starter`. Pour un autre
+emplacement : `export RDC_DATA_DIR=/chemin/vers/alphaforge_starter`.
+
+L'application fonctionne tout de suite en mode **« Sans modèle »** : les plaidoiries sont
+alors écrites par des gabarits. C'est le mode pour développer, et le filet de sécurité de la démo.
 
 ## Avec Docker
 
-Deux conteneurs : le menu Angular et le tribunal (Streamlit).
+Deux conteneurs, une seule adresse : nginx sert l'interface Angular et relaie `/api/`
+vers le conteneur de l'API Python (`frontend/nginx.conf`).
 
 ```bash
 cd reglement-de-comptes
 docker compose up --build
-docker compose run --rm tribunal pytest -q backend/tests     # les tests, dans le conteneur
+docker compose run --rm api pytest -q backend/tests     # les tests, dans le conteneur
 ```
 
 - Menu : http://localhost:4200 (le bouton **Débuter** ouvre le tribunal)
-- Tribunal : http://localhost:8501
+- Tribunal : http://localhost:4200/tribunal
 
-Les deux ports ne sont ouverts que sur votre ordinateur, pas sur le réseau Wi-Fi.
+Seul le port 4200 est ouvert, et seulement sur votre ordinateur, pas sur le réseau Wi-Fi.
 Le jeu de départ est monté en lecture seule depuis `../Datathon2026/alphaforge_starter`.
 Pour le mode Bedrock, exportez vos variables AWS avant `docker compose up`, ou placez-les
 dans un fichier `.env` à côté de `docker-compose.yml` (ce fichier est ignoré par git, ne le
 publiez pas). Les identifiants du Datathon expirent : après en avoir collé de nouveaux,
-relancez `docker compose up` pour que le tribunal les reçoive.
+relancez `docker compose up` pour que l'API les reçoive.
 
 ## Les rôles
 
@@ -73,6 +95,8 @@ relancez `docker compose up` pour que le tribunal les reçoive.
 | Défense, Procureur | `backend/rdc/agents.py` | Plaident pour et contre. En mode Bedrock, ils choisissent eux-mêmes les témoins à convoquer. |
 | Juge | `backend/rdc/agents.py` + `backend/rdc/proces.py` | Le verdict vient d'une **règle** (`regle_verdict`). Le juge ne fait que le motiver. |
 | La salle | `backend/rdc/proces.py` | Rejoue la règle en changeant une hypothèse à la fois : ce qui changerait le verdict. |
+| API | `backend/api.py` | Expose le tribunal en JSON. Aucun calcul. |
+| Interface | `frontend/src/app/` | Pages, services et composants Angular. Affiche, ne calcule pas. |
 
 Quatre verdicts possibles : contraire à une contrainte déclarée, en tension avec le profil
 déclaré, indécidable (information manquante), compatible avec le profil déclaré. Le tribunal
@@ -118,10 +142,10 @@ faible coût pendant le développement :
 
 ```bash
 export BEDROCK_MODEL_ID=global.amazon.nova-2-lite-v1:0   # facultatif
-streamlit run app.py          # ou : docker compose up --build
+uvicorn api:app --app-dir backend --port 8000   # ou : docker compose up --build
 ```
 
-Dans la barre latérale, choisissez **Amazon Bedrock (Strands)**. Si l'appel échoue,
+Dans le dossier du tribunal, choisissez **Amazon Bedrock (Strands)**. Si l'appel échoue,
 l'application affiche l'erreur et rejoue le procès en mode gabarit.
 
 Pièges connus : Claude Sonnet 5, Opus 5 et 5.5 refusent `temperature` (le code n'en passe
