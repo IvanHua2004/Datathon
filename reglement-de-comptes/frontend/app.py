@@ -1,13 +1,20 @@
 """Règlement de comptes : interface Streamlit.
 
-Lancer :  streamlit run app.py
+Lancer depuis le dossier du projet : streamlit run frontend/app.py
 """
 from __future__ import annotations
+
+import sys
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
-from rdc import donnees, graphiques, temoins
+import graphiques
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+
+from rdc import donnees, temoins
 from rdc.format import dollars, pct
 from rdc.profils import PROFILS
 from rdc.proces import (V_COMPATIBLE, V_CONTRAINTE, V_INDECIDABLE, V_TENSION, courbe,
