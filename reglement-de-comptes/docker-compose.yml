@@ -16,7 +16,7 @@ services:
       # Les variables ci-dessous sont transmises seulement si elles existent dans votre
       # terminal ou dans un fichier .env placé à côté de ce fichier. Sans elles,
       # l'application fonctionne en mode « Sans modèle ».
-      - AWS_REGION
+      - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN

@@ -162,15 +162,25 @@ def _juge_gabarit(proces) -> Plaidoirie:
 
 
 # ----------------------------------------------------------------------------- mode bedrock
+# Valeurs vérifiées dans l'atelier AWS du Datathon (région unique : us-east-1).
+# Pour itérer à faible coût : BEDROCK_MODEL_ID=global.amazon.nova-2-lite-v1:0
+MODELE_PAR_DEFAUT = "global.anthropic.claude-sonnet-5"
+REGION_PAR_DEFAUT = "us-east-1"
+
+
 def _modele():
+    from botocore.config import Config
     from strands.models import BedrockModel
 
-    options = {}
-    if os.environ.get("BEDROCK_MODEL_ID"):
-        options["model_id"] = os.environ["BEDROCK_MODEL_ID"]
-    if os.environ.get("AWS_REGION"):
-        options["region_name"] = os.environ["AWS_REGION"]
-    return BedrockModel(**options)
+    # Pas de `temperature` : Claude Sonnet 5 et Opus 5/5.5 la refusent. Ces modèles raisonnent
+    # avant de répondre ; un max_tokens trop petit donne une réponse vide.
+    return BedrockModel(
+        model_id=os.environ.get("BEDROCK_MODEL_ID") or MODELE_PAR_DEFAUT,
+        region_name=os.environ.get("AWS_REGION") or REGION_PAR_DEFAUT,
+        max_tokens=2000,
+        # Nouvelles tentatives avec délai croissant en cas de ThrottlingException
+        boto_client_config=Config(retries={"mode": "adaptive", "max_attempts": 6}),
+    )
 
 
 def _agent_bedrock(proces, role_nom: str, role_consigne: str, message: str, avec_outil: bool) -> Plaidoirie:
