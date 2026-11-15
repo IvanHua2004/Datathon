@@ -393,6 +393,9 @@ def scenarios(demande: DemandeScenarios) -> list[dict]:
     decision = regle_verdict(dossier)
     return generer_scenarios_alternatifs(dossier, decision, demande.intention_texte or "")
 
+@app.get("/")
+def racine() -> dict:
+    return {"statut": "ok", "service": "Reglement de comptes"}
 
 @app.post("/api/pdf")
 def telecharger_pdf(demande: DemandePDF) -> Response:
