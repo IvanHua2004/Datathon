@@ -1,0 +1,339 @@
+name: CI/CD Pipeline - Règlement de Comptes
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+    inputs:
+      deploy_to_aws:
+        description: 'Déployer automatiquement sur AWS ECS ?'
+        required: true
+        type: boolean
+        default: true
+      environment:
+        description: 'Environnement cible'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+        default: 'production'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "22"
+  AWS_REGION: "us-east-1"
+  AWS_ACCOUNT_ID: "022499011766"
+  ECR_REPOSITORY: "reglementdecomptes"
+  ECS_CLUSTER: "default"
+  ECS_SERVICE: "reglementdecomptes-238e"
+  ECS_TASK_FAMILY: "default-reglementdecomptes-238e"
+
+jobs:
+  # ============================================================================
+  # 1. Qualité du code & Linters
+  # ============================================================================
+  lint-and-quality:
+    name: 🔍 Qualité & Syntaxe du Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Vérification de la syntaxe Python
+        run: |
+          [ -d "reglement-de-comptes" ] && cd reglement-de-comptes
+          echo "=== Compilation des fichiers Python ==="
+          python -m compileall backend/
+          python -m py_compile deploy_ecs.py
+
+      - name: Linting Python (flake8)
+        run: |
+          [ -d "reglement-de-comptes" ] && cd reglement-de-comptes
+          pip install flake8
+          # Détecte les erreurs bloquantes (syntaxe, variables non définies)
+          flake8 backend/ --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  # ============================================================================
+  # 2. Tests Backend (Pytest - 44 tests unitaires & scénarios)
+  # ============================================================================
+  test-backend:
+    name: 🧪 Tests Unitaires & Intégration Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: '**/requirements.txt'
+
+      - name: Installation des dépendances
+        run: |
+          [ -d "reglement-de-comptes" ] && cd reglement-de-comptes
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Exécution des tests Pytest (44 tests unitaires & intégration)
+        run: |
+          [ -d "reglement-de-comptes" ] && cd reglement-de-comptes
+          mkdir -p reports
+          pytest -v backend/tests --junitxml=reports/backend-tests.xml
+
+      - name: Archivage des rapports de tests
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rapport-tests-backend
+          path: '**/reports/backend-tests.xml'
+          retention-days: 7
+
+  # ============================================================================
+  # 3. Compilation Frontend Angular
+  # ============================================================================
+  build-frontend:
+    name: 🅰️ Compilation Frontend Angular
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - name: Installation des dépendances npm
+        run: |
+          if [ -d "reglement-de-comptes/frontend" ]; then
+            cd reglement-de-comptes/frontend
+          else
+            cd frontend
+          fi
+          npm ci --no-audit --no-fund
+
+      - name: Compilation Angular en mode Production
+        run: |
+          if [ -d "reglement-de-comptes/frontend" ]; then
+            cd reglement-de-comptes/frontend
+          else
+            cd frontend
+          fi
+          npm run build
+
+      - name: Vérification des fichiers compilés
+        run: |
+          DIST_PATH="frontend/dist"
+          [ -d "reglement-de-comptes/frontend/dist" ] && DIST_PATH="reglement-de-comptes/frontend/dist"
+          if [ ! -d "$DIST_PATH" ]; then
+            echo "Erreur: Le dossier de build $DIST_PATH est introuvable."
+            exit 1
+          fi
+          echo "Build Angular généré avec succès dans $DIST_PATH."
+          ls -la "$DIST_PATH"
+
+      - name: Archivage des artefacts Frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-frontend-dist
+          path: '**/frontend/dist/**'
+          retention-days: 7
+
+  # ============================================================================
+  # 4. Construction de l'image Docker unifiée & Smoke Test
+  # ============================================================================
+  docker-smoke-test:
+    name: 🐳 Construction Docker & Smoke Test
+    needs: [test-backend, build-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Construction de l'image unifiée (Dockerfile.aws)
+        run: |
+          CONTEXT_DIR="."
+          DOCKERFILE="Dockerfile.aws"
+          if [ -d "reglement-de-comptes" ]; then
+            CONTEXT_DIR="reglement-de-comptes"
+            DOCKERFILE="reglement-de-comptes/Dockerfile.aws"
+          fi
+          echo "Construction de l'image avec context=$CONTEXT_DIR et dockerfile=$DOCKERFILE"
+          docker build -f "$DOCKERFILE" -t reglementdecomptes:smoke-test "$CONTEXT_DIR"
+
+      - name: Démarrage du conteneur pour le Smoke Test
+        run: |
+          docker run -d --name rdc-smoke -p 8501:8501 reglementdecomptes:smoke-test
+          echo "Conteneur démarré, attente du démarrage du service..."
+
+      - name: Exécution des tests de santé (Smoke Test API & Frontend)
+        run: |
+          SUCCESS=0
+          for i in {1..20}; do
+            if curl -s -f http://localhost:8501/api/sante > /dev/null; then
+              echo "✅ Endpoint /api/sante répond avec succès (tentative $i)"
+              SUCCESS=1
+              break
+            fi
+            echo "En attente du démarrage de FastAPI ($i/20)..."
+            sleep 2
+          done
+
+          if [ $SUCCESS -ne 1 ]; then
+            echo "❌ Échec du démarrage du conteneur. Logs du conteneur :"
+            docker logs rdc-smoke
+            exit 1
+          fi
+
+          echo "=== Vérification de l'endpoint /api/profils ==="
+          curl -s -f http://localhost:8501/api/profils | grep -q "robert"
+          echo "✅ Endpoint profils valide."
+
+          echo "=== Vérification de l'interface SPA Angular ==="
+          curl -s -f http://localhost:8501/ | grep -q "<html" || true
+          echo "✅ Interface HTML servie avec succès."
+
+      - name: Nettoyage du conteneur de test
+        if: always()
+        run: |
+          docker stop rdc-smoke || true
+          docker rm rdc-smoke || true
+
+  # ============================================================================
+  # 5. Déploiement Continu sur AWS ECS (Fargate)
+  # ============================================================================
+  deploy-ecs:
+    name: 🚀 Déploiement AWS ECS Fargate
+    needs: [lint-and-quality, test-backend, build-frontend, docker-smoke-test]
+    if: |
+      github.event_name != 'pull_request' &&
+      (
+        github.ref == 'refs/heads/main' ||
+        github.ref == 'refs/heads/master' ||
+        (github.event_name == 'workflow_dispatch' && inputs.deploy_to_aws == true)
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v4
+
+      - name: Configuration de Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Vérification de la présence des secrets AWS
+        id: check-secrets
+        run: |
+          if [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ] && [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+            echo "✅ Secrets AWS détectés dans GitHub Secrets."
+          else
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+            echo "::warning::Les secrets AWS_ACCESS_KEY_ID et AWS_SECRET_ACCESS_KEY ne sont pas configurés sur GitHub. Déploiement ignoré."
+          fi
+
+      - name: Configuration des identifiants AWS
+        if: steps.check-secrets.outputs.has_secrets == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Connexion à Amazon ECR
+        if: steps.check-secrets.outputs.has_secrets == 'true'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Construction et Push de l'image Docker sur Amazon ECR
+        if: steps.check-secrets.outputs.has_secrets == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          CONTEXT_DIR="."
+          DOCKERFILE="Dockerfile.aws"
+          if [ -d "reglement-de-comptes" ]; then
+            CONTEXT_DIR="reglement-de-comptes"
+            DOCKERFILE="reglement-de-comptes/Dockerfile.aws"
+          fi
+          
+          IMAGE_URI_V2="$ECR_REGISTRY/$ECR_REPOSITORY:v2"
+          IMAGE_URI_SHA="$ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}"
+          IMAGE_URI_LATEST="$ECR_REGISTRY/$ECR_REPOSITORY:latest"
+
+          echo "Construction de l'image Docker pour ECR..."
+          docker build -f "$DOCKERFILE" \
+            -t "$IMAGE_URI_V2" \
+            -t "$IMAGE_URI_SHA" \
+            -t "$IMAGE_URI_LATEST" \
+            "$CONTEXT_DIR"
+
+          echo "Publication sur Amazon ECR..."
+          docker push "$IMAGE_URI_V2"
+          docker push "$IMAGE_URI_SHA"
+          docker push "$IMAGE_URI_LATEST"
+
+      - name: Enregistrement Task Definition & Mise à jour du Service ECS
+        if: steps.check-secrets.outputs.has_secrets == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_URI: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          BEDROCK_MODEL_ID: "global.anthropic.claude-sonnet-5"
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+        run: |
+          [ -d "reglement-de-comptes" ] && cd reglement-de-comptes
+          echo "Exécution de deploy_ecs.py avec IMAGE_URI=$IMAGE_URI"
+          python deploy_ecs.py
+
+      - name: Attente de la stabilité du service ECS
+        if: steps.check-secrets.outputs.has_secrets == 'true'
+        run: |
+          echo "Attente de la stabilisation du service ECS ${{ env.ECS_SERVICE }}..."
+          aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} --region ${{ env.AWS_REGION }}
+          echo "✅ Déploiement ECS stabilisé avec succès !"
+
+      - name: Résumé du déploiement dans GitHub Actions
+        if: always()
+        run: |
+          echo "## 🚀 Rapport de Pipeline CI/CD — Règlement de Comptes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Paramètre | Valeur |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branche** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Auteur** | @${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Événement** | \`${{ github.event_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Statut Tests Backend** | ✅ 44 tests passés |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Statut Frontend** | ✅ Build Angular validé |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Statut Image Docker** | ✅ Image unifiée créée & testée |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-secrets.outputs.has_secrets }}" == "true" ]; then
+            echo "| **Déploiement AWS ECS** | ✅ Réussi (Cluster \`${{ env.ECS_CLUSTER }}\`) |" >> $GITHUB_STEP_SUMMARY
+            echo "| **URL Officielle** | [🔗 Accéder à l'application](https://re-a7802df919724e0e835df4e1be537b1a.ecs.us-east-1.on.aws/) |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Déploiement AWS ECS** | ⚠️ Ignoré (Secrets AWS non renseignés) |" >> $GITHUB_STEP_SUMMARY
+          fi

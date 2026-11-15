@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .env
 .git/
-# L'interface Angular a sa propre image (frontend/Dockerfile)
-frontend/
-rdc/
+frontend/node_modules/
+frontend/.angular/
+frontend/dist/
+
