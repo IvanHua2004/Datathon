@@ -1,0 +1,115 @@
+import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { EnteteComponent } from '../../components/entete/entete.component';
+import { ProcesService } from '../../services/proces.service';
+import { dollars, pct } from '../../shared/format';
+
+/** Étape 1 : choisir l'investisseur fictif dont on va juger la décision. */
+@Component({
+  selector: 'rdc-persona',
+  imports: [RouterLink, EnteteComponent],
+  template: `
+    <rdc-entete [etape]="1" />
+    <main class="scene">
+      <h1>Choisis ton persona</h1>
+      <p class="intro">Trois investisseurs fictifs. Le tribunal jugera une décision à partir de leur profil.</p>
+
+      @if (tribunal.erreur(); as erreur) {
+        <p class="erreur" role="alert">{{ erreur }}</p>
+      }
+      @if (tribunal.chargement()) {
+        <p class="intro" role="status">Le greffier prépare les dossiers…</p>
+      }
+
+      <ul class="cartes">
+        @for (p of tribunal.profils(); track p.cle) {
+          <li>
+            <a class="carte" routerLink="/question" [queryParams]="{ profil: p.cle }">
+              <span class="avatar" aria-hidden="true">{{ p.nom[0] }}</span>
+              <strong class="nom">{{ p.nom }}</strong>
+              <span class="resume">{{ p.resume }}</span>
+              <dl>
+                <div><dt>Objectif</dt><dd>{{ p.objectif }}</dd></div>
+                <div><dt>Capital fictif</dt><dd>{{ dollars(p.capital) }}</dd></div>
+                <div><dt>Perte supportable</dt><dd>{{ pct(p.budgetPerte, 0) }}</dd></div>
+              </dl>
+              <span class="choisir">Choisir {{ p.nom }} →</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </main>
+  `,
+  styles: `
+    :host { display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); min-height: 100svh; color: #ffe5bf; }
+    .scene {
+      padding: clamp(1.5rem, 5vh, 3rem) clamp(1rem, 4vw, 2.5rem) 3rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background-image:
+        radial-gradient(ellipse at 50% 42%, rgb(0 0 0 / 20%), rgb(0 0 0 / 67%)),
+        repeating-linear-gradient(90deg, rgb(255 229 191 / 15%) 0 1px, transparent 1px 32px),
+        radial-gradient(ellipse at 50% 42%, #663b57, #281523 78%);
+    }
+    h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); text-align: center; }
+    .intro { margin: 0; max-width: 40rem; text-align: center; line-height: 1.5; color: rgb(255 229 191 / 85%); }
+    .erreur { margin: 0; padding: 0.75rem 1rem; border-radius: 4px; background: #fff8ec; color: #8a1c1c; }
+    .cartes {
+      list-style: none;
+      margin: 1rem 0 0;
+      padding: 0;
+      width: min(100%, 72rem);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+      gap: 1.25rem;
+    }
+    .carte {
+      height: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      padding: 1.4rem;
+      border-radius: 6px;
+      background: #fff8ec;
+      color: #200e0c;
+      text-decoration: none;
+      box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+    .carte:hover { transform: translateY(-3px); box-shadow: 0 9px 0 rgb(0 0 0 / 35%); }
+    .carte:focus-visible { outline: 3px solid #ffc247; outline-offset: 4px; }
+    .avatar {
+      width: 3.5rem; height: 3.5rem; border-radius: 50%;
+      display: grid; place-items: center;
+      background: #773c6f; color: #ffe5bf; font-size: 1.6rem; font-weight: 800;
+    }
+    .nom { font-size: 1.4rem; }
+    .resume { line-height: 1.45; color: #4a3a44; }
+    dl { margin: 0.2rem 0 0; display: grid; gap: 0.45rem; font-size: 0.9rem; }
+    dt { color: #5c4a55; }
+    dd { margin: 0; font-weight: 600; line-height: 1.4; }
+    .choisir {
+      margin-top: auto;
+      align-self: flex-start;
+      padding: 0.7rem 1.25rem;
+      border-radius: 2px;
+      background: #ffc247;
+      font-weight: 700;
+    }
+    .carte:hover .choisir { background: #fbde85; }
+    @media (prefers-reduced-motion: reduce) { .carte { transition: none; } .carte:hover { transform: none; } }
+  `,
+})
+export class PersonaPage {
+  readonly tribunal = inject(ProcesService);
+  readonly pct = pct;
+  readonly dollars = dollars;
+
+  constructor() {
+    this.tribunal.chargerReferentiels();
+  }
+}

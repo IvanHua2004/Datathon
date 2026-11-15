@@ -15,7 +15,7 @@ des pièces vérifiables.
 ```
 reglement-de-comptes/
 ├── backend/                 API Python (FastAPI) + tribunal
-│   ├── api.py               routes /api/... : profils, actifs, procès
+│   ├── api.py               routes /api/... : profils, actifs, questions, procès
 │   ├── rdc/                 moteur, témoins, greffier, agents, règle du verdict
 │   ├── donnees_externes/    preuves ESG collectées à la main
 │   └── tests/
@@ -23,11 +23,11 @@ reglement-de-comptes/
     ├── nginx.conf           sert l'interface et relaie /api/ (Docker)
     ├── proxy.conf.json      relaie /api/ en développement (ng serve)
     └── src/app/
-        ├── pages/           accueil (menu), tribunal
+        ├── pages/           accueil (menu), persona, greffier (question), tribunal
         ├── services/        api.service (HTTP), proces.service (état du tribunal)
-        ├── components/      plaidoirie, courbe-taille (graphique SVG)
+        ├── components/      entete (logo + étapes), plaidoirie, courbe-taille (graphique SVG)
         ├── models/          types des réponses de l'API
-        └── shared/          mise en forme des chiffres
+        └── shared/          mise en forme des chiffres, autocomplétion de la question
 ```
 
 Angular n'exécute aucun calcul : il appelle l'API, qui appelle le tribunal Python.
@@ -54,15 +54,20 @@ npm start
 
 Dans PowerShell sous Windows, utilisez `npm.cmd ci` et `npm.cmd start`.
 
-Ouvrez `http://localhost:4200` : le menu, puis **Débuter** pour le tribunal
-(`/tribunal`). `ng serve` relaie `/api/` vers le port 8000. La documentation interactive
+Ouvrez `http://localhost:4200`. Le parcours : menu → **Débuter** → choix du persona
+(`/persona`) → question au greffier (`/question?profil=robert`) → tribunal (`/tribunal`).
+Le greffier (`POST /api/questions/analyser`, règles dans `backend/rdc/questions.py`) n'ouvre
+le débat que si la question porte sur un des 31 actifs avec une part de 5 à 50 % ; sinon il
+explique pourquoi (titre absent des données, prédiction de prix, ordre réel, hors sujet,
+plusieurs titres) et propose une question recevable. `ng serve` relaie `/api/` vers le port 8000. La documentation interactive
 de l'API est sur `http://localhost:8000/docs`.
 
 Les données sont lues par défaut dans `../Datathon2026/alphaforge_starter`. Pour un autre
 emplacement : `export RDC_DATA_DIR=/chemin/vers/alphaforge_starter`.
 
-L'application fonctionne tout de suite en mode **« Sans modèle »** : les plaidoiries sont
-alors écrites par des gabarits. C'est le mode pour développer, et le filet de sécurité de la démo.
+Les agents passent par **Amazon Bedrock** (identifiants AWS requis, voir plus bas). Si
+Bedrock ne répond pas, le procès est rejoué avec des gabarits et un avertissement s'affiche.
+Les tests utilisent ces gabarits (`"mode": "gabarit"`) pour tourner hors ligne.
 
 ## Avec Docker
 

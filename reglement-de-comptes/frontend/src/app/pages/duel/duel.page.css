@@ -1,0 +1,173 @@
+:host {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100svh;
+  color: #ffe5bf;
+}
+
+.retour { color: #ffc247; font-weight: 700; text-decoration: none; }
+.retour:hover { text-decoration: underline; }
+
+.scene {
+  padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, rgb(0 0 0 / 20%), rgb(0 0 0 / 67%)),
+    repeating-linear-gradient(90deg, rgb(255 229 191 / 15%) 0 1px, transparent 1px 32px),
+    radial-gradient(ellipse at 50% 30%, #663b57, #281523 78%);
+}
+
+.sur-titre { margin: 0; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+h1 { margin: 0; font-size: clamp(1.8rem, 4vw, 2.6rem); text-align: center; }
+h1 span[aria-hidden] { color: #ffc247; margin: 0 0.4rem; }
+
+.bandeau { margin: 0; width: min(100%, 72rem); padding: 0.75rem 1rem; border-radius: 4px; background: #fff8ec; color: #200e0c; }
+.bandeau--erreur { border-left: 5px solid #b3261e; }
+.bandeau--avertissement { border-left: 5px solid #e0a21b; }
+
+.attente { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 2rem 0; text-align: center; }
+.points { display: inline-flex; gap: 0.4rem; }
+.points i { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: #ffc247; animation: point 1s ease-in-out infinite; }
+.points i:nth-child(2) { animation-delay: 150ms; }
+.points i:nth-child(3) { animation-delay: 300ms; }
+
+.debat {
+  width: min(100%, 72rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.debat h2 { margin: 0; font-size: 1.1rem; letter-spacing: 0.04em; }
+.tour { display: flex; gap: 0.75rem; align-items: flex-start; max-width: 52rem; }
+.tour[data-role='avocat_b'] { align-self: flex-end; flex-direction: row-reverse; }
+.tour[data-role='juge'] { align-self: center; }
+.tour .avatar {
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  background: #773c6f;
+  color: #ffe5bf;
+}
+.tour[data-role='avocat_b'] .avatar { background: #ffe5bf; color: #773c6f; }
+.tour[data-role='juge'] .avatar { background: #ffc247; color: #200e0c; font-size: 1.3rem; }
+.parole {
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
+  background: #fff8ec;
+  color: #200e0c;
+  line-height: 1.5;
+  box-shadow: 0 4px 0 rgb(0 0 0 / 30%);
+  animation: arrivee 300ms ease-out backwards;
+}
+.tour:nth-child(3) .parole { animation-delay: 150ms; }
+.tour:nth-child(4) .parole { animation-delay: 300ms; }
+.parole strong { font-size: 0.85rem; color: #773c6f; }
+.parole p { margin: 0.3rem 0 0; }
+.controle { font-size: 0.75rem; color: #1e6b3c; }
+.controle.alerte { color: #8a1c1c; }
+
+@keyframes arrivee { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .parole { animation: none; } }
+
+.decision {
+  width: min(100%, 72rem);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.1rem 1.25rem;
+  border-radius: 6px;
+  background: #ffc247;
+  color: #200e0c;
+  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+}
+.decision.egalite { background: #fff8ec; }
+.decision h2 { margin: 0 0 0.3rem; font-size: 1.35rem; }
+.decision p { margin: 0; line-height: 1.5; }
+.decision .regle { margin-top: 0.4rem; font-size: 0.8rem; opacity: 0.8; }
+.sceau { font-size: 2rem; line-height: 1; }
+
+.cotes {
+  width: min(100%, 72rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1.25rem;
+}
+
+.cote {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: 6px;
+  background: #fff8ec;
+  color: #200e0c;
+  border: 3px solid transparent;
+  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+}
+.cote.gagnante { border-color: #ffc247; }
+.cote header h3 { margin: 0; font-size: 1.25rem; }
+.cote header p { margin: 0.2rem 0 0; font-size: 0.85rem; color: #5c4a55; }
+
+.ruban {
+  position: absolute;
+  top: -0.8rem;
+  right: 1rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 2px;
+  background: #ffc247;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.verdict { margin: 0; padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 700; }
+[data-ton='contraire'] .verdict { background: rgb(179 38 30 / 12%); color: #8a1c1c; }
+[data-ton='tension'] .verdict { background: rgb(224 162 27 / 18%); color: #7a5208; }
+[data-ton='indecidable'] .verdict { background: rgb(92 74 85 / 12%); color: #4a3a44; }
+[data-ton='compatible'] .verdict { background: rgb(46 139 87 / 15%); color: #1e6b3c; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 0.4rem 0.5rem; border-bottom: 1px solid rgb(119 60 111 / 15%); text-align: left; }
+thead th { font-size: 0.8rem; color: #5c4a55; font-weight: 600; }
+tbody th { font-weight: 400; }
+tr.alerte td strong { color: #8a1c1c; }
+tr.alerte th::after { content: ' ⚠'; color: #b3261e; }
+
+h4 { margin: 0; font-size: 0.9rem; color: #773c6f; }
+.motifs { margin: 0; padding-left: 1.1rem; line-height: 1.45; font-size: 0.9rem; }
+
+details { font-size: 0.9rem; line-height: 1.5; }
+summary { cursor: pointer; font-weight: 700; color: #773c6f; }
+details p { margin: 0.5rem 0 0; }
+
+.secondaire {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 0.6rem 1rem;
+  border: 1px solid #773c6f;
+  border-radius: 2px;
+  color: #773c6f;
+  font-weight: 700;
+  text-decoration: none;
+}
+.secondaire:hover { background: rgb(119 60 111 / 8%); }
+
+a:focus-visible, summary:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@keyframes point {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) { .points i { animation: none; } }

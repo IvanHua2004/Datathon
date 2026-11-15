@@ -15,7 +15,7 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from rdc import donnees, temoins, greffier
+from rdc import donnees, greffier, questions, temoins
 from rdc.profils import PROFILS
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
                         construire_timeline_discussion)
@@ -35,8 +35,34 @@ class DemandeProces(BaseModel):
     profil: str = Field(description="Clé du profil : amira, mateo ou robert")
     ticker: str = Field(description="Titre de l'univers de 31 actifs, par exemple NVDA")
     taille: float = Field(gt=0, le=0.5, description="Part du portefeuille à placer, de 0,05 à 0,5")
-    mode: Literal["gabarit", "bedrock"] = "gabarit"
+    # Bedrock par défaut. « gabarit » (sans modèle) reste disponible pour les tests hors ligne.
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
     intention_texte: str | None = Field(default=None, description="Volonté de l'investisseur exprimée en texte libre")
+
+
+class Question(BaseModel):
+    texte: str = Field(max_length=500, description="La question telle que l'investisseur l'a écrite")
+    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    ticker: str | None = Field(default=None, description="Titre déjà connu d'un échange précédent")
+    taille: float | None = Field(default=None, description="Part déjà connue d'un échange précédent")
+    comparer: list[str] | None = Field(default=None, min_length=2, max_length=2,
+                                       description="Deux titres (ou « MOY:<domaine> ») choisis à l'écran")
+    historique: list[str] = Field(default_factory=list, max_length=20,
+                                  description="Questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
+    action: Literal["catalogue", "choisir_deux"] | None = Field(
+        default=None, description="Bouton de l'écran : voir tous les titres, ou en choisir deux à comparer")
+
+
+class CoteDuel(BaseModel):
+    ticker: str
+    taille: float = Field(gt=0, le=0.5)
+
+
+class DemandeDuel(BaseModel):
+    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    a: CoteDuel
+    b: CoteDuel
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
 
 
 class DemandeIntention(BaseModel):
@@ -62,7 +88,7 @@ class DemandePDF(BaseModel):
     profil: str = Field(description="Clé du profil : amira, mateo ou robert")
     ticker: str = Field(description="Titre évalué")
     taille: float = Field(gt=0, le=0.5, description="Taille de l'allocation")
-    mode: Literal["gabarit", "bedrock"] = "gabarit"
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
     intention_texte: str | None = None
     choix_investisseur: str | None = None
 
@@ -132,6 +158,44 @@ def tailles() -> list[float]:
     return [t for t in TAILLES_COURBE if t > 0]
 
 
+@app.post("/api/questions/analyser")
+def analyser_question(q: Question) -> dict:
+    """Le greffier dit si la question peut être jugée, et sinon pourquoi."""
+    profil = PROFILS.get(q.profil)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {q.profil}")
+    univers = {t: str(n) for t, n in _donnees().univers["name"].items()}
+    if q.action:
+        # Boutons « Voir tous les titres » et « Comparer deux titres » : l'archiviste montre le catalogue.
+        from rdc import archiviste
+        r = archiviste.catalogue(set(profil.portefeuille), set(profil.classes_exclues))
+        if q.action == "catalogue":
+            return questions.Analyse("catalogue", "catalogue", r["message"], agent="archiviste",
+                                     groupes=r["groupes"]).en_json()
+        s = archiviste.selection(r["groupes"], un_par_groupe=False)
+        return questions.Analyse("selection", "selection", "Choisissez deux titres à mettre côte à côte.",
+                                 agent="archiviste", groupes=s["groupes"], selection="deux").en_json()
+    if q.comparer:
+        # Comparaison choisie à l'écran (titres ou moyennes de domaine) : l'archiviste répond directement.
+        from rdc import archiviste
+        a, b = q.comparer
+        try:
+            r = archiviste.comparer(a, b)
+        except KeyError as erreur:
+            raise HTTPException(status_code=404, detail=f"Inconnu : {erreur}") from erreur
+        choix = [questions.Choix(t, univers[t], questions.part_par_defaut(t),
+                                 questions.formuler(t, questions.part_par_defaut(t), univers),
+                                 "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
+        return questions.Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
+                                 fiches=r["fiches"], choix=choix).en_json()
+    ticker = q.ticker if q.ticker in univers else None
+    analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
+                                 resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
+                                 portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
+                                 historique=[h[:500] for h in q.historique])
+    return analyse.en_json()
+
+
 @app.get("/api/actions")
 def liste_actions() -> list[dict]:
     """Retourne la synthèse financière précalculée de chaque action pour les agents et le frontend."""
@@ -174,6 +238,23 @@ def interpreter_demande(demande: DemandeIntention) -> dict:
         "classe": str(d.univers.loc[ticker, "asset_class"]),
         "explication": explication,
     }
+
+
+@app.post("/api/duel")
+def duel(demande: DemandeDuel) -> dict:
+    """Deux procès sur le même profil, puis une décision A contre B selon une règle fixe."""
+    from rdc.duel import juger_duel
+    profil = PROFILS.get(demande.profil)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    d = _donnees()
+    for cote in (demande.a, demande.b):
+        if cote.ticker not in d.univers.index:
+            raise HTTPException(status_code=404, detail=f"{cote.ticker} n'est pas dans l'univers de 31 actifs.")
+    if demande.a.ticker == demande.b.ticker:
+        raise HTTPException(status_code=422, detail="Un duel oppose deux titres différents.")
+    return juger_duel(profil, (demande.a.ticker, demande.a.taille), (demande.b.ticker, demande.b.taille),
+                      demande.mode)
 
 
 @app.post("/api/proces")

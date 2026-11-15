@@ -1,5 +1,5 @@
 <header class="barre">
-  <a class="retour" routerLink="/">← Menu</a>
+  <a class="retour" routerLink="/question" [queryParams]="{ profil: profilCle() }">← Le greffier</a>
   <div class="titres">
     <h1>Règlement de comptes</h1>
     <p>Avant d'investir, faites passer votre idée en procès. Simulation pédagogique sur des profils fictifs : ce n'est pas un conseil financier.</p>
@@ -58,19 +58,10 @@
         }
       </select>
 
-      <fieldset>
-        <legend>Agents</legend>
-        <label class="choix">
-          <input type="radio" name="mode" [checked]="mode() === 'gabarit'" (change)="choisirMode('gabarit')">
-          Sans modèle (gabarits)
-        </label>
-        <label class="choix">
-          <input type="radio" name="mode" [checked]="mode() === 'bedrock'" (change)="choisirMode('bedrock')">
-          Amazon Bedrock (Strands)
-        </label>
-      </fieldset>
+      <p class="note">Agents : Amazon Bedrock (Strands).</p>
 
-      <button type="button" class="ouvrir" (click)="ouvrir()" [disabled]="tribunal.enCours()">
+
+      <button type="button" class="ouvrir" (click)="versGreffier()" [disabled]="tribunal.enCours()">
         {{ tribunal.enCours() ? 'Le tribunal siège…' : 'Ouvrir le procès' }}
       </button>
       <p class="note">{{ sourceTexte() }}</p>
@@ -84,7 +75,7 @@
 
     @if (tribunal.enCours()) {
       <p class="bandeau" role="status">
-        Le tribunal siège… {{ mode() === 'bedrock' ? 'Avec Bedrock, un procès prend environ 30 secondes.' : '' }}
+        Le tribunal siège… Avec Bedrock, un procès prend environ 30 secondes.
       </p>
     }
 
@@ -94,6 +85,7 @@
       }
 
       <h2 class="demande">{{ pr.demande.nom }} demande {{ pct(pr.demande.taille, 0) }} du portefeuille dans {{ pr.demande.ticker }}</h2>
+      @if (question()) { <p class="note">Question au rôle : « {{ question() }} »</p> }
 
       <!-- Déroulement vivant du Tribunal : Débat contradictoire cadencé -->
       @if (pr.discussion && pr.discussion.length > 0) {

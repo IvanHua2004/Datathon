@@ -1,0 +1,245 @@
+<rdc-entete [etape]="2">
+  @if (persona(); as p) {
+    <a class="dossier" routerLink="/personas" aria-label="Changer de persona">
+      <span class="pastille" aria-hidden="true">{{ p.nom[0] }}</span>
+      Dossier {{ p.nom }} <span class="changer">Changer</span>
+    </a>
+  }
+</rdc-entete>
+
+<main class="scene">
+  <p class="titre-audience">Audience préliminaire</p>
+
+  <section #fil class="fil" aria-label="Dialogue avec le greffier" aria-live="polite">
+    @for (m of messages(); track $index) {
+      @if (m.de === 'greffier') {
+        <div class="ligne ligne--greffier">
+          <span class="avatar" aria-hidden="true">G</span>
+          <div class="bulle bulle--greffier" [attr.data-ton]="m.ton">
+            <strong class="auteur">Le greffier</strong>
+            @if (m.ton === 'ok') { <strong class="statut statut--ok">Recevable.</strong> }
+            <p>{{ m.ton === 'ok' ? m.texte.replace('Recevable. ', '') : m.texte }}</p>
+
+            @if (m.analyse; as a) {
+              @if (a.statut === 'recevable') {
+                <div class="actions">
+                  <button type="button" class="principal" (click)="ouvrirDebat(a)">Ouvrir le débat →</button>
+                  <button type="button" class="secondaire" (click)="modifierPart(a)" [disabled]="!estDerniere(m)">
+                    Modifier la part
+                  </button>
+                </div>
+              }
+              @if (a.statut === 'choix' && a.choix.length) {
+                <ul class="choix" [attr.aria-label]="a.motif === 'part_manquante' ? 'Parts possibles' : 'Dossiers possibles'">
+                  @for (c of a.choix; track c.ticker + c.taille) {
+                    <li>
+                      <button type="button" class="dossier-choix" (click)="ouvrirDebat(c)">
+                        <span class="choix-tete">
+                          @if (a.motif === 'part_manquante') {
+                            <strong>{{ pct(c.taille, 0) }}</strong>
+                          } @else {
+                            <strong>{{ c.nomTitre }}</strong>
+                            <span class="choix-symbole">{{ c.ticker }} · {{ pct(c.taille, 0) }}</span>
+                          }
+                        </span>
+                        <span class="choix-raison">{{ c.raison }}</span>
+                        <span class="choix-action" aria-hidden="true">Ouvrir le débat →</span>
+                      </button>
+                    </li>
+                  }
+                  @if (peutDueler(a)) {
+                    <li class="choix-duel">
+                      <button type="button" class="dossier-choix dossier-choix--duel" (click)="ouvrirDuel(a)">
+                        <span class="choix-tete">
+                          <strong><span aria-hidden="true">⚔</span> Débat entre les deux</strong>
+                          <span class="choix-symbole">{{ a.choix[0].ticker }} contre {{ a.choix[1].ticker }} · {{ pct(partDuel(a), 0) }} chacun</span>
+                        </span>
+                        <span class="choix-raison">Deux avocats s'affrontent, le juge dit lequel convient le mieux à votre profil</span>
+                        <span class="choix-action" aria-hidden="true">Ouvrir le débat →</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+              @if (a.statut === 'refus' && a.reformulations.length) {
+                <div class="reformulations">
+                  <span>{{ a.reformulations.length > 1 ? 'Questions que le tribunal peut juger :' : 'Le tribunal peut juger :' }}</span>
+                  @for (r of a.reformulations; track r) {
+                    <button type="button" class="lien" (click)="reformuler(r)">« {{ r }} »</button>
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      } @else if (m.de === 'archiviste') {
+        <div class="ligne ligne--greffier">
+          <span class="avatar avatar--archiviste" aria-hidden="true">A</span>
+          <div class="bulle bulle--greffier bulle--archiviste">
+            <strong class="auteur">L'archiviste · les données, rien que les données</strong>
+            <p>{{ m.texte }}</p>
+            @if (m.analyse; as a) {
+              @switch (a.statut) {
+                @case ('fiche') {
+                  @for (f of a.fiches; track f.ticker) {
+                    <article class="fiche" [attr.aria-label]="'Fiche ' + f.nomTitre">
+                      <header class="fiche-tete">
+                        <strong>{{ f.nomTitre }}</strong>
+                        <span>{{ f.ticker }} · {{ f.classe }} · {{ f.secteur }} · {{ f.marche }}</span>
+                      </header>
+                      <dl class="fiche-faits">
+                        @for (x of f.faits; track x.libelle) {
+                          <div>
+                            <dt>{{ x.libelle }}</dt>
+                            <dd>{{ x.valeur }}</dd>
+                            @if (x.aide) { <dd class="aide-fait">{{ x.aide }}</dd> }
+                          </div>
+                        }
+                      </dl>
+                      <p class="fiche-limites">{{ f.limites }} Source : {{ f.source }}.</p>
+                    </article>
+                  }
+                }
+                @case ('comparaison') {
+                  <div class="tableau-defile">
+                    <table class="comparaison">
+                      <caption class="visually-hidden">Les mêmes chiffres pour les deux titres</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col"><span class="visually-hidden">Chiffre</span></th>
+                          @for (f of a.fiches; track f.ticker) {
+                            <th scope="col">{{ f.nomTitre }}<span>{{ f.ticker.startsWith('MOY:') ? f.classe + ' : ' + f.secteur : f.ticker + ' · ' + f.classe }}</span></th>
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (x of a.fiches[0].faits; track x.libelle; let i = $index) {
+                          <tr>
+                            <th scope="row">{{ x.libelle }}</th>
+                            @for (f of a.fiches; track f.ticker) {
+                              <td>
+                                <strong>{{ f.faits[i].valeur }}</strong>
+                                @if (f.faits[i].aide) { <span>{{ f.faits[i].aide }}</span> }
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="fiche-limites">{{ a.fiches[0].limites }} Source : {{ a.fiches[0].source }}.</p>
+                }
+                @case ('catalogue') {
+                  @for (g of a.groupes; track g.nom) {
+                    <section class="groupe">
+                      <h3>{{ g.nom }} <span>{{ g.titres.length }}</span></h3>
+                      <ul class="pastilles">
+                        @for (t of g.titres; track t.ticker) {
+                          <li>
+                            <button type="button" class="pastille-titre" (click)="voirFiche(t.ticker)"
+                                    [title]="t.secteur">
+                              <strong>{{ t.nomTitre }}</strong>
+                              <span>{{ t.ticker }}</span>
+                              @if (t.dansPortefeuille) { <em class="marque marque--portefeuille">dans votre portefeuille</em> }
+                              @if (t.exclu) { <em class="marque marque--exclu">exclu par votre profil</em> }
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    </section>
+                  }
+                }
+                @case ('selection') {
+                  @for (g of a.groupes; track g.nom; let gi = $index) {
+                    <section class="groupe">
+                      <h3>{{ g.nom }}</h3>
+                      <ul class="pastilles" role="group" [attr.aria-label]="g.nom">
+                        @for (t of g.titres; track t.ticker) {
+                          <li>
+                            <button type="button" class="pastille-titre" [class.choisie]="estChoisi(m, t.ticker, gi)"
+                                    [attr.aria-pressed]="estChoisi(m, t.ticker, gi)"
+                                    [disabled]="!estDerniere(m)" (click)="basculer(m, t.ticker, gi)">
+                              <strong>{{ t.nomTitre }}</strong>
+                              <span>{{ t.ticker.startsWith('MOY:') ? t.secteur : t.ticker }}</span>
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    </section>
+                  }
+                  @if (estDerniere(m)) {
+                    <div class="actions">
+                      <button type="button" class="principal" [disabled]="!peutComparer(m)" (click)="comparerSelection(m)">
+                        Comparer ces deux titres
+                      </button>
+                    </div>
+                  }
+                }
+              }
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="ligne ligne--moi">
+          <div class="bulle bulle--moi">{{ m.texte }}</div>
+        </div>
+      }
+    }
+
+    @if (enCours()) {
+      <div class="ligne ligne--greffier" role="status">
+        <span class="avatar" aria-hidden="true">G</span>
+        <div class="bulle bulle--greffier bulle--attente">
+          <span class="visually-hidden">Le greffier examine votre question</span>
+          <span class="points" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+      </div>
+    }
+  </section>
+
+  <form class="compositeur" (submit)="$event.preventDefault(); envoyer()">
+    @if (listeVisible()) {
+      <ul id="suggestions" class="suggestions" role="listbox" aria-label="Compléter la phrase">
+        @for (s of suggestions(); track s; let i = $index) {
+          <li [id]="'suggestion-' + i" role="option" [attr.aria-selected]="i === active()"
+              [class.active]="i === active()"
+              (mousedown)="$event.preventDefault(); accepter(s)">
+            @let parts = morceaux(s);
+            <span>{{ parts.tape }}</span><strong>{{ parts.suite }}</strong>
+          </li>
+        }
+        <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
+      </ul>
+    }
+    <div class="outils" role="group" aria-label="Raccourcis">
+      <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
+        <span aria-hidden="true">☰</span> Voir tous les titres
+      </button>
+      <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
+        <span aria-hidden="true">⇄</span> Comparer deux titres
+      </button>
+    </div>
+    <div class="barre">
+      <label for="champ" class="visually-hidden">Votre question</label>
+      <input
+        #champ
+        id="champ"
+        type="text"
+        autocomplete="off"
+        maxlength="500"
+        placeholder="Posez votre question…"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="suggestions"
+        [attr.aria-expanded]="listeVisible()"
+        [attr.aria-activedescendant]="active() >= 0 ? 'suggestion-' + active() : null"
+        [value]="saisie()"
+        (input)="taper($event)"
+        (keydown)="clavier($event)"
+        (focus)="ouverte.set(true)"
+        (blur)="ouverte.set(false)"
+      >
+      <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
+    </div>
+  </form>
+</main>
