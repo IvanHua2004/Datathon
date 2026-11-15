@@ -1,0 +1,104 @@
+{
+  "ticker": "CNR.TO",
+  "nom": "Canadian National Railway",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Industrials",
+  "prix": {
+    "dernier_prix_cad": 181.9,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 123.28,
+    "prix_max_5ans_cad": 182.93
+  },
+  "rendements": {
+    "cumule_5ans": 0.2423,
+    "cagr_annualise": 0.0428,
+    "rendement_1an": 0.4251,
+    "rendement_3ans": 0.1864,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1948,
+    "volatilite_baisse_semi_deviation": 0.1395,
+    "pire_baisse_globale": -0.27247527672555716,
+    "pire_baisse_2022": -0.180992324925212,
+    "creux_date": "2025-08-07",
+    "sommet_date": "2024-03-21",
+    "annees_sous_le_sommet": 2.26,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0197,
+    "cvar_95_expected_shortfall": 0.0288,
+    "var_95_cornish_fisher": 0.0202,
+    "var_99_quotidienne": 0.0357,
+    "cvar_99_expected_shortfall": 0.0438,
+    "var_95_1mois_estimee": 0.0903
+  },
+  "distribution": {
+    "skewness": -0.255,
+    "excess_kurtosis": 2.443,
+    "statistique_jb": 338.39,
+    "p_valeur_jb": 3.3026576594595758e-74,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.0428,
+    "volatilite_annuelle": 0.1948,
+    "volatilite_baisse_sortino": 0.1395,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.04,
+    "ratio_sortino": 0.06,
+    "ratio_calmar": 0.16
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.51,
+    "alpha_annuel_vs_spy": -0.0452,
+    "correlation_vs_spy": 0.43,
+    "beta_xiu_canada": 0.84,
+    "alpha_annuel_vs_xiu.to": -0.0735,
+    "correlation_vs_xiu.to": 0.55,
+    "correlation_variation_usdcad": -0.14,
+    "correlation_taux_10y_canada": -0.1,
+    "correlation_taux_10y_us": -0.06,
+    "correlation_taux_directeur_boc": 0.05
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.0297,
+      "pire_baisse_pendant_regime": -0.181
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0498,
+      "pire_baisse_pendant_regime": -0.0537
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": -0.0797,
+      "pire_baisse_pendant_regime": -0.1545
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 4.521,
+    "rendement_dividende_pct": 0.0249,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-09-08",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Industrials",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Canadian National Railway (CNR.TO) est un actif de type equity (Industrials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 4.3% pour une volatilité de 19.5% (ratio de Sharpe de 0.04). Sa VaR quotidienne à 95% est de 2.0%. Son profil se caractérise par : Action Individuelle, Industrials, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+}

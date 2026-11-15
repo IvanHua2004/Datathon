@@ -21,6 +21,7 @@ export class TribunalPage {
   readonly ticker = signal('');
   readonly taille = signal(0.2);
   readonly mode = signal<Mode>('gabarit');
+  readonly intentionTexte = signal('');
 
   readonly pct = pct;
   readonly dollars = dollars;
@@ -86,7 +87,34 @@ export class TribunalPage {
       ticker: this.ticker(),
       taille: this.taille(),
       mode: this.mode(),
+      intention_texte: this.intentionTexte() || undefined,
     });
+  }
+
+  mettreAJourIntention(event: Event): void {
+    this.intentionTexte.set((event.target as HTMLInputElement).value);
+  }
+
+  choisirArbitrage(choix: 'OUI' | 'NON'): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.choisirArbitrage(choix, this.profilCle(), this.ticker(), this.taille());
+  }
+
+  demanderScenarios(): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.genererScenarios(this.profilCle(), this.ticker(), this.taille(), this.intentionTexte());
+  }
+
+  telechargerPdf(choix?: string): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.telechargerPdf(
+      this.profilCle(),
+      this.ticker(),
+      this.taille(),
+      this.mode(),
+      this.intentionTexte(),
+      choix
+    );
   }
 
   valeur(event: Event): string {

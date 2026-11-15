@@ -1,0 +1,110 @@
+{
+  "ticker": "SHOP.TO",
+  "nom": "Shopify",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Information Technology",
+  "prix": {
+    "dernier_prix_cad": 209.41,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 35.37,
+    "prix_max_5ans_cad": 252.53
+  },
+  "rendements": {
+    "cumule_5ans": -0.0004,
+    "cagr_annualise": -0.0001,
+    "rendement_1an": -0.0567,
+    "rendement_3ans": 1.0777,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.6319,
+    "volatilite_baisse_semi_deviation": 0.4231,
+    "pire_baisse_globale": -0.8347057237222226,
+    "pire_baisse_2022": -0.796921393695041,
+    "creux_date": "2022-10-11",
+    "sommet_date": "2021-11-19",
+    "annees_sous_le_sommet": 3.84,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0589,
+    "cvar_95_expected_shortfall": 0.0874,
+    "var_95_cornish_fisher": 0.0548,
+    "var_99_quotidienne": 0.1084,
+    "cvar_99_expected_shortfall": 0.1415,
+    "var_95_1mois_estimee": 0.2697
+  },
+  "distribution": {
+    "skewness": 0.47,
+    "excess_kurtosis": 5.425,
+    "statistique_jb": 1646.83,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": -0.0001,
+    "volatilite_annuelle": 0.6319,
+    "volatilite_baisse_sortino": 0.4231,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": -0.06,
+    "ratio_sortino": -0.08,
+    "ratio_calmar": -0.0
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 2.09,
+    "alpha_annuel_vs_spy": -0.2539,
+    "correlation_vs_spy": 0.54,
+    "beta_xiu_canada": 2.69,
+    "alpha_annuel_vs_xiu.to": -0.2947,
+    "correlation_vs_xiu.to": 0.54,
+    "correlation_variation_usdcad": -0.12,
+    "correlation_taux_10y_canada": -0.12,
+    "correlation_taux_10y_us": -0.07,
+    "correlation_taux_directeur_boc": 0.04
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.792,
+      "pire_baisse_pendant_regime": -0.7969
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.1399,
+      "pire_baisse_pendant_regime": -0.069
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.0688,
+      "pire_baisse_pendant_regime": -0.3894
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 0.0,
+    "rendement_dividende_pct": 0.0,
+    "nb_paiements_total_5ans": 0,
+    "frequence_dividende": "Aucun",
+    "derniere_date_ex": null,
+    "splits": [
+      {
+        "date": "2022-06-29",
+        "ratio": 10.0
+      }
+    ],
+    "nb_splits": 1
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Information Technology",
+    "Volatilité Extrême",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement",
+    "Haut Bêta (>1.3)"
+  ],
+  "synthese_agent_llm": "Shopify (SHOP.TO) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de -0.0% pour une volatilité de 63.2% (ratio de Sharpe de -0.06). Sa VaR quotidienne à 95% est de 5.9%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Extrême, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement, Haut Bêta (>1.3)."
+}

@@ -1,0 +1,105 @@
+{
+  "ticker": "AGG",
+  "nom": "iShares Core U.S. Aggregate Bond ETF",
+  "classe_actif": "etf_bond",
+  "marche": "NYSE Arca",
+  "devise_origine": "USD",
+  "secteur": "Bonds (U.S. aggregate)",
+  "prix": {
+    "dernier_prix_cad": 135.74,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 109.49,
+    "prix_max_5ans_cad": 138.75
+  },
+  "rendements": {
+    "cumule_5ans": 0.1169,
+    "cagr_annualise": 0.0216,
+    "rendement_1an": -0.0059,
+    "rendement_3ans": 0.1484,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.0725,
+    "volatilite_baisse_semi_deviation": 0.05,
+    "pire_baisse_globale": -0.12751006047894575,
+    "pire_baisse_2022": -0.1032875021233075,
+    "creux_date": "2022-06-13",
+    "sommet_date": "2021-12-20",
+    "annees_sous_le_sommet": 2.61,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0074,
+    "cvar_95_expected_shortfall": 0.0098,
+    "var_95_cornish_fisher": 0.0073,
+    "var_99_quotidienne": 0.0113,
+    "cvar_99_expected_shortfall": 0.0138,
+    "var_95_1mois_estimee": 0.0338
+  },
+  "distribution": {
+    "skewness": 0.034,
+    "excess_kurtosis": 0.965,
+    "statistique_jb": 50.88,
+    "p_valeur_jb": 8.95859441248969e-12,
+    "est_normale": false,
+    "diagnostic": "Distribution proche d'une loi normale"
+  },
+  "ratios_performance": {
+    "cagr": 0.0216,
+    "volatilite_annuelle": 0.0725,
+    "volatilite_baisse_sortino": 0.05,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": -0.18,
+    "ratio_sortino": -0.27,
+    "ratio_calmar": 0.17
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.07,
+    "alpha_annuel_vs_spy": -0.021,
+    "correlation_vs_spy": 0.16,
+    "beta_xiu_canada": -0.03,
+    "alpha_annuel_vs_xiu.to": -0.0102,
+    "correlation_vs_xiu.to": -0.06,
+    "correlation_variation_usdcad": 0.58,
+    "correlation_taux_10y_canada": -0.67,
+    "correlation_taux_10y_us": -0.68,
+    "correlation_taux_directeur_boc": -0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.0786,
+      "pire_baisse_pendant_regime": -0.1033
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.017,
+      "pire_baisse_pendant_regime": -0.0363
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.0694,
+      "pire_baisse_pendant_regime": -0.0273
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 4.308,
+    "rendement_dividende_pct": 0.0317,
+    "nb_paiements_total_5ans": 60,
+    "frequence_dividende": "Mensuel",
+    "derniere_date_ex": "2026-11-02",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Bonds (U.S. aggregate)",
+    "Défensif / Faible Volatilité",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)",
+    "Vulnérable aux Taux d'Intérêt"
+  ],
+  "synthese_agent_llm": "iShares Core U.S. Aggregate Bond ETF (AGG) est un actif de type etf_bond (Bonds (U.S. aggregate)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 2.2% pour une volatilité de 7.2% (ratio de Sharpe de -0.18). Sa VaR quotidienne à 95% est de 0.7%. Son profil se caractérise par : FNB Indiciel, Bonds (U.S. aggregate), Défensif / Faible Volatilité, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+}
