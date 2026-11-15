@@ -169,3 +169,32 @@ def test_memoire_de_la_conversation():
     # Une nouvelle question complète ignore l'historique.
     e = _q("Devrais-je placer 20 % dans TSLA ?", historique=["10 % dans Apple ?"])
     assert (e["ticker"], e["taille"]) == ("TSLA", 0.2) and not e["message"].startswith("D'après")
+
+
+def test_conversation_naturelle():
+    assert _q("bonjour")["statut"] == "social"
+    assert _q("recommence")["motif"] == "recommencer"
+    d = _q("c'est quoi la volatilité ?")
+    assert (d["agent"], d["statut"], d["definition"]["terme"]) == ("archiviste", "definition", "volatilité")
+    b = _q("c'est quoi mon budget de perte ?")
+    assert (b["statut"], b["agent"]) == ("profil", "archiviste") and "12 %" in b["message"]
+    p = _q("qu'est-ce que j'ai dans mon portefeuille ?")
+    assert p["statut"] == "profil" and {x["ticker"] for x in p["profil"]["portefeuille"]} >= {"XBB.TO", "SPY"}
+    assert _q("J'aime l'IA")["theme"] == "l'intelligence artificielle"
+    f = _q("10 % dans nvidai")
+    assert (f["statut"], f["ticker"]) == ("recevable", "NVDA") and "nvidai" in f["message"]
+    assert _q("stats de shopfy")["fiches"][0]["ticker"] == "SHOP.TO"
+    assert _q("Je veux placer 10 % de mon portefeuille")["motif"] == "titre_manquant"
+
+
+def test_filet_bedrock_reecrit_la_question(monkeypatch):
+    """Sans appeler AWS : on simule la réponse du modèle et on vérifie le chemin complet."""
+    from rdc import conversation
+    monkeypatch.setattr(conversation, "classer_avec_modele",
+                        lambda *a, **k: {"intention": "decision", "tickers": ["NVDA"], "part": 0.15, "terme": None})
+    a = _q("je suis fan des cartes graphiques, j'en mets un peu ?")
+    assert (a["statut"], a["ticker"], a["taille"]) == ("recevable", "NVDA", 0.15)
+    assert a["message"].startswith("J'ai compris : « Devrais-je placer 15 % dans NVDA ? »")
+    monkeypatch.setattr(conversation, "classer_avec_modele",
+                        lambda *a, **k: {"intention": "hors_sujet", "tickers": [], "part": None, "terme": None})
+    assert _q("raconte une blague")["motif"] == "hors_sujet"

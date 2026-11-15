@@ -6,6 +6,7 @@ import { Mode, TourDiscussion } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
+import { laisserUnRetour } from '../../shared/memoire';
 
 /** Le tribunal : choix du dossier, procès, verdict, salle et pièces du greffier. */
 @Component({
@@ -65,6 +66,14 @@ export class TribunalPage {
   constructor() {
     const persona = inject(ActivatedRoute).snapshot.queryParamMap.get('persona');
     this.tribunal.chargerReferentiels();
+    // Résumé du verdict pour le greffier, affiché quand on revient à la conversation.
+    effect(() => {
+      const pr = this.tribunal.resultat();
+      if (!pr) return;
+      laisserUnRetour(pr.demande.profil,
+        `Retour d'audience : le tribunal a jugé ${pct(pr.demande.taille, 0)} dans ${pr.demande.nomTitre} `
+        + `(${pr.demande.ticker}) : « ${pr.decision.verdict} ».`);
+    });
     effect(() => {
       const profils = this.tribunal.profils();
       if (!profils.length || this.profilCle()) return;

@@ -2,7 +2,7 @@
 
 export type StatutQuestion =
   | 'recevable' | 'choix' | 'incomplet' | 'refus'
-  | 'fiche' | 'comparaison' | 'catalogue' | 'selection';
+  | 'fiche' | 'comparaison' | 'catalogue' | 'selection' | 'profil' | 'definition' | 'social';
 
 /** Un dossier que le greffier propose quand la question est vague ou porte sur plusieurs titres. */
 export interface ChoixDossier {
@@ -31,6 +31,27 @@ export interface AnalyseQuestion {
   groupes: GroupeTitres[];
   /** « deux » : choisir deux titres; « un_par_groupe » : un titre dans chaque domaine. */
   selection: 'deux' | 'un_par_groupe' | null;
+  /** Dossier de l'investisseur (statut « profil »). */
+  profil: DossierInvestisseur | null;
+  /** Terme du glossaire (statut « definition »). */
+  definition: { terme: string; texte: string; exemple: string | null } | null;
+}
+
+export interface DossierInvestisseur {
+  cle: string;
+  nom: string;
+  resume: string;
+  objectif: string;
+  preferences: string;
+  capital: number;
+  horizonAns: number;
+  budgetPerte: number;
+  plafondPosition: number;
+  plafondSecteur: number;
+  classesExclues: string[];
+  filtreEsg: boolean;
+  secteursAJustifier: string[];
+  portefeuille: { ticker: string; nomTitre: string; classe: string; poids: number }[];
 }
 
 export interface TitreCatalogue {

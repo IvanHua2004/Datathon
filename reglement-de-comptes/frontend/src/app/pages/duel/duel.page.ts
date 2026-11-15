@@ -6,6 +6,7 @@ import { EnteteComponent } from '../../components/entete/entete.component';
 import { Duel } from '../../models/duel.model';
 import { ApiService } from '../../services/api.service';
 import { pct, tonVerdict } from '../../shared/format';
+import { laisserUnRetour } from '../../shared/memoire';
 
 /** Lit « NVDA:0.1 » dans l'URL. */
 function lireCote(texte: string): { ticker: string; taille: number } | null {
@@ -58,6 +59,8 @@ export class DuelPage {
     this.api.duel(this.profil(), a, b).subscribe({
       next: (d) => {
         this.duel.set(d);
+        laisserUnRetour(d.profil, `Retour du débat ${d.cotes[0].ticker} contre ${d.cotes[1].ticker} : `
+          + `${d.decision.titre}.`);
         this.enCours.set(false);
       },
       error: (e: unknown) => {

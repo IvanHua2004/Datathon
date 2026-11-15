@@ -9,15 +9,25 @@ import { AnalyseQuestion, ChoixDossier } from '../../models/question.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { Attente, completer } from '../../shared/autocompletion';
-import { pct } from '../../shared/format';
+import { dollars, pct } from '../../shared/format';
+import { cleConversation, cleRetour, ecrire, effacer, lire } from '../../shared/memoire';
 
 interface Message {
   de: 'greffier' | 'archiviste' | 'moi';
   texte: string;
-  ton?: 'ok' | 'refus' | 'question' | 'erreur';
+  ton?: 'ok' | 'refus' | 'question' | 'erreur' | 'info';
   analyse?: AnalyseQuestion;
   /** Titres cochés quand l'archiviste fait choisir deux titres à comparer. */
   choisis?: WritableSignal<string[]>;
+}
+
+/** Forme sauvegardée d'un message (les signaux ne se sérialisent pas). */
+type MessageSauve = Omit<Message, 'choisis'> & { choisis?: string[] };
+
+interface Sauvegarde {
+  messages: MessageSauve[];
+  debutContexte: number;
+  enAttente: { ticker: string | null; taille: number | null; attente: Attente };
 }
 
 /** Étape 2 : l'investisseur pose sa question au greffier, qui dit si le tribunal peut la juger. */
@@ -32,6 +42,7 @@ export class GreffierPage {
   private readonly router = inject(Router);
   readonly tribunal = inject(ProcesService);
   readonly pct = pct;
+  readonly dollars = dollars;
 
   /** Lu dans l'URL : /question?profil=robert */
   readonly profil = input<string>('');
@@ -44,6 +55,29 @@ export class GreffierPage {
   private readonly enAttente = signal<{ ticker: string | null; taille: number | null; attente: Attente }>(
     { ticker: null, taille: null, attente: null },
   );
+
+  /** Les questions avant cet indice sont oubliées (bouton ✕ du contexte, « recommence »). */
+  private readonly debutContexte = signal(0);
+
+  /** Ce que le greffier a retenu : le titre (et la part) le plus récent de la conversation. */
+  readonly contexte = computed(() => {
+    const attente = this.enAttente();
+    const moi = this.messages().filter((m) => m.de === 'moi').length;
+    if (moi <= this.debutContexte()) return null;
+    for (const m of [...this.messages()].reverse()) {
+      const a = m.analyse;
+      if (m.de === 'moi' || !a) continue;
+      if (a.ticker && a.nomTitre) {
+        return { titre: `${a.nomTitre} (${a.ticker})`, taille: a.taille ?? attente.taille };
+      }
+      if (a.fiches?.length === 2) {
+        return { titre: `${a.fiches[0].ticker} et ${a.fiches[1].ticker}`, taille: null };
+      }
+    }
+    return null;
+  });
+
+  private restaure = false;
 
   private readonly fil = viewChild<ElementRef<HTMLElement>>('fil');
   private readonly champ = viewChild<ElementRef<HTMLInputElement>>('champ');
@@ -79,19 +113,74 @@ export class GreffierPage {
       }
     });
 
-    // Le greffier ouvre l'audience dès que le persona est connu.
+    // Le greffier ouvre l'audience dès que le persona est connu, ou reprend la conversation.
     effect(() => {
       const p = this.persona();
-      if (p && this.messages().length === 0) {
-        this.messages.set([{
-          de: 'greffier',
-          ton: 'question',
-          texte: `Bonjour ${p.nom}. Quelle décision voulez-vous soumettre au tribunal ? `
-            + 'Nommez un titre et la part de votre portefeuille.',
-        }]);
-        setTimeout(() => this.champ()?.nativeElement.focus());
+      if (!p || this.restaure) return;
+      this.restaure = true;
+      const sauve = lire<Sauvegarde>(cleConversation(p.cle));
+      if (sauve?.messages?.length) {
+        this.messages.set(sauve.messages.map((m) => ({
+          ...m,
+          choisis: m.choisis ? signal(m.choisis) : undefined,
+        })));
+        this.debutContexte.set(sauve.debutContexte ?? 0);
+        this.enAttente.set(sauve.enAttente ?? { ticker: null, taille: null, attente: null });
+      } else {
+        this.accueillir(p.nom);
       }
+      // Retour du tribunal ou du duel : le greffier résume ce qui a été jugé.
+      const retour = lire<{ texte: string }>(cleRetour(p.cle));
+      if (retour?.texte) {
+        effacer(cleRetour(p.cle));
+        this.ajouter({ de: 'greffier', ton: 'info', texte: retour.texte });
+        this.ajouter({ de: 'greffier', ton: 'question', texte: 'Une autre décision à soumettre au tribunal ?' });
+      }
+      setTimeout(() => {
+        this.champ()?.nativeElement.focus();
+        const fil = this.fil()?.nativeElement;
+        fil?.scrollTo({ top: fil.scrollHeight });
+      });
     });
+
+    // Sauvegarde à chaque changement, pour survivre à un aller-retour vers le tribunal.
+    effect(() => {
+      const p = this.persona();
+      const messages = this.messages();
+      if (!p || !this.restaure) return;
+      ecrire(cleConversation(p.cle), {
+        messages: messages.map((m) => ({ ...m, choisis: m.choisis?.() })),
+        debutContexte: this.debutContexte(),
+        enAttente: this.enAttente(),
+      } satisfies Sauvegarde);
+    });
+  }
+
+  private accueillir(nom: string): void {
+    this.messages.set([{
+      de: 'greffier',
+      ton: 'question',
+      texte: `Bonjour ${nom}. Quelle décision voulez-vous soumettre au tribunal ? `
+        + 'Nommez un titre et la part de votre portefeuille.',
+    }]);
+  }
+
+  /** ✕ sur l'étiquette « Contexte » : les questions précédentes ne comptent plus. */
+  effacerContexte(): void {
+    this.debutContexte.set(this.messages().filter((m) => m.de === 'moi').length);
+    this.enAttente.set({ ticker: null, taille: null, attente: null });
+    this.champ()?.nativeElement.focus();
+  }
+
+  nouvelleConversation(): void {
+    const p = this.persona();
+    if (!p) return;
+    effacer(cleConversation(p.cle));
+    this.debutContexte.set(0);
+    this.enAttente.set({ ticker: null, taille: null, attente: null });
+    this.saisie.set('');
+    this.accueillir(p.nom);
+    this.champ()?.nativeElement.focus();
   }
 
   // ----- Saisie et suggestions -----
@@ -162,7 +251,8 @@ export class GreffierPage {
     const p = this.persona();
     if (!p || this.enCours() || !texte.trim()) return;
     // Les questions précédentes partent avec la nouvelle : le greffier relit la conversation.
-    const historique = this.messages().filter((m) => m.de === 'moi').map((m) => m.texte).slice(-10);
+    const historique = this.messages().filter((m) => m.de === 'moi').map((m) => m.texte)
+      .slice(this.debutContexte()).slice(-10);
     this.ajouter({ de: 'moi', texte: texte.trim() });
     this.saisie.set('');
     const champ = this.champ()?.nativeElement;
@@ -174,6 +264,12 @@ export class GreffierPage {
     this.api.analyserQuestion({ texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille, comparer, action, historique }).subscribe({
       next: (a) => {
         this.enCours.set(false);
+        if (a.statut === 'social' && a.motif === 'recommencer') {
+          this.ajouter({ de: 'greffier', ton: 'question', texte: a.message });
+          this.effacerContexte();
+          this.ouverte.set(false);
+          return;
+        }
         if (a.agent === 'archiviste') {
           this.repondreArchiviste(a);
           this.ouverte.set(false);

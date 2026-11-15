@@ -415,3 +415,45 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 .choix-duel { grid-column: 1 / -1; }
 .dossier-choix--duel { border: 2px solid #ffc247; background: rgb(255 194 71 / 18%); }
 .dossier-choix--duel:hover { background: rgb(255 194 71 / 35%); }
+
+.bulle--greffier[data-ton='info'] { border-left-color: #773c6f; background: #f6ecf3; }
+
+.contexte {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.85rem;
+  border-radius: 999px;
+  background: rgb(255 194 71 / 18%);
+  border: 1px solid rgb(255 194 71 / 60%);
+  font-size: 0.85rem;
+}
+.effacer {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #ffe5bf;
+}
+.effacer:hover { background: rgb(255 229 191 / 15%); }
+.outil--discret { margin-left: auto; border-style: dashed; }
+
+.terme { margin: 0; font-size: 0.85rem; color: #5c4a55; }
+.exemple { margin: 0; padding: 0.5rem 0.75rem; border-left: 3px solid #ffc247; background: #fff; font-size: 0.9rem; }
+
+.dossier-investisseur .preferences { margin: 0.7rem 0 0; font-size: 0.85rem; line-height: 1.45; }
+.titre-portefeuille { margin: 0.8rem 0 0.4rem; font-size: 0.85rem; color: #773c6f; }
+.barre-portefeuille { display: flex; height: 0.8rem; gap: 2px; border-radius: 3px; overflow: hidden; }
+.barre-portefeuille span { flex-grow: 0; flex-shrink: 0; }
+.barre-portefeuille span[data-i='0'], .pastille-couleur[data-i='0'] { background: #773c6f; }
+.barre-portefeuille span[data-i='1'], .pastille-couleur[data-i='1'] { background: #b5739f; }
+.barre-portefeuille span[data-i='2'], .pastille-couleur[data-i='2'] { background: #e0a21b; }
+.barre-portefeuille span[data-i='3'], .pastille-couleur[data-i='3'] { background: #2e8b57; }
+.barre-portefeuille span[data-i='4'], .pastille-couleur[data-i='4'] { background: #4a6fa5; }
+.barre-portefeuille span[data-i='5'], .pastille-couleur[data-i='5'] { background: #8a7a84; }
+.lignes-portefeuille { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.2rem; font-size: 0.85rem; }
+.lignes-portefeuille li { display: flex; align-items: center; gap: 0.5rem; }
+.lignes-portefeuille strong { margin-left: auto; font-variant-numeric: tabular-nums; }
+.pastille-couleur { width: 0.7rem; height: 0.7rem; border-radius: 2px; flex: none; }

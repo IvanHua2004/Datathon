@@ -125,6 +125,21 @@ def sante() -> dict:
     return {"source": _source(), "periode": {"debut": d.debut, "fin": d.fin}}
 
 
+def _dossier_investisseur(p, univers) -> dict:
+    """Le dossier complet d'un persona, pour l'archiviste (« qu'est-ce que j'ai dans mon portefeuille ? »)."""
+    total = sum(p.portefeuille.values())
+    return {
+        "cle": p.cle, "nom": p.nom, "resume": p.resume, "objectif": p.objectif,
+        "preferences": p.preferences, "capital": p.capital, "horizonAns": p.horizon_ans,
+        "budgetPerte": p.budget_perte, "plafondPosition": p.plafond_position,
+        "plafondSecteur": p.plafond_secteur, "classesExclues": list(p.classes_exclues),
+        "filtreEsg": p.filtre_esg, "secteursAJustifier": list(p.secteurs_a_justifier),
+        "portefeuille": [{"ticker": t, "nomTitre": str(univers.loc[t, "name"]) if t in univers.index else t,
+                          "classe": str(univers.loc[t, "asset_class"]) if t in univers.index else "",
+                          "poids": v / total} for t, v in p.portefeuille.items()],
+    }
+
+
 @app.get("/api/profils")
 def profils() -> list[dict]:
     resultat = []
@@ -192,7 +207,8 @@ def analyser_question(q: Question) -> dict:
     analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
                                  resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
-                                 historique=[h[:500] for h in q.historique])
+                                 historique=[h[:500] for h in q.historique],
+                                 profil_info=_dossier_investisseur(profil, _donnees().univers))
     return analyse.en_json()
 
 
