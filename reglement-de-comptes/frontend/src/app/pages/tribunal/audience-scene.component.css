@@ -13,57 +13,125 @@
   background: url('/assets/courtroom.png') center / cover;
 }
 
-/* Bouton « Terminer » : une plaque de greffe posée sur la scène, qui appelle l'œil quand l'audience est finie. */
-.bouton-terminer {
+.annonce-scene {
   position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgb(32 13 25 / 48%);
+  animation: voile-annonce var(--duree-annonce) ease both;
+}
+
+.cartouche-annonce {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  padding: 0.45rem clamp(0.8rem, 3vw, 2.4rem);
+  border-block: 2px solid #ffb1a3;
+  background: #a8172d;
+  color: #fff4e6;
+  box-shadow: 0.4rem 0.45rem 0 #350c1d;
+  text-align: center;
+  animation: impact-annonce var(--duree-annonce) both;
+}
+
+.cartouche-annonce strong {
+  font: 900 clamp(1rem, 4vw, 3.1rem) / 1.08 Aptos, sans-serif;
+  text-transform: uppercase;
+}
+
+.cartouche-annonce span { font-size: clamp(0.7rem, 1.6vw, 1rem); }
+
+@keyframes voile-annonce {
+  0%, 100% { opacity: 0; }
+  10%, 75% { opacity: 1; }
+}
+
+@keyframes impact-annonce {
+  0% { transform: translateX(-105%) rotate(-12deg); }
+  13% { transform: translateX(4%) rotate(-4deg) scale(1.06); }
+  23%, 78% { transform: translateX(0) rotate(-4deg); }
+  100% { transform: translateX(10%) rotate(-4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartouche-annonce { animation: none; }
+}
+
+.bouton-verdict {
+  position: relative;
   z-index: 1;
-  top: clamp(0.45rem, 1.5vw, 1rem);
-  right: clamp(0.45rem, 1.5vw, 1rem);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  min-height: 2.75rem;
-  padding: 0.3rem 1.05rem 0.3rem 0.3rem;
-  border: 2px solid #200d19;
-  border-radius: 999px;
-  background: #fff4e6;
-  box-shadow: 0 4px 0 #200d19;
-  color: #200d19;
-  font: 800 clamp(0.85rem, 1.35vw, 1rem) / 1 Aptos, sans-serif;
-  letter-spacing: 0.01em;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.15rem;
+  flex: 0 0 auto;
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0;
+  border: 1px solid #bb7d48;
+  border-radius: 50%;
+  background: #281526;
+  color: #ffe0a6;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.15;
   cursor: pointer;
   transition: transform 120ms, box-shadow 120ms, background-color 120ms;
 }
-.icone-terminer {
-  display: grid;
-  place-items: center;
-  width: 2.1rem;
-  height: 2.1rem;
-  border: 2px solid #200d19;
-  border-radius: 50%;
-  background: #fc4547;
+
+.icone-verdict {
+  display: block;
+  width: 2.9rem;
+  height: 2rem;
+  object-fit: contain;
+  object-view-box: inset(0 17% 0 20%);
+  mix-blend-mode: lighten;
 }
-.icone-terminer svg, .icone-fin svg, .fleche-fin, .coche-option svg {
-  width: 1.15rem;
-  height: 1.15rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.bouton-terminer:hover { background: #ffffff; transform: translateY(-1px); box-shadow: 0 5px 0 #200d19; }
-.bouton-terminer:active { transform: translateY(3px); box-shadow: 0 1px 0 #200d19; }
-.bouton-terminer:focus-visible { outline: 3px solid #ffd578; outline-offset: 3px; }
-.bouton-terminer.terminer-attendu::after {
+.bouton-verdict:hover { background: #3c2134; border-color: #ffd578; }
+.bouton-verdict:is(:active, .verdict-enfonce) { transform: scale(0.95); }
+.bouton-verdict:focus-visible { outline-color: #fff6eb; }
+
+.bouton-verdict.verdict-attendu::after {
   position: absolute;
   inset: -6px;
   border: 3px solid #ffd578;
-  border-radius: 999px;
+  border-radius: inherit;
   pointer-events: none;
   content: '';
   animation: appel-terminer 1.05s ease-in-out 4;
 }
+/* Éclats du coup de marteau sur « Terminé ». */
+.eclats-verdict { position: absolute; inset: 0; pointer-events: none; }
+.eclats-verdict i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1.5px solid #200d19;
+  border-radius: 50%;
+  background: #ffd578;
+  animation: eclat-verdict 230ms ease-out both;
+}
+.eclats-verdict i:nth-child(1) { --x: -4.1rem; --y: -1.2rem; }
+.eclats-verdict i:nth-child(2) { --x: -4.4rem; --y: 0.8rem; background: #fc4547; }
+.eclats-verdict i:nth-child(3) { --x: -3.4rem; --y: 2.5rem; border-radius: 0.12rem; }
+.eclats-verdict i:nth-child(4) { --x: -1.6rem; --y: 3.7rem; background: #fff4e6; }
+.eclats-verdict i:nth-child(5) { --x: 0.7rem; --y: 4rem; border-radius: 0.12rem; }
+.eclats-verdict i:nth-child(6) { --x: 2.35rem; --y: 3rem; background: #fc4547; }
+@keyframes eclat-verdict {
+  from { opacity: 0; transform: translate(calc(var(--x) * 0.48), calc(var(--y) * 0.48)) scale(0.45); }
+  35% { opacity: 1; }
+  to { opacity: 1; transform: translate(var(--x), var(--y)) rotate(45deg); }
+}
+
 @keyframes appel-terminer {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.06); }
@@ -476,7 +544,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .fenetre-rapport[open] .contenu-rapport, .outils-rapport, .fenetre-fin[open], .fenetre-verdict[open] { animation: none; }
-  .bouton-terminer.terminer-attendu::after { animation: none; opacity: 1; }
+  .bouton-verdict.verdict-attendu::after { animation: none; opacity: 1; }
 }
 
 /* Écran étroit : la barre passe au-dessus du papier, en ligne, alignée à droite. */
@@ -544,6 +612,7 @@
 .personnage[data-emplacement="centre"] { --position-x: 50%; --position-bas: 48%; --largeur: 20%; }
 .personnage[data-emplacement="droite"] { --position-x: 82%; }
 .personnage img { display: block; width: 100%; height: auto; }
+
 .nom-avocat {
   position: absolute;
   left: 50%;
@@ -589,6 +658,18 @@
 }
 
 .portrait img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.portrait:has(.portrait-blob) {
+  position: relative;
+  overflow: hidden;
+  background: #352631;
+}
+.portrait .portrait-blob {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding: 0.125rem;
+}
+.portrait .portrait-blob-recadrer { object-view-box: inset(4% 0 0); }
 .replique { max-height: min(35dvh, 16rem); overflow-y: auto; overscroll-behavior-y: contain; }
 .etiquettes { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.65rem; }
 
@@ -598,6 +679,7 @@ p { margin: 0; }
 .titre-replique { margin-top: 0.2rem; color: #654455; font-weight: 600; }
 .texte-replique, .attente p { margin-top: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
 .mot-masque { visibility: hidden; }
+.mot-emphase { font-weight: 750; }
 .texte-accessible {
   position: absolute;
   width: 1px;
@@ -652,6 +734,22 @@ p { margin: 0; }
 .compteur { color: #654455; font-size: 0.875rem; white-space: nowrap; }
 :is(button, .replique):focus-visible { outline: 2px solid #773c6f; outline-offset: 2px; }
 .attente { display: block; }
+.attente-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.son-preparation {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #b78b65;
+  border-radius: 0.3rem;
+  background: #fff4e6;
+  color: #58354d;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
 .verdict-final { border-top: 3px solid #a62432; }
 .verdict-final .progression { grid-column: -2 / -1; }
 

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, DestroyRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
@@ -14,7 +15,7 @@ import { AudienceSceneComponent } from './audience-scene.component';
 /** Le tribunal : choix du dossier, procès, verdict, salle et pièces du greffier. */
 @Component({
   selector: 'rdc-tribunal',
-  imports: [RouterLink, PlaidoirieComponent, CourbeTailleComponent, AudienceSceneComponent, EnteteComponent],
+  imports: [NgTemplateOutlet, RouterLink, PlaidoirieComponent, CourbeTailleComponent, AudienceSceneComponent, EnteteComponent],
   templateUrl: './tribunal.page.html',
   styleUrl: './tribunal.page.css',
   host: { '[class.tribunal-scene]': 'versionScene' },

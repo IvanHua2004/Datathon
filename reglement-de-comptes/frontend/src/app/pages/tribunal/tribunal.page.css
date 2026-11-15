@@ -66,8 +66,7 @@
 .dossier-colonne { display: contents; }
 :host(.tribunal-scene) .dossier-colonne {
   display: grid;
-  grid-template-rows: minmax(0, auto) auto;
-  gap: 0.6rem;
+  grid-template-rows: auto minmax(0, auto) auto;
   min-height: 0;
 }
 :host(.tribunal-scene) .dossier {
@@ -75,26 +74,62 @@
   gap: 0.3rem;
   padding: 0.8rem 0.95rem;
   border: 1px solid #c7ac8f;
-  border-radius: 0.25rem;
+  border-radius: 0 0.3rem 0.3rem 0.3rem;
   background-color: var(--paper-background);
   background-image: var(--paper-ruling);
 }
-.ouvrir-rapport {
-  min-height: 2.5rem;
-  padding: 0.45rem 0.75rem;
+.actions-dossier {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+.onglets-cartable {
+  display: flex;
+  align-items: stretch;
+  gap: 0.25rem;
+  margin-bottom: -1px;
+  z-index: 1;
+}
+.onglet-dossier, .ouvrir-rapport {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.35rem 0.65rem;
   border: 1px solid #c7ac8f;
-  border-radius: 0.25rem;
-  background: #fff7ec;
-  color: #58354d;
+  border-radius: 0.55rem 0.55rem 0 0;
+  color: #442538;
   font: inherit;
+  font-size: 0.8rem;
   font-weight: 700;
+  line-height: 1.15;
+  text-align: start;
+}
+.onglet-dossier {
+  border-bottom-color: var(--paper-background);
+  background: var(--paper-background);
+}
+.ouvrir-rapport {
+  gap: 0.3rem;
+  background: #e8d4bc;
   cursor: pointer;
 }
-.ouvrir-rapport:hover:enabled { background: #ffe6bf; }
-.ouvrir-rapport:disabled { opacity: 0.55; cursor: default; }
+.ouvrir-rapport:hover:enabled { background: #f5e6d3; }
+.ouvrir-rapport:focus-visible { outline: 2px solid #a46a2f; outline-offset: -3px; }
+.ouvrir-rapport:disabled { color: #705c56; cursor: default; }
+
+.icone-rapport {
+  display: grid;
+  place-content: center;
+  flex: 0 0 1.85rem;
+  height: 1.85rem;
+  overflow: hidden;
+}
+.icone-rapport img { display: block; width: 2.65rem; max-width: none; mix-blend-mode: multiply; }
 
 .question-audience {
   grid-column: 1 / -1;
+  order: -2;
   margin: 0;
   padding: clamp(0.55rem, 1.35dvh, 0.85rem) clamp(0.9rem, 3vw, 2rem);
   border: 1px solid #aa676a;
@@ -107,7 +142,6 @@
 }
 
 .dossier .investisseur-dossier { margin: 0; font-size: 0.95rem; }
-:host(.tribunal-scene) .dossier h2:first-child { margin-bottom: 0.1rem; }
 :host(.tribunal-scene) .profil { margin: 0; font-size: 0.84rem; line-height: 1.3; }
 :host(.tribunal-scene) .profil-details { font-size: 0.82rem; line-height: 1.28; }
 :host(.tribunal-scene) .profil-details dt { margin-top: 0.25rem; }
@@ -116,15 +150,16 @@
   :host(.tribunal-scene) .disposition { display: grid; grid-template-columns: minmax(0, 1fr); }
   :host(.tribunal-scene) .dossier { max-width: none; }
   :host(.tribunal-scene) .audience-ouverte { order: -1; }
-  .question-audience { order: -2; }
 }
 
 @media (width > 58rem) {
   :host(.tribunal-scene) .disposition {
     display: grid;
-    grid-template-columns: clamp(15rem, 23vw, 21rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) clamp(15rem, 23vw, 21rem);
     padding: clamp(0.75rem, 2dvh, 1.35rem) clamp(0.75rem, 2vw, 1.5rem);
   }
+
+  :host(.tribunal-scene) .audience { order: -1; }
 
   :host(.tribunal-scene) .dossier-colonne {
     position: sticky;
