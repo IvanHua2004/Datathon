@@ -25,7 +25,8 @@ const PERSONNAGES = [
   { role: 'procureur', image: 'assets/tribunal-2/procureur', emplacement: 'droite', nom: 'Me Austère', cote: 'Le Procureur' },
 ] as const;
 
-const BLOBS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const BLOBS = [1, 3, 4, 5, 6, 7, 8, 9];
+const TRAJECTOIRES_TOMATE = ['horizontale', 'montante', 'descendante', 'cloche'] as const;
 
 function clePortrait(tour: TourDiscussion): string {
   return tour.role === 'temoin' ? tour.temoin || tour.acteur : tour.role + ':' + tour.acteur;
@@ -42,7 +43,7 @@ function clePortrait(tour: TourDiscussion): string {
           [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
           [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
           <img class="icone-verdict" src="assets/tribunal-2/marteau.png" alt="" />
-          <span>Terminé</span>
+          <span>Terminer</span>
           @if (impactVerdict()) {
             <span class="eclats-verdict" aria-hidden="true">
               <i></i><i></i><i></i><i></i><i></i><i></i>
@@ -54,6 +55,14 @@ function clePortrait(tour: TourDiscussion): string {
     <section class="scene" aria-label="Audience du Tribunal 2">
       <div #ancrageSon hidden></div>
       <div class="plateau">
+        @if (tomate(); as lancer) {
+          <div class="lancer-tomate" [class.tir-droite]="lancer.depuisDroite"
+            [attr.data-trajectoire]="lancer.trajectoire" aria-hidden="true">
+            <img class="tomate-en-vol" src="assets/tribunal-2/tomate.png" alt="" />
+            <img class="tomate-impact" src="assets/tribunal-2/tomate-eclatee.png" alt="" />
+            <div class="gouttes-tomate"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        }
         @for (annonce of annoncesScene(); track annonce.tour) {
           <div class="annonce-scene" [style.--duree-annonce]="dureeAnnonceMs + 'ms'" aria-hidden="true">
             <div class="cartouche-annonce">
@@ -78,10 +87,12 @@ function clePortrait(tour: TourDiscussion): string {
       @if (tour(); as tour) {
         <article class="dialogue" [class.verdict-final]="verdictRendu()">
           <div class="portrait" aria-hidden="true">
-            @if (portrait(); as image) {
+            @if (portraitVisible(); as image) {
               <img [src]="image" [class.miroir]="tour.role === 'procureur'"
                 [class.portrait-blob]="blobActif() !== undefined"
-                [class.portrait-blob-recadrer]="blobActif() === 7 || blobActif() === 8" alt="">
+                [class.portrait-blob-recadrer]="blobActif() === 7 || blobActif() === 8"
+                [attr.fetchpriority]="index() === 0 ? 'high' : null"
+                (error)="portraitEnErreur.set(true)" alt="">
             } @else {
               <span>{{ tour.avatar }}</span>
             }
@@ -146,7 +157,7 @@ function clePortrait(tour: TourDiscussion): string {
               } @else {
                 <button type="button" (click)="afficherTour(index() - 1)" [disabled]="index() === 0">← Précédent</button>
                 @if (index() < tours().length - 1) {
-                  <button type="button" class="suivant" [disabled]="annonceActive()"
+                  <button type="button" class="suivant avancer" [disabled]="annonceActive()"
                     [title]="repliqueDevoilee() ? 'Passer à la réplique suivante' : 'Afficher toute la réplique'"
                     (click)="suivant()">Suivant →</button>
                 } @else if (!audienceTerminee()) {
@@ -159,16 +170,9 @@ function clePortrait(tour: TourDiscussion): string {
           </nav>
         </article>
       } @else {
-        <div class="dialogue attente" [class.attente-active]="preparation()">
-          <div>
-            <h2>Salle d’audience</h2>
-            <p role="status">{{ preparation() ? 'Les parties préparent leurs interventions…' : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
-          </div>
-          @if (preparation()) {
-            <button class="son-preparation" type="button" (click)="basculerSon()">
-              {{ sonActive() && !sonBloque() ? 'Couper l’ambiance' : 'Activer l’ambiance' }}
-            </button>
-          }
+        <div class="dialogue attente">
+          <h2>Salle d’audience</h2>
+          <p role="status">{{ preparation() ? 'Les parties préparent leurs interventions…' : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
         </div>
       }
     </section>
@@ -246,6 +250,10 @@ export class AudienceSceneComponent {
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly preparation = computed(() => this.enCours() && !this.tour());
+  readonly tomate = signal<{
+    depuisDroite: boolean;
+    trajectoire: typeof TRAJECTOIRES_TOMATE[number];
+  } | null>(null);
   readonly annoncesScene = computed(() => {
     const tour = this.tour();
     if (!tour) return [];
@@ -370,6 +378,8 @@ export class AudienceSceneComponent {
     const blob = this.blobActif();
     return blob ? `assets/tribunal-2/blob-${blob}.png` : null;
   });
+  readonly portraitEnErreur = linkedSignal({ source: this.portrait, computation: () => false });
+  readonly portraitVisible = computed(() => this.portraitEnErreur() ? null : this.portrait());
   private readonly replique = viewChild<ElementRef<HTMLElement>>('replique');
   private readonly voixAudience = linkedSignal({ source: this.tours, computation: choisirVoixAudience });
   private readonly sonAudience = inject(SonAudienceService);
@@ -381,11 +391,32 @@ export class AudienceSceneComponent {
 
   constructor() {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
-    inject(DestroyRef).onDestroy(() => {
-      clearTimeout(this.minuterieVerdict);
-      this.sonAudience.arreterAmbianceSalle();
-    });
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
+    effect((nettoyer) => {
+      if (!this.tours().length) return;
+      let minuterie: ReturnType<typeof setTimeout>;
+      const lancer = () => {
+        if (this.verdictRendu() || this.audienceTerminee()) return;
+        if (document.hidden || this.annonceActive() || this.verdictOuvert() || this.rapportOuvert()) {
+          minuterie = setTimeout(lancer, 800);
+          return;
+        }
+        this.tomate.set({
+          depuisDroite: Math.random() < 0.5,
+          trajectoire: TRAJECTOIRES_TOMATE[Math.floor(Math.random() * TRAJECTOIRES_TOMATE.length)],
+        });
+        minuterie = setTimeout(() => {
+          this.tomate.set(null);
+          minuterie = setTimeout(lancer, 2400 + Math.random() * 3000);
+        }, 1600);
+      };
+      minuterie = setTimeout(lancer, 2000 + Math.random() * 2000);
+      nettoyer(() => {
+        clearTimeout(minuterie);
+        this.tomate.set(null);
+      });
+    });
     afterRenderEffect(() => {
       if (this.verdictRendu()) this.replique()?.nativeElement.focus({ preventScroll: true });
     });
@@ -418,12 +449,15 @@ export class AudienceSceneComponent {
     });
 
     effect((nettoyer) => {
-      const preparation = this.preparation();
-      if (!preparation) this.sonAudience.arreterAmbianceSalle();
+      if (this.preparation()) {
+        void this.sonAudience.jouerAmbianceSalle().catch(() => {
+          // Le navigateur peut bloquer le son lors d’une ouverture directe.
+        });
+        nettoyer(() => this.sonAudience.arreterAmbianceSalle());
+        return;
+      }
       if (!this.sonActive() || this.sonBloque()) return;
-      if (preparation) {
-        this.jouerAmbianceSalle();
-      } else if (this.annonceActive()) {
+      if (this.annonceActive()) {
         if (this.verdictOuvert() || this.rapportOuvert()) return;
         this.jouerImpactAnnonce();
       } else {
@@ -542,12 +576,7 @@ export class AudienceSceneComponent {
     }
     this.sonActive.set(true);
     this.sonBloque.set(false);
-    if (this.preparation()) this.jouerAmbianceSalle();
-    else if (this.lectureActive()) this.jouerVoix();
-  }
-
-  private jouerAmbianceSalle(): void {
-    this.surveillerLecture(this.sonAudience.jouerAmbianceSalle());
+    if (this.lectureActive()) this.jouerVoix();
   }
 
   private jouerImpactAnnonce(): void {

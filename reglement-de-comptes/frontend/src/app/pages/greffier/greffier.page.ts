@@ -425,15 +425,9 @@ export class GreffierPage {
   ouvrirDebat(a: AnalyseQuestion | ChoixDossier): void {
     const p = this.persona();
     if (!p || !a.ticker || a.taille == null) return;
-    void this.sonAudience.jouerAmbianceSalle().catch(() => {
-      // Le tribunal peut proposer d’activer le son après la navigation.
-    });
-    void this.router.navigate(['/tribunal-2'], {
+    this.sonAudience.amorcer();
+    this.router.navigate(['/tribunal-2'], {
       queryParams: { profil: p.cle, ticker: a.ticker, taille: a.taille, question: a.question },
-    }).then((navigationReussie) => {
-      if (!navigationReussie) this.sonAudience.arreterAmbianceSalle();
-    }, () => {
-      this.sonAudience.arreterAmbianceSalle();
     });
   }
 
