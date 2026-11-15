@@ -539,3 +539,52 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 .actions--discretes { margin-top: 0.5rem; }
 .actions--discretes .secondaire { min-height: 2.4rem; font-size: 0.88rem; }
 .suggestions-debat { margin-top: 0.4rem; }
+
+/* ---------- Dictée vocale ---------- */
+.barre input.provisoire { color: #7a6873; font-style: italic; }
+.micro {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid rgb(119 60 111 / 35%);
+  border-radius: 50%;
+  background: #fff;
+  color: #773c6f;
+}
+.micro svg { width: 1.3rem; height: 1.3rem; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.micro:hover { border-color: #773c6f; background: rgb(119 60 111 / 8%); }
+.micro:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
+.micro.ecoute { border-color: #a62432; background: #a62432; color: #fff; }
+.micro.ecoute svg { fill: currentColor; stroke: none; }
+.micro.ecoute::after {
+  position: absolute;
+  inset: -5px;
+  border: 2px solid #a62432;
+  border-radius: 50%;
+  content: '';
+  animation: halo-dictee 1.2s ease-out infinite;
+}
+.micro.connexion { opacity: 0.7; cursor: progress; }
+@keyframes halo-dictee {
+  from { opacity: 0.8; transform: scale(0.9); }
+  to { opacity: 0; transform: scale(1.35); }
+}
+.etat-dictee {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0 1rem 0.5rem;
+  color: #5c4a55;
+  font-size: 0.82rem;
+}
+.etat-dictee--erreur { color: #8a1c1c; }
+.point-dictee { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #a62432; animation: clignote-dictee 1s steps(2) infinite; }
+@keyframes clignote-dictee { 50% { opacity: 0.2; } }
+@media (prefers-reduced-motion: reduce) {
+  .micro.ecoute::after, .point-dictee { animation: none; }
+}
