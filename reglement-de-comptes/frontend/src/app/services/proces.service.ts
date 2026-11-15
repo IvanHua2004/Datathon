@@ -32,6 +32,7 @@ export class ProcesService {
 
   readonly comparaison = signal<AnalyseComparative | null>(null);
   readonly chargementComparaison = signal(false);
+  readonly choixInvestisseur = signal<'OUI' | 'NON' | null>(null);
 
   readonly scenarios = signal<ScenarioAlternatif[] | null>(null);
   readonly chargementScenarios = signal(false);
@@ -74,6 +75,7 @@ export class ProcesService {
     this.api.ouvrirProces(demande).subscribe({
       next: (proces) => {
         this.voteAudience.set(null);
+        this.choixInvestisseur.set(null);
         this.resultat.set(proces);
         this.enCours.set(false);
       },
@@ -84,9 +86,17 @@ export class ProcesService {
     });
   }
 
-  choisirArbitrage(choix: 'OUI' | 'NON', profil: string, ticker: string, taille: number): void {
+  choisirArbitrage(
+    choix: 'OUI' | 'NON',
+    profil: string,
+    ticker: string,
+    taille: number,
+    profitInitial: number | null,
+  ): void {
     this.chargementComparaison.set(true);
-    this.api.comparerDecision(profil, ticker, taille, choix).subscribe({
+    this.comparaison.set(null);
+    this.erreur.set(null);
+    this.api.comparerDecision(profil, ticker, taille, choix, profitInitial).subscribe({
       next: (comp) => {
         this.comparaison.set(comp);
         this.chargementComparaison.set(false);
@@ -167,6 +177,7 @@ export class ProcesService {
     this.resultat.set(null);
     this.comparaison.set(null);
     this.scenarios.set(null);
+    this.choixInvestisseur.set(null);
   }
 
   private message(e: unknown): string {

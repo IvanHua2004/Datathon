@@ -39,7 +39,8 @@ def test_temoin_diversification(dossier_robert_nvda):
     assert piece.numero == "P-01"
     assert piece.temoin == "diversification"
     assert any("Rendement moyen" in k for k in piece.faits)
-    assert any("Poids maximal d'un secteur" in k for k in piece.faits)
+    assert any("Poids du secteur" in k for k in piece.faits)
+    assert any("Exposition au dollar américain" in k for k in piece.faits)
     assert piece.limites
 
 
