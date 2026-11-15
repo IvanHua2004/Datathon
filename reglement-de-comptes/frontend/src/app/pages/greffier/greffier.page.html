@@ -1,9 +1,9 @@
 <rdc-entete [etape]="2">
   @if (persona(); as p) {
-    <a class="dossier" routerLink="/personas" [attr.aria-label]="'Dossier de ' + p.nom + ', changer de persona'">
+    <a class="dossier" routerLink="/personas" [attr.aria-label]="'Dossier' + p.nom + ', changer de persona'">
       <img class="dossier-portrait" [src]="'assets/' + p.cle + '.png'" alt="" width="48" height="48">
       <span class="dossier-texte">
-        <strong>Dossier {{ p.nom }}</strong>
+        <strong>Dossier de {{ p.nom }}</strong>
         <span class="changer">Changer <span aria-hidden="true">›</span></span>
       </span>
     </a>
@@ -11,13 +11,13 @@
 </rdc-entete>
 
 <main class="scene">
-  <p class="titre-audience">Audience préliminaire</p>
+  <h1 class="titre-audience">Audience préliminaire</h1>
 
   <section #fil class="fil" aria-label="Dialogue avec le greffier" aria-live="polite">
     @for (m of messages(); track $index) {
       @if (m.de === 'greffier') {
         <div class="ligne ligne--greffier">
-          <span class="avatar" aria-hidden="true">G</span>
+          <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
           <div class="bulle bulle--greffier" [attr.data-ton]="m.ton">
             <strong class="auteur">Le greffier</strong>
             @if (m.ton === 'ok') { <strong class="statut statut--ok">Recevable.</strong> }
@@ -77,9 +77,9 @@
         </div>
       } @else if (m.de === 'archiviste') {
         <div class="ligne ligne--greffier">
-          <span class="avatar avatar--archiviste" aria-hidden="true">A</span>
+          <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
           <div class="bulle bulle--greffier bulle--archiviste">
-            <strong class="auteur">L'archiviste · les données, rien que les données</strong>
+            <strong class="auteur">Le greffier</strong>
             <p>{{ m.texte }}</p>
             @if (m.analyse; as a) {
               @switch (a.statut) {
@@ -191,7 +191,7 @@
 
     @if (enCours()) {
       <div class="ligne ligne--greffier" role="status">
-        <span class="avatar" aria-hidden="true">G</span>
+        <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
         <div class="bulle bulle--greffier bulle--attente">
           <span class="visually-hidden">Le greffier examine votre question</span>
           <span class="points" aria-hidden="true"><i></i><i></i><i></i></span>

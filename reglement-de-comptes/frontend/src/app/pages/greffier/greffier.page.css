@@ -4,6 +4,11 @@
   grid-template-columns: minmax(0, 1fr);
   height: 100svh;
   color: #ffe5bf;
+  background-image:
+    linear-gradient(180deg, rgb(0 0 0 / 76%), rgb(0 0 0 / 92%) 72%),
+    url('/assets/courtroom.png');
+  background-size: cover;
+  background-position: center top;
 }
 
 .dossier {
@@ -39,24 +44,27 @@
 
 .scene {
   min-height: 0;
+  width: min(54rem, calc(100% - 2rem));
+  margin: clamp(0.5rem, 2vh, 1.25rem) auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border: 1px solid #ded3c6;
+  border-radius: 4px;
+  background-color: #fffdf8;
   background-image:
-    linear-gradient(180deg, rgb(40 21 35 / 74%), rgb(40 21 35 / 95%) 72%),
-    url('/assets/courtroom.png');
-  background-size: cover;
-  background-position: center top;
+    linear-gradient(90deg, transparent 10px, rgb(179 38 30 / 22%) 10px 11px, transparent 11px),
+    repeating-linear-gradient(180deg, transparent 0 29px, rgb(119 60 111 / 7%) 29px 30px);
+  box-shadow: 3px 4px 0 -1px #e7ddd0, 0 14px 32px rgb(0 0 0 / 35%);
+  color: #200e0c;
 }
 
 .titre-audience {
-  margin: 0;
-  padding: 1.25rem 1rem 0.25rem;
-  text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgb(255 229 191 / 80%);
+  margin: 0 clamp(1rem, 3vw, 1.5rem);
+  padding: 0.85rem 0 0.6rem;
+  border-bottom: 3px double #cbb5bd;
+  color: #523047;
+  font: 700 clamp(1.2rem, 3vw, 1.5rem) "Bookman Old Style", Georgia, serif;
 }
 
 .fil {
@@ -75,21 +83,16 @@
 .ligne { display: flex; gap: 0.75rem; align-items: flex-end; }
 .ligne--moi { justify-content: flex-end; }
 
-.avatar {
+.avatar--greffier {
   flex: none;
   width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #ffc247;
-  color: #200e0c;
-  font-weight: 800;
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform: scale(1.5);
 }
 
 .bulle.bulle--archiviste { max-width: min(46rem, calc(100% - 3.5rem)); }
 
-.avatar--archiviste { background: #fff8ec; color: #773c6f; border: 2px solid #773c6f; }
 
 .fiche {
   margin-top: 0.25rem;
@@ -184,13 +187,14 @@
 .bulle p { margin: 0; }
 
 .bulle--greffier {
-  background: #fff8ec;
+  background: #fffaf1;
   color: #200e0c;
   border-radius: 6px 6px 6px 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  border-left: 5px solid transparent;
+  border: 1px solid #e6dbce;
+  border-left: 5px solid #d8c4ce;
 }
 
 .bulle--greffier[data-ton='ok'] { border-left-color: #2e8b57; }
@@ -316,8 +320,9 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
   gap: 0.5rem;
   padding: 0.5rem 0.5rem 0.5rem 1rem;
   border-radius: 6px;
-  background: #fff8ec;
-  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+  border: 1px solid #d8c4ce;
+  background: #fff;
+  box-shadow: 0 3px 0 rgb(82 48 71 / 12%);
 }
 
 .barre input {
@@ -391,7 +396,8 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 }
 
 @media (max-width: 40rem) {
-  .avatar { width: 2.25rem; height: 2.25rem; }
+  .scene { width: calc(100% - 1rem); }
+  .avatar--greffier { width: 2.25rem; }
   .ligne { gap: 0.5rem; }
 }
 
