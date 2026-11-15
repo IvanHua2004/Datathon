@@ -26,6 +26,15 @@ class Profil:
     preferences: str = ""
     portefeuille: dict[str, float] = field(default_factory=dict)
     demande_exemple: tuple[str, float] = ("NVDA", 0.20)
+    horizon_max_declare: float | None = None
+    risque_declare: str | None = None
+    # Faux quand le portefeuille est un portefeuille de référence fictif (persona personnalisé dont
+    # la note ne décrit pas les positions) : les agents ne disent alors jamais « votre portefeuille ».
+    portefeuille_declare: bool = True
+
+    @property
+    def mot_portefeuille(self) -> str:
+        return "votre portefeuille" if self.portefeuille_declare else "le portefeuille de référence"
 
     def avec(self, **changements) -> "Profil":
         return replace(self, **changements)
@@ -43,6 +52,8 @@ class Profil:
     @property
     def horizon_max(self) -> float:
         """Conforme Roadmap Issue 1.3."""
+        if self.horizon_max_declare is not None:
+            return self.horizon_max_declare
         if self.cle == "amira":
             return 25.0
         elif self.cle == "mateo":
@@ -52,6 +63,8 @@ class Profil:
     @property
     def risque(self) -> str:
         """Conforme Roadmap Issue 1.3."""
+        if self.risque_declare is not None:
+            return self.risque_declare
         if self.cle == "amira":
             return "élevé"
         elif self.cle == "mateo":

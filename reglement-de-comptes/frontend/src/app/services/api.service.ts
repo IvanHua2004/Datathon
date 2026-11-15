@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Actif, AnalyseComparative, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
+import { Actif, AnalyseComparative, ConfigurationPersona, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
 import { AnalyseQuestion, DemandeAnalyse } from '../models/question.model';
 import { Duel } from '../models/duel.model';
 
@@ -18,6 +18,14 @@ export class ApiService {
 
   profils(): Observable<Profil[]> {
     return this.http.get<Profil[]>(`${this.base}/profils`);
+  }
+
+  enregistrerPersona(persona: ConfigurationPersona): Observable<Profil> {
+    return this.http.post<Profil>(`${this.base}/profils/personnalise`, persona);
+  }
+
+  oublierPersona(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/profils/personnalise`);
   }
 
   actifs(): Observable<Actif[]> {

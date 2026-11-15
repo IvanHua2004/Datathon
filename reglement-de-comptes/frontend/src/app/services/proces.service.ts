@@ -1,8 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
 import { Actif, AnalyseComparative, DemandeProces, Mode, Proces, Profil, Sante, ScenarioAlternatif } from '../models/proces.model';
+import { AudienceDossier } from '../models/question.model';
 import { ApiService } from './api.service';
 
 /** État du tribunal partagé par les pages : référentiels, procès en cours, erreurs. */
@@ -10,14 +11,23 @@ import { ApiService } from './api.service';
 export class ProcesService {
   private readonly api = inject(ApiService);
 
-  readonly profils = signal<Profil[]>([]);
+  private readonly profilsReference = signal<Profil[]>([]);
+  readonly personaPersonnalise = signal<Profil | null>(null);
+  readonly profils = computed(() => {
+    const reference = this.profilsReference();
+    const personnalise = this.personaPersonnalise();
+    return reference.length && personnalise ? [...reference, personnalise] : reference;
+  });
   readonly actifs = signal<Actif[]>([]);
   readonly tailles = signal<number[]>([]);
   readonly sante = signal<Sante | null>(null);
 
   readonly chargement = signal(false);
   readonly enCours = signal(false);
+  /** Le dernier procès plaidé. Il reste en mémoire pour revenir voter sans relancer les avocats. */
   readonly resultat = signal<Proces | null>(null);
+  /** Le camp retenu par l'investisseur pour ce procès, ou null tant qu'il n'a pas voté. */
+  readonly voteAudience = signal<'avocat_defense' | 'procureur' | null>(null);
   readonly erreur = signal<string | null>(null);
 
   readonly comparaison = signal<AnalyseComparative | null>(null);
@@ -39,7 +49,8 @@ export class ProcesService {
       sante: this.api.sante(),
     }).subscribe({
       next: (r) => {
-        this.profils.set(r.profils);
+        this.personaPersonnalise.update((p) => p ?? r.profils.find((profil) => profil.cle === 'personnalise') ?? null);
+        this.profilsReference.set(r.profils.filter((profil) => profil.cle !== 'personnalise'));
         this.actifs.set(r.actifs);
         this.tailles.set(r.tailles);
         this.sante.set(r.sante);
@@ -59,6 +70,7 @@ export class ProcesService {
     this.scenarios.set(null);
     this.api.ouvrirProces(demande).subscribe({
       next: (proces) => {
+        this.voteAudience.set(null);
         this.resultat.set(proces);
         this.enCours.set(false);
       },
@@ -113,7 +125,32 @@ export class ProcesService {
     });
   }
 
+  /** Le procès en mémoire correspond-il à cette demande ? (pour le reprendre au lieu de le relancer) */
+  correspond(profil: string, ticker: string, taille: number): boolean {
+    const d = this.resultat()?.demande;
+    return !!d && d.profil === profil && d.ticker === ticker && Math.abs(d.taille - taille) < 1e-9;
+  }
+
+  /** Le dossier de l'audience plaidée pour ce persona, envoyé à l'archiviste avec les questions. */
+  dossierAudience(profil: string): AudienceDossier | undefined {
+    const pr = this.resultat();
+    if (!pr || pr.demande.profil !== profil || !pr.pieces.length) return undefined;
+    return {
+      ticker: pr.demande.ticker,
+      nomTitre: pr.demande.nomTitre,
+      taille: pr.demande.taille,
+      pieces: pr.pieces.map(({ numero, temoin, description, faits, source, periode, limites }) =>
+        ({ numero, temoin, description, faits, source, periode, limites })),
+      plaidoiries: pr.plaidoiries.slice(0, 2).map((p, i) => ({
+        camp: i === 0 ? 'defense' : 'accusation',
+        texte: p.texte,
+        nonVerifies: p.non_verifies ?? [],
+      })),
+    };
+  }
+
   effacer(): void {
+    this.voteAudience.set(null);
     this.resultat.set(null);
     this.comparaison.set(null);
     this.scenarios.set(null);

@@ -14,6 +14,17 @@ export interface Position {
   poids: number;
 }
 
+export type NiveauRisque = 'faible' | 'faible_a_modere' | 'modere' | 'modere_a_eleve' | 'eleve';
+
+export interface ConfigurationPersona {
+  nom: string;
+  age: number;
+  risque: NiveauRisque;
+  horizon_min: number;
+  horizon_max: number;
+  note: string;
+}
+
 export interface Profil {
   cle: string;
   nom: string;
@@ -26,6 +37,9 @@ export interface Profil {
   plafondPosition: number;
   portefeuille: Position[];
   demandeExemple: { ticker: string; taille: number };
+  /** Faux quand la note du persona ne décrit pas ses positions : portefeuille de référence fictif. */
+  portefeuilleDeclare?: boolean;
+  configuration?: ConfigurationPersona;
 }
 
 export interface Actif {

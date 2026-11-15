@@ -71,7 +71,11 @@ def _expose(proces) -> str:
             f"Préférences : {p.preferences} Capital : {dollars(p.capital)}. "
             f"{volonte}"
             f"Demande soumise au tribunal : placer {pct(d.taille, 0)} du portefeuille dans {d.ticker} "
-            f"({d.donnees.univers.loc[d.ticker, 'name']}), financé au prorata des autres positions.")
+            f"({d.donnees.univers.loc[d.ticker, 'name']}), financé au prorata des autres positions."
+            + ("" if p.portefeuille_declare else
+               " Les positions réelles de l'investisseur ne sont pas connues : le portefeuille étudié est un "
+               "portefeuille de référence fictif. Ne dites jamais « votre portefeuille » ni « vos positions » ; "
+               "dites « le portefeuille de référence »."))
 
 
 def _faits(proces, temoin: str) -> tuple[str, dict]:

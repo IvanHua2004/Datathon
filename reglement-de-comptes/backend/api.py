@@ -8,15 +8,18 @@ intention, comparaison, scenarios, rapport_pdf) et renvoie le résultat au forma
 """
 from __future__ import annotations
 
+import json
+import re
 import os
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 from dataclasses import asdict
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException, Request, Response
+from pydantic import BaseModel, Field, StringConstraints, model_validator
 
-from rdc import donnees, greffier, questions, temoins
-from rdc.profils import PROFILS
+from rdc import audience, donnees, greffier, questions, temoins
+from rdc.profils import PROFILS, Profil
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
                         construire_timeline_discussion)
 from rdc.intention import interpreter_intention
@@ -32,7 +35,7 @@ app = FastAPI(
 
 
 class DemandeProces(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     ticker: str = Field(description="Titre de l'univers de 31 actifs, par exemple NVDA")
     taille: float = Field(gt=0, le=0.5, description="Part du portefeuille à placer, de 0,05 à 0,5")
     # Bedrock par défaut. « gabarit » (sans modèle) reste disponible pour les tests hors ligne.
@@ -42,7 +45,7 @@ class DemandeProces(BaseModel):
 
 class Question(BaseModel):
     texte: str = Field(max_length=500, description="La question telle que l'investisseur l'a écrite")
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     ticker: str | None = Field(default=None, description="Titre déjà connu d'un échange précédent")
     taille: float | None = Field(default=None, description="Part déjà connue d'un échange précédent")
     comparer: list[str] | None = Field(default=None, min_length=2, max_length=2,
@@ -51,6 +54,9 @@ class Question(BaseModel):
                                   description="Questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
     action: Literal["catalogue", "choisir_deux"] | None = Field(
         default=None, description="Bouton de l'écran : voir tous les titres, ou en choisir deux à comparer")
+    audience: dict | None = Field(
+        default=None, description="L'audience déjà plaidée (titre, pièces scellées, plaidoiries), pour que "
+                                  "l'archiviste réponde sur le débat")
 
 
 class CoteDuel(BaseModel):
@@ -59,38 +65,150 @@ class CoteDuel(BaseModel):
 
 
 class DemandeDuel(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     a: CoteDuel
     b: CoteDuel
     mode: Literal["gabarit", "bedrock"] = "bedrock"
 
 
 class DemandeIntention(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     texte: str = Field(description="Demande en langage naturel (ex: devrais acheter +30% dans des etf ?)")
 
 
 class DemandeComparaison(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     ticker: str = Field(description="Titre de l'univers")
     taille: float = Field(gt=0, le=0.5, description="Taille de la position")
     choix_investisseur: Literal["OUI", "NON"] = Field(description="Choix de l'investisseur face au verdict")
 
 
 class DemandeScenarios(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     ticker: str = Field(description="Titre de la demande initiale")
     taille: float = Field(gt=0, le=0.5, description="Taille de la position initiale")
     intention_texte: str | None = Field(default=None, description="Intention textuelle initiale")
 
 
 class DemandePDF(BaseModel):
-    profil: str = Field(description="Clé du profil : amira, mateo ou robert")
+    profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
     ticker: str = Field(description="Titre évalué")
     taille: float = Field(gt=0, le=0.5, description="Taille de l'allocation")
     mode: Literal["gabarit", "bedrock"] = "bedrock"
     intention_texte: str | None = None
     choix_investisseur: str | None = None
+
+
+_RISQUES_PERSONA = {
+    "faible": ("Faible", 0.08),
+    "faible_a_modere": ("Faible à modéré", 0.12),
+    "modere": ("Modéré", 0.25),
+    "modere_a_eleve": ("Modéré à élevé", 0.35),
+    "eleve": ("Élevé", 0.45),
+}
+
+
+class PersonaPersonnalise(BaseModel):
+    nom: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+    age: int = Field(ge=18, le=120, description="Simulation réservée aux adultes : 18 ans minimum")
+    risque: Literal["faible", "faible_a_modere", "modere", "modere_a_eleve", "eleve"]
+    horizon_min: int = Field(ge=1, le=100)
+    horizon_max: int = Field(ge=1, le=100)
+    note: str = Field(default="", max_length=200)
+
+    @model_validator(mode="after")
+    def verifier_horizon(self) -> PersonaPersonnalise:
+        if self.horizon_min > self.horizon_max:
+            raise ValueError("L’horizon maximal doit être au moins égal à l’horizon minimal.")
+        return self
+
+    def creer_profil(self, univers: dict[str, str] | None = None) -> Profil:
+        # Capital et plafonds fictifs communs à toutes les simulations personnalisées. Le portefeuille
+        # vient de la note quand elle le décrit assez (« SPY 60 %, XBB.TO 40 % ») ; sinon un portefeuille
+        # de référence fictif, que les agents ne présentent jamais comme celui de l'investisseur.
+        risque, budget = _RISQUES_PERSONA[self.risque]
+        declare = portefeuille_depuis_note(self.note, univers if univers is not None else _univers_noms())
+        horizon = (f"{self.horizon_min} ans" if self.horizon_min == self.horizon_max
+                   else f"{self.horizon_min} à {self.horizon_max} ans")
+        return Profil(
+            cle="personnalise",
+            nom=self.nom,
+            resume=f"{self.age} ans · Risque : {risque.lower()} · Horizon de {horizon}",
+            objectif="Investir selon son horizon et sa tolérance aux pertes.",
+            capital=100_000,
+            horizon_ans=self.horizon_min,
+            budget_perte=budget,
+            plafond_position=0.20,
+            plafond_secteur=0.40,
+            preferences=self.note.strip(),
+            portefeuille=declare or {"XIU.TO": 35, "SPY": 25, "XBB.TO": 40},
+            horizon_max_declare=self.horizon_max,
+            risque_declare=risque.lower(),
+            portefeuille_declare=bool(declare),
+        )
+
+
+_POURCENT = re.compile(r"(\d{1,3}(?:[.,]\d+)?)\s*%")
+_SEPARATEURS = re.compile(r"[,;/+\n]|\bet\b", re.IGNORECASE)
+
+
+def portefeuille_depuis_note(note: str, univers: dict[str, str]) -> dict[str, float]:
+    """Positions décrites dans la note (« SPY 60 %, 40 % en XBB.TO »), en pourcentages.
+
+    La note est jugée assez détaillée seulement si chaque morceau reconnu nomme un seul titre
+    de l'univers avec une part, et si les parts totalisent de 90 % à 110 % ; sinon {}.
+    """
+    if not note or not univers:
+        return {}
+    positions: dict[str, float] = {}
+    for morceau in _SEPARATEURS.split(note):
+        parts = _POURCENT.findall(morceau)
+        titres = questions.trouver_titres(morceau, univers)
+        if len(parts) == 1 and len(titres) == 1:
+            positions[titres[0]] = positions.get(titres[0], 0) + float(parts[0].replace(",", "."))
+    total = sum(positions.values())
+    return positions if positions and 90 <= total <= 110 else {}
+
+
+def _univers_noms() -> dict[str, str]:
+    try:
+        return {t: str(n) for t, n in donnees.charger().univers["name"].items()}
+    except Exception:  # données indisponibles : le portefeuille de référence s'applique
+        return {}
+
+
+_COOKIE_PERSONA = "rdc_persona"
+
+
+def _persona_personnalise(request: Request) -> PersonaPersonnalise | None:
+    cookie = request.cookies.get(_COOKIE_PERSONA)
+    if not cookie:
+        return None
+    try:
+        donnees_cookie = json.loads(urlsafe_b64decode(cookie))
+        if isinstance(donnees_cookie, dict) and isinstance(donnees_cookie.get("horizon"), int):
+            horizon = donnees_cookie.pop("horizon")
+            pourcentage = donnees_cookie.get("risque")
+            if isinstance(pourcentage, int):
+                donnees_cookie.update(
+                    horizon_min=horizon,
+                    horizon_max=horizon,
+                    risque=min(_RISQUES_PERSONA, key=lambda niveau: abs(_RISQUES_PERSONA[niveau][1] * 100 - pourcentage)),
+                )
+        return PersonaPersonnalise.model_validate(donnees_cookie)
+    except ValueError:
+        return None
+
+
+def _profil(request: Request, cle: str) -> Profil:
+    if cle == "personnalise":
+        persona = _persona_personnalise(request)
+        if persona is not None:
+            return persona.creer_profil()
+    profil = PROFILS.get(cle)
+    if profil is None:
+        raise HTTPException(status_code=404, detail=f"Profil inconnu : {cle}")
+    return profil
 
 
 def _source() -> dict:
@@ -125,25 +243,64 @@ def sante() -> dict:
     return {"source": _source(), "periode": {"debut": d.debut, "fin": d.fin}}
 
 
+def _dossier_investisseur(p, univers) -> dict:
+    """Le dossier complet d'un persona, pour l'archiviste (« qu'est-ce que j'ai dans mon portefeuille ? »)."""
+    total = sum(p.portefeuille.values())
+    return {
+        "cle": p.cle, "nom": p.nom, "resume": p.resume, "objectif": p.objectif,
+        "preferences": p.preferences, "capital": p.capital, "horizonAns": p.horizon_ans,
+        "budgetPerte": p.budget_perte, "plafondPosition": p.plafond_position,
+        "plafondSecteur": p.plafond_secteur, "classesExclues": list(p.classes_exclues),
+        "filtreEsg": p.filtre_esg, "secteursAJustifier": list(p.secteurs_a_justifier),
+        "portefeuilleDeclare": p.portefeuille_declare,
+        "portefeuille": [{"ticker": t, "nomTitre": str(univers.loc[t, "name"]) if t in univers.index else t,
+                          "classe": str(univers.loc[t, "asset_class"]) if t in univers.index else "",
+                          "poids": v / total} for t, v in p.portefeuille.items()],
+    }
+
+
+def _profil_public(p: Profil) -> dict:
+    total = sum(p.portefeuille.values())
+    return {
+        "cle": p.cle,
+        "nom": p.nom,
+        "resume": p.resume,
+        "objectif": p.objectif,
+        "preferences": p.preferences,
+        "capital": p.capital,
+        "horizonAns": p.horizon_ans,
+        "budgetPerte": p.budget_perte,
+        "plafondPosition": p.plafond_position,
+        "portefeuille": [{"ticker": t, "poids": v / total} for t, v in p.portefeuille.items()],
+        "portefeuilleDeclare": p.portefeuille_declare,
+        "demandeExemple": {"ticker": p.demande_exemple[0], "taille": p.demande_exemple[1]},
+    }
+
+
 @app.get("/api/profils")
-def profils() -> list[dict]:
-    resultat = []
-    for p in PROFILS.values():
-        total = sum(p.portefeuille.values())
-        resultat.append({
-            "cle": p.cle,
-            "nom": p.nom,
-            "resume": p.resume,
-            "objectif": p.objectif,
-            "preferences": p.preferences,
-            "capital": p.capital,
-            "horizonAns": p.horizon_ans,
-            "budgetPerte": p.budget_perte,
-            "plafondPosition": p.plafond_position,
-            "portefeuille": [{"ticker": t, "poids": v / total} for t, v in p.portefeuille.items()],
-            "demandeExemple": {"ticker": p.demande_exemple[0], "taille": p.demande_exemple[1]},
-        })
+def profils(request: Request, response: Response) -> list[dict]:
+    response.headers["Cache-Control"] = "private, no-store"
+    personnalise = _persona_personnalise(request)
+    resultat = [_profil_public(p) for p in PROFILS.values()]
+    if personnalise is not None:
+        resultat.append({**_profil_public(personnalise.creer_profil()), "configuration": personnalise.model_dump()})
     return resultat
+
+
+@app.post("/api/profils/personnalise")
+def enregistrer_persona(persona: PersonaPersonnalise, request: Request, response: Response) -> dict:
+    cookie = urlsafe_b64encode(persona.model_dump_json().encode()).decode("ascii")
+    response.set_cookie(_COOKIE_PERSONA, cookie, httponly=True, samesite="lax",
+                        secure=request.url.scheme == "https")
+    return {**_profil_public(persona.creer_profil()), "configuration": persona.model_dump()}
+
+
+@app.delete("/api/profils/personnalise", status_code=204)
+def oublier_persona(response: Response) -> Response:
+    """Chaque arrivée sur la page des personas repart de zéro : on oublie le persona personnalisé."""
+    response.status_code = 204
+    response.delete_cookie(_COOKIE_PERSONA, httponly=True, samesite="lax")
+    return response
 
 
 @app.get("/api/actifs")
@@ -159,11 +316,9 @@ def tailles() -> list[float]:
 
 
 @app.post("/api/questions/analyser")
-def analyser_question(q: Question) -> dict:
+def analyser_question(q: Question, request: Request) -> dict:
     """Le greffier dit si la question peut être jugée, et sinon pourquoi."""
-    profil = PROFILS.get(q.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {q.profil}")
+    profil = _profil(request, q.profil)
     univers = {t: str(n) for t, n in _donnees().univers["name"].items()}
     if q.action:
         # Boutons « Voir tous les titres » et « Comparer deux titres » : l'archiviste montre le catalogue.
@@ -188,11 +343,22 @@ def analyser_question(q: Question) -> dict:
                                  "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
         return questions.Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
                                  fiches=r["fiches"], choix=choix).en_json()
+    if q.audience and audience.concerne_le_debat(q.texte, q.audience):
+        # Question sur le débat qui vient d'être plaidé : l'archiviste répond à partir des pièces.
+        r = audience.repondre(q.texte, q.audience)
+        reponse = questions.Analyse("audience", "audience", r.message, agent="archiviste", extraits=r.extraits)
+        if not profil.portefeuille_declare:
+            questions.adapter_au_portefeuille_de_reference(reponse)
+        return reponse.en_json()
     ticker = q.ticker if q.ticker in univers else None
     analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
                                  resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
-                                 historique=[h[:500] for h in q.historique])
+                                 historique=[h[:500] for h in q.historique],
+                                 profil_info=_dossier_investisseur(profil, _donnees().univers))
+    if not profil.portefeuille_declare:
+        # Persona trop peu détaillé : le greffier ne parle pas d'un portefeuille qu'il ne connaît pas.
+        questions.adapter_au_portefeuille_de_reference(analyse)
     return analyse.en_json()
 
 
@@ -225,10 +391,8 @@ def declencher_extraction(televerser_s3: bool = True) -> dict:
 
 
 @app.post("/api/intention")
-def interpreter_demande(demande: DemandeIntention) -> dict:
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+def interpreter_demande(demande: DemandeIntention, request: Request) -> dict:
+    profil = _profil(request, demande.profil)
     d = _donnees()
     ticker, taille, explication = interpreter_intention(demande.texte, d.univers, profil)
     return {
@@ -241,12 +405,10 @@ def interpreter_demande(demande: DemandeIntention) -> dict:
 
 
 @app.post("/api/duel")
-def duel(demande: DemandeDuel) -> dict:
+def duel(demande: DemandeDuel, request: Request) -> dict:
     """Deux procès sur le même profil, puis une décision A contre B selon une règle fixe."""
     from rdc.duel import juger_duel
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    profil = _profil(request, demande.profil)
     d = _donnees()
     for cote in (demande.a, demande.b):
         if cote.ticker not in d.univers.index:
@@ -258,10 +420,8 @@ def duel(demande: DemandeDuel) -> dict:
 
 
 @app.post("/api/proces")
-def proces(demande: DemandeProces) -> dict:
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+def proces(demande: DemandeProces, request: Request) -> dict:
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
@@ -322,11 +482,9 @@ def proces(demande: DemandeProces) -> dict:
 
 
 @app.post("/api/proces/discussion")
-def discussion_seule(demande: DemandeProces) -> list[dict]:
+def discussion_seule(demande: DemandeProces, request: Request) -> list[dict]:
     """Renvoie uniquement la chronologie théâtralisée du débat (tours de parole) pour affichage cadencé."""
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
@@ -337,11 +495,9 @@ def discussion_seule(demande: DemandeProces) -> list[dict]:
 
 
 @app.post("/api/proces/stream")
-async def stream_proces(demande: DemandeProces):
+async def stream_proces(demande: DemandeProces, request: Request):
     """Diffusion en streaming (Server-Sent Events) cadencée des prises de parole du tribunal."""
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
@@ -365,10 +521,8 @@ async def stream_proces(demande: DemandeProces):
 
 
 @app.post("/api/comparaison")
-def comparer(demande: DemandeComparaison) -> dict:
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+def comparer(demande: DemandeComparaison, request: Request) -> dict:
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
@@ -381,10 +535,8 @@ def comparer(demande: DemandeComparaison) -> dict:
 
 
 @app.post("/api/scenarios")
-def scenarios(demande: DemandeScenarios) -> list[dict]:
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+def scenarios(demande: DemandeScenarios, request: Request) -> list[dict]:
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")
@@ -395,10 +547,8 @@ def scenarios(demande: DemandeScenarios) -> list[dict]:
 
 
 @app.post("/api/pdf")
-def telecharger_pdf(demande: DemandePDF) -> Response:
-    profil = PROFILS.get(demande.profil)
-    if profil is None:
-        raise HTTPException(status_code=404, detail=f"Profil inconnu : {demande.profil}")
+def telecharger_pdf(demande: DemandePDF, request: Request) -> Response:
+    profil = _profil(request, demande.profil)
     d = _donnees()
     if demande.ticker not in d.univers.index:
         raise HTTPException(status_code=404, detail=f"{demande.ticker} n'est pas dans l'univers de 31 actifs.")

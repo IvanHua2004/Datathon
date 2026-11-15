@@ -101,7 +101,7 @@ PART_RE = re.compile(r"(\d{1,3}(?:[.,]\d+)?)\s*(?:%|pour ?cent|pourcents?|p\.?\s
 
 # Thèmes vagues -> dossiers possibles : (motifs dans le texte normalisé, [(titre, raison)]).
 THEMES: list[tuple[str, tuple[str, ...], list[tuple[str, str]]]] = [
-    ("l'intelligence artificielle", (r"\bia\b", r"intelligence artificielle", r"\bai\b"), [
+    ("l'intelligence artificielle", (r"\bia\b", r"intelligence artificielle", r"(?<!j')\bai\b"), [
         ("NVDA", "Les puces qui font tourner l'IA"),
         ("MSFT", "L'IA dans les logiciels d'entreprise"),
         ("GOOGL", "La recherche et les modèles d'IA"),
@@ -218,10 +218,13 @@ class Analyse:
     reformulations: list[str] = field(default_factory=list)
     choix: list[Choix] = field(default_factory=list)
     theme: str | None = None
+    profil: dict | None = None          # dossier de l'investisseur (statut « profil »)
+    definition: dict | None = None      # terme du glossaire (statut « definition »)
     agent: str = "greffier"             # qui répond : le greffier, ou l'archiviste pour les chiffres
     fiches: list[dict] = field(default_factory=list)
     groupes: list[dict] = field(default_factory=list)   # catalogue ou titres à choisir
     selection: str | None = None        # « deux » ou « un_par_groupe » quand il faut choisir
+    extraits: list[dict] = field(default_factory=list)  # pièces de l'audience citées par l'archiviste
 
     def en_json(self) -> dict:
         d = asdict(self)
@@ -481,10 +484,64 @@ def est_une_relance(texte_norm: str) -> bool:
     return len(texte_norm.split()) <= 6 or any(re.search(m, texte_norm) for m in RELANCE)
 
 
+def _reponse_profil(norm: str, p: dict) -> str:
+    """Une phrase qui répond à la question précise, puis le dossier complet."""
+    nom = p["nom"]
+    reponses = []
+    if re.search(r"budget|perte|tolerance|limite", norm):
+        reponses.append(f"Le budget de perte déclaré de {nom} est de {round(p['budgetPerte'] * 100):g} % du portefeuille.")
+    if re.search(r"horizon|quand|combien de temps", norm):
+        reponses.append(f"Son horizon est d'environ {p['horizonAns']:g} ans.")
+    if re.search(r"capital|combien j'?ai|argent", norm):
+        reponses.append(f"Son capital (fictif) est de {p['capital']:,.0f} $.".replace(",", " "))
+    if re.search(r"objectif|but", norm):
+        reponses.append(f"Son objectif : {p['objectif'].rstrip('.').lower()}.")
+    if re.search(r"plafond|maximum|max", norm):
+        reponses.append(f"Un seul titre ne doit pas dépasser {round(p['plafondPosition'] * 100):g} % du portefeuille.")
+    if re.search(r"crypto|exclu|interdit|pas avoir|peux pas", norm):
+        if p.get("classesExclues"):
+            reponses.append(f"{nom} exclut ces classes d'actifs : {', '.join(p['classesExclues'])}. "
+                            "Un placement dans l'une d'elles sera jugé contraire à son profil.")
+        else:
+            reponses.append(f"{nom} n'exclut aucune classe d'actifs.")
+    debut = " ".join(reponses) + " " if reponses else ""
+    if not p.get("portefeuilleDeclare", True):
+        return (f"{debut}Voici le dossier de {nom}, tel qu'il a été déclaré (profil fictif). "
+                "Sa note ne décrit pas ses positions : le tribunal raisonne donc sur un portefeuille "
+                "de référence fictif, pas sur le sien. Pour le préciser, ajoutez-les dans la note "
+                "du persona (par exemple « SPY 60 %, XBB.TO 40 % »).")
+    return f"{debut}Voici le dossier de {nom}, tel qu'il a été déclaré (profil fictif)."
+
+
+_VOTRE_PORTEFEUILLE = [
+    (re.compile(r"\b([Dd])e (?:votre|mon) portefeuille\b"), r"\1u portefeuille de référence"),
+    (re.compile(r"\b(?:votre|mon) portefeuille\b"), "le portefeuille de référence"),
+    (re.compile(r"\b(?:Votre|Mon) portefeuille\b"), "Le portefeuille de référence"),
+]
+
+
+def sans_votre_portefeuille(texte: str) -> str:
+    """Pour un persona dont on ne connaît pas les positions : jamais « votre portefeuille »."""
+    for motif, remplacement in _VOTRE_PORTEFEUILLE:
+        texte = motif.sub(remplacement, texte)
+    return texte
+
+
+def adapter_au_portefeuille_de_reference(a: "Analyse") -> "Analyse":
+    a.message = sans_votre_portefeuille(a.message)
+    if a.question:
+        a.question = sans_votre_portefeuille(a.question)
+    a.reformulations = [sans_votre_portefeuille(r) for r in a.reformulations]
+    for c in a.choix:
+        c.question = sans_votre_portefeuille(c.question)
+    return a
+
+
 def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None = None,
              taille_en_attente: float | None = None, titre_exemple: str = "SPY",
              resume_profil: str = "", portefeuille: set[str] = frozenset(),
-             classes_exclues: set[str] = frozenset(), historique: list[str] | None = None) -> Analyse:
+             classes_exclues: set[str] = frozenset(), historique: list[str] | None = None,
+             profil_info: dict | None = None, _profondeur: int = 0) -> Analyse:
     """Analyse une réponse au greffier, en tenant compte des questions précédentes.
 
     univers : ticker -> nom. ticker_en_attente / taille_en_attente : ce que le greffier
@@ -494,9 +551,37 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
     if not norm:
         return Analyse("incomplet", "vide", "Je vous écoute : nommez un titre et la part de votre portefeuille.")
 
+    from . import conversation
+
     titres = trouver_titres(texte, univers)
     part = trouver_part(texte)
     rappel = None   # ce que le greffier a repris de la conversation, dit à l'investisseur
+    nom = profil_info["nom"] if profil_info else "l'investisseur"
+
+    # Politesse : bonjour, merci, recommencer.
+    poli = conversation.politesse(norm, nom)
+    if poli and not titres:
+        return Analyse("social", poli[0], poli[1])
+
+    # Le dossier de l'investisseur : c'est l'archiviste qui le lit, sans juger.
+    if (profil_info and conversation.question_sur_le_profil(norm) and part is None and not titres
+            and not re.search(r"\b(?:placer|investir|acheter|ajouter|mettre|vendre)\b", norm)):
+        return Analyse("profil", "profil", _reponse_profil(norm, profil_info), agent="archiviste",
+                       profil=profil_info)
+
+    # Les mots du tribunal : définition écrite à la main, avec l'exemple du persona si utile.
+    terme = conversation.terme_demande(norm, bool(titres))
+    if terme:
+        texte_def = conversation.GLOSSAIRE[terme][1]
+        exemple = conversation.exemple_pour(terme, profil_info)
+        return Analyse("definition", "definition", texte_def, agent="archiviste",
+                       definition={"terme": terme, "texte": texte_def, "exemple": exemple})
+
+    # Fautes de frappe : « nvidai » -> NVIDIA, dit à l'investisseur.
+    approximations = []
+    if not titres and not themes_reconnus(norm):
+        approximations = conversation.titres_approchants(norm, univers, ALIAS)
+        titres = [t for _, t in approximations]
 
     contexte = lire_contexte(historique or [], univers)
     autres_themes = [nom for nom, cands in themes_reconnus(norm) if not any(t in titres for t, _ in cands)]
@@ -520,8 +605,28 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
             part = contexte.part
             rappel = (rappel + " " if rappel else "") + f"Je garde la part de {round(part * 100):g} %."
 
+    if approximations:
+        compris = ", ".join(f"« {mot} » comme {univers[t]} ({t})" for mot, t in approximations)
+        rappel = f"J'ai compris {compris}." + (f" {rappel}" if rappel else "")
+
     analyse = _analyser(texte, norm, titres, part, univers, ticker_en_attente, taille_en_attente,
                         titre_exemple, resume_profil, portefeuille, classes_exclues)
+
+    # Dernier recours : les règles n'ont pas compris, Bedrock classe la question et la réécrit.
+    if _profondeur == 0 and analyse.motif in ("hors_sujet", "titre_manquant"):
+        classement = conversation.classer_avec_modele(texte, univers, resume_profil, historique or [])
+        if classement and classement["intention"] == "decision" and len(classement["tickers"]) > 1:
+            choix = _proposer([(t, "Proposé d'après votre question") for t in classement["tickers"]],
+                              classement["part"], univers)
+            return Analyse("choix", "interpretation", _message_choix(None, choix), choix=choix)
+        canon = conversation.question_canonique(classement) if classement else None
+        if canon:
+            relue = analyser(canon, univers, ticker_en_attente, taille_en_attente, titre_exemple,
+                             resume_profil, portefeuille, classes_exclues, historique, profil_info,
+                             _profondeur=1)
+            relue.message = f"J'ai compris : « {canon} ». {relue.message}"
+            return relue
+
     if rappel:
         analyse.message = f"{rappel} {analyse.message}"
     return analyse
@@ -577,10 +682,6 @@ def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univ
         if ticker_en_attente:
             titres = [ticker_en_attente]
         elif part is not None or any(m in norm for m in MOTS_FINANCE):
-            candidats = interpreter_avec_modele(texte, univers, resume_profil)
-            if candidats:
-                choix = _proposer(candidats, part_valide, univers)
-                return Analyse("choix", "interpretation", _message_choix(None, choix), choix=choix)
             return Analyse(
                 "incomplet", "titre_manquant",
                 "Dans quel titre ? Le tribunal connaît 31 actifs : actions canadiennes et "
@@ -600,7 +701,10 @@ def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univ
         choix = _proposer([(t, "Nommé dans votre question") for t in titres[:4]], part_valide, univers)
         return Analyse(
             "choix", "plusieurs_titres",
-            "Un procès à la fois : le tribunal juge un seul titre par audience. Lequel voulez-vous soumettre ?",
+            ("Vous pouvez soumettre un seul de ces titres au tribunal, ou les opposer dans un débat "
+             "pour savoir lequel convient le mieux à votre profil."
+             if len(choix) == 2 else
+             "Un procès à la fois : le tribunal juge un seul titre par audience. Lequel voulez-vous soumettre ?"),
             choix=choix,
         )
 

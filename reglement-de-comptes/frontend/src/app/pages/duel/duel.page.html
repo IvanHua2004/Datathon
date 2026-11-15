@@ -25,6 +25,30 @@
       <p class="bandeau bandeau--avertissement" role="status">{{ av }}</p>
     }
 
+    @if (d.avertissementDebat; as av2) {
+      <p class="bandeau bandeau--avertissement" role="status">{{ av2 }}</p>
+    }
+
+    <section class="debat" aria-label="Le débat">
+      <h2>Le débat</h2>
+      @for (t of d.debat; track t.ordre) {
+        <div class="tour" [attr.data-role]="t.role">
+          <span class="avatar" aria-hidden="true">{{ t.role === 'juge' ? '⚖' : (t.ticker ?? '?').slice(0, 4) }}</span>
+          <div class="parole">
+            <strong>{{ t.acteur }}</strong>
+            <p>{{ t.texte }}</p>
+            <p class="controle" [class.alerte]="t.non_verifies.length">
+              @if (t.non_verifies.length) {
+                Greffier : chiffres absents des dossiers → {{ t.non_verifies.join(', ') }}
+              } @else if (t.role !== 'juge') {
+                Greffier : tous les chiffres cités figurent dans les dossiers.
+              }
+            </p>
+          </div>
+        </div>
+      }
+    </section>
+
     <section class="decision" [class.egalite]="!d.decision.gagnant" aria-live="polite">
       <span class="sceau" aria-hidden="true">⚖</span>
       <div>
@@ -74,7 +98,7 @@
             <p><strong>Le Juge.</strong> {{ c.juge }}</p>
           </details>
 
-          <a class="secondaire" routerLink="/tribunal"
+          <a class="secondaire" routerLink="/tribunal-2" (click)="sonAudience.amorcer()"
              [queryParams]="{ profil: d.profil, ticker: c.ticker, taille: c.taille }">Voir le procès complet →</a>
         </article>
       }

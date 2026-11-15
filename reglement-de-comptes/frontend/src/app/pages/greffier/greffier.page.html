@@ -1,24 +1,57 @@
 <rdc-entete [etape]="2">
   @if (persona(); as p) {
-    <a class="dossier" routerLink="/personas" aria-label="Changer de persona">
-      <span class="pastille" aria-hidden="true">{{ p.nom[0] }}</span>
-      Dossier {{ p.nom }} <span class="changer">Changer</span>
+    <a class="dossier" routerLink="/personas" [attr.aria-label]="'Dossier' + p.nom + ', changer de persona'">
+      <img class="dossier-portrait" [src]="'assets/' + p.cle + '.png'" alt="" width="48" height="48">
+      <span class="dossier-texte">
+        <strong>Dossier de {{ p.nom }}</strong>
+        <span class="changer">Changer <span aria-hidden="true">›</span></span>
+      </span>
     </a>
   }
 </rdc-entete>
 
 <main class="scene">
-  <p class="titre-audience">Audience préliminaire</p>
+  <h1 class="titre-audience">{{ titre() }}</h1>
 
-  <section #fil class="fil" aria-label="Dialogue avec le greffier" aria-live="polite">
+  <section #fil class="fil" aria-label="Dialogue avec le greffier et l’archiviste" aria-live="polite">
     @for (m of messages(); track $index) {
       @if (m.de === 'greffier') {
         <div class="ligne ligne--greffier">
-          <span class="avatar" aria-hidden="true">G</span>
+          <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
           <div class="bulle bulle--greffier" [attr.data-ton]="m.ton">
             <strong class="auteur">Le greffier</strong>
             @if (m.ton === 'ok') { <strong class="statut statut--ok">Recevable.</strong> }
             <p>{{ m.ton === 'ok' ? m.texte.replace('Recevable. ', '') : m.texte }}</p>
+
+            @if (m.audience; as au) {
+              <article class="carte-audience" [attr.aria-label]="'Audience ' + au.nomTitre">
+                <header class="tete-audience">
+                  <span class="sur-audience">{{ au.vote ? 'Audience close' : 'Audience suspendue' }}</span>
+                  <strong>{{ au.nomTitre }} ({{ au.ticker }}) · {{ pct(au.taille, 0) }}</strong>
+                  @if (au.vote) {
+                    <span class="etat-audience" [class.accord]="au.accord === true" [class.desaccord]="au.accord === false">
+                      Vous : {{ au.vote === 'avocat_defense' ? 'la Défense' : 'le Procureur' }} · Tribunal : {{ au.verdictTribunal }}
+                    </span>
+                  } @else {
+                    <span class="etat-audience">Verdict en attente</span>
+                  }
+                </header>
+                <div class="actions">
+                  @if (!au.vote && peutRevenirVoter(au)) {
+                    <button type="button" class="principal" (click)="revenirVoter(au)">⚖ Revenir voter</button>
+                  }
+                  <button type="button" class="secondaire" (click)="interrogerArchiviste(au)">Interroger l’archiviste sur ce débat</button>
+                </div>
+                <p class="sous-audience">Ou ouvrir un autre débat :</p>
+                <ul class="pastilles-audience">
+                  @for (t of autresParts(au); track t) {
+                    <li><button type="button" (click)="debatAutrePart(au, t)">{{ au.ticker }} à {{ pct(t, 0) }}</button></li>
+                  }
+                  <li><button type="button" (click)="voirTousLesTitres()">Un autre titre</button></li>
+                  <li><button type="button" (click)="choisirDeuxTitres()"><span aria-hidden="true">⚔</span> Duel entre deux titres</button></li>
+                </ul>
+              </article>
+            }
 
             @if (m.analyse; as a) {
               @if (a.statut === 'recevable') {
@@ -47,12 +80,19 @@
                       </button>
                     </li>
                   }
+                  @if (peutDueler(a)) {
+                    <li class="choix-duel">
+                      <button type="button" class="dossier-choix dossier-choix--duel" (click)="ouvrirDuel(a)">
+                        <span class="choix-tete">
+                          <strong><span aria-hidden="true">⚔</span> Débat entre les deux</strong>
+                          <span class="choix-symbole">{{ a.choix[0].ticker }} contre {{ a.choix[1].ticker }} · {{ pct(partDuel(a), 0) }} chacun</span>
+                        </span>
+                        <span class="choix-raison">Deux avocats s'affrontent, le juge dit lequel convient le mieux à votre profil</span>
+                        <span class="choix-action" aria-hidden="true">Ouvrir le débat →</span>
+                      </button>
+                    </li>
+                  }
                 </ul>
-                @if (peutDueler(a)) {
-                  <button type="button" class="principal duel" (click)="ouvrirDuel(a)">
-                    <span aria-hidden="true">⚔</span> Juger les deux en duel
-                  </button>
-                }
               }
               @if (a.statut === 'refus' && a.reformulations.length) {
                 <div class="reformulations">
@@ -67,10 +107,17 @@
         </div>
       } @else if (m.de === 'archiviste') {
         <div class="ligne ligne--greffier">
-          <span class="avatar avatar--archiviste" aria-hidden="true">A</span>
+          <img class="avatar--greffier" src="assets/archiviste.png" alt="">
           <div class="bulle bulle--greffier bulle--archiviste">
-            <strong class="auteur">L'archiviste · les données, rien que les données</strong>
+            <strong class="auteur">L’archiviste</strong>
             <p>{{ m.texte }}</p>
+            @if (m.suggestions?.length) {
+              <div class="reformulations suggestions-debat">
+                @for (q of m.suggestions; track q) {
+                  <button type="button" class="lien" (click)="envoyer(q)">« {{ q }} »</button>
+                }
+              </div>
+            }
             @if (m.analyse; as a) {
               @switch (a.statut) {
                 @case ('fiche') {
@@ -122,6 +169,81 @@
                   </div>
                   <p class="fiche-limites">{{ a.fiches[0].limites }} Source : {{ a.fiches[0].source }}.</p>
                 }
+                @case ('profil') {
+                  @if (a.profil; as d) {
+                    <article class="fiche dossier-investisseur" [attr.aria-label]="'Dossier de ' + d.nom">
+                      <header class="fiche-tete">
+                        <strong>Dossier de {{ d.nom }}</strong>
+                        <span>{{ d.resume }}</span>
+                      </header>
+                      <dl class="fiche-faits">
+                        <div><dt>Objectif</dt><dd>{{ d.objectif }}</dd></div>
+                        <div><dt>Horizon</dt><dd>environ {{ d.horizonAns }} ans</dd></div>
+                        <div><dt>Capital (fictif)</dt><dd>{{ dollars(d.capital) }}</dd></div>
+                        <div><dt>Budget de perte</dt><dd>{{ pct(d.budgetPerte, 0) }}</dd></div>
+                        <div><dt>Plafond par titre</dt><dd>{{ pct(d.plafondPosition, 0) }}</dd></div>
+                        <div><dt>Plafond par secteur</dt><dd>{{ pct(d.plafondSecteur, 0) }}</dd></div>
+                        <div><dt>Classes exclues</dt><dd>{{ d.classesExclues.length ? d.classesExclues.join(', ') : 'aucune' }}</dd></div>
+                        <div><dt>Filtre ESG</dt><dd>{{ d.filtreEsg ? 'oui' : 'non' }}</dd></div>
+                      </dl>
+                      <p class="preferences"><strong>Préférences :</strong> {{ d.preferences }}</p>
+                      <h3 class="titre-portefeuille">{{ d.portefeuilleDeclare === false ? 'Portefeuille de référence (fictif)' : 'Portefeuille actuel' }}</h3>
+                      @if (d.portefeuilleDeclare === false) {
+                        <p class="preferences">La note du persona ne décrit pas ses positions : le tribunal raisonne sur ce portefeuille type.</p>
+                      }
+                      <div class="barre-portefeuille" aria-hidden="true">
+                        @for (x of d.portefeuille; track x.ticker; let i = $index) {
+                          <span [style.flex-basis.%]="x.poids * 100" [attr.data-i]="i % 6" [title]="x.ticker"></span>
+                        }
+                      </div>
+                      <ul class="lignes-portefeuille">
+                        @for (x of d.portefeuille; track x.ticker; let i = $index) {
+                          <li>
+                            <span class="pastille-couleur" [attr.data-i]="i % 6" aria-hidden="true"></span>
+                            <button type="button" class="lien" (click)="voirFiche(x.ticker)">{{ x.nomTitre }} ({{ x.ticker }})</button>
+                            <strong>{{ pct(x.poids, 0) }}</strong>
+                          </li>
+                        }
+                      </ul>
+                      <p class="fiche-limites">Profil fictif inspiré du cas officiel ; les montants sont des hypothèses de l'équipe.</p>
+                    </article>
+                  }
+                }
+                @case ('audience') {
+                  @for (x of a.extraits ?? []; track x.numero) {
+                    <article class="fiche fiche-piece" [attr.aria-label]="'Pièce ' + x.numero">
+                      <header class="fiche-tete">
+                        <strong>Pièce {{ x.numero }}</strong>
+                        <span>Témoin « {{ x.temoin }} » · {{ x.periode }}</span>
+                      </header>
+                      <dl class="fiche-faits">
+                        @for (f of x.faits; track f.libelle) {
+                          <div><dt>{{ f.libelle }}</dt><dd>{{ f.valeur }}</dd></div>
+                        }
+                      </dl>
+                      @if (x.limites || x.source) {
+                        <p class="fiche-limites">{{ x.limites }} Source : {{ x.source }}.</p>
+                      }
+                    </article>
+                  }
+                  @if (tribunal.resultat(); as pr) {
+                    @if (!tribunal.voteAudience() && persona(); as p) {
+                      @if (tribunal.correspond(p.cle, pr.demande.ticker, pr.demande.taille)) {
+                        <div class="actions actions--discretes">
+                          <button type="button" class="secondaire" (click)="revenirVoter({ ticker: pr.demande.ticker, nomTitre: pr.demande.nomTitre, taille: pr.demande.taille, question: '', vote: null, verdictTribunal: null, accord: null })">
+                            ⚖ Revenir voter
+                          </button>
+                        </div>
+                      }
+                    }
+                  }
+                }
+                @case ('definition') {
+                  @if (a.definition; as def) {
+                    <p class="terme">Terme : <strong>{{ def.terme }}</strong></p>
+                    @if (def.exemple) { <p class="exemple">{{ def.exemple }}</p> }
+                  }
+                }
                 @case ('catalogue') {
                   @for (g of a.groupes; track g.nom) {
                     <section class="groupe">
@@ -133,7 +255,7 @@
                                     [title]="t.secteur">
                               <strong>{{ t.nomTitre }}</strong>
                               <span>{{ t.ticker }}</span>
-                              @if (t.dansPortefeuille) { <em class="marque marque--portefeuille">dans votre portefeuille</em> }
+                              @if (t.dansPortefeuille) { <em class="marque marque--portefeuille">{{ persona()?.portefeuilleDeclare === false ? 'dans le portefeuille de référence' : 'dans votre portefeuille' }}</em> }
                               @if (t.exclu) { <em class="marque marque--exclu">exclu par votre profil</em> }
                             </button>
                           </li>
@@ -181,7 +303,7 @@
 
     @if (enCours()) {
       <div class="ligne ligne--greffier" role="status">
-        <span class="avatar" aria-hidden="true">G</span>
+        <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
         <div class="bulle bulle--greffier bulle--attente">
           <span class="visually-hidden">Le greffier examine votre question</span>
           <span class="points" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -191,48 +313,60 @@
   </section>
 
   <form class="compositeur" (submit)="$event.preventDefault(); envoyer()">
-    @if (listeVisible()) {
-      <ul id="suggestions" class="suggestions" role="listbox" aria-label="Compléter la phrase">
-        @for (s of suggestions(); track s; let i = $index) {
-          <li [id]="'suggestion-' + i" role="option" [attr.aria-selected]="i === active()"
-              [class.active]="i === active()"
-              (mousedown)="$event.preventDefault(); accepter(s)">
-            @let parts = morceaux(s);
-            <span>{{ parts.tape }}</span><strong>{{ parts.suite }}</strong>
-          </li>
-        }
-        <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
-      </ul>
+    @if (contexte(); as c) {
+      <p class="contexte">
+        <span>Contexte retenu : <strong>{{ c.titre }}</strong>@if (c.taille) { · {{ pct(c.taille, 0) }} }</span>
+        <button type="button" class="effacer" (click)="effacerContexte()" aria-label="Oublier ce contexte">✕</button>
+      </p>
     }
-    <div class="outils" role="group" aria-label="Raccourcis">
-      <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
-        <span aria-hidden="true">☰</span> Voir tous les titres
-      </button>
-      <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
-        <span aria-hidden="true">⇄</span> Comparer deux titres
-      </button>
-    </div>
-    <div class="barre">
-      <label for="champ" class="visually-hidden">Votre question</label>
-      <input
-        #champ
-        id="champ"
-        type="text"
-        autocomplete="off"
-        maxlength="500"
-        placeholder="Posez votre question…"
-        role="combobox"
-        aria-autocomplete="list"
-        aria-controls="suggestions"
-        [attr.aria-expanded]="listeVisible()"
-        [attr.aria-activedescendant]="active() >= 0 ? 'suggestion-' + active() : null"
-        [value]="saisie()"
-        (input)="taper($event)"
-        (keydown)="clavier($event)"
-        (focus)="ouverte.set(true)"
-        (blur)="ouverte.set(false)"
-      >
-      <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
+    <div class="zone-saisie">
+      @if (listeVisible()) {
+        <ul id="suggestions" class="suggestions" role="listbox" aria-label="Compléter la phrase">
+          @for (s of suggestions(); track s; let i = $index) {
+            <li [id]="'suggestion-' + i" role="option" [attr.aria-selected]="i === active()"
+                [class.active]="i === active()"
+                (mousedown)="$event.preventDefault(); accepter(s)">
+              @let parts = morceaux(s);
+              <span>{{ parts.tape }}</span><strong>{{ parts.suite }}</strong>
+            </li>
+          }
+          <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
+        </ul>
+      }
+      <div class="barre">
+        <label for="champ" class="visually-hidden">Votre question</label>
+        <input
+          #champ
+          id="champ"
+          type="text"
+          autocomplete="off"
+          maxlength="500"
+          placeholder="Posez votre question…"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="suggestions"
+          [attr.aria-expanded]="listeVisible()"
+          [attr.aria-activedescendant]="active() >= 0 ? 'suggestion-' + active() : null"
+          [value]="saisie()"
+          (input)="taper($event)"
+          (keydown)="clavier($event)"
+          (focus)="ouverte.set(true)"
+          (click)="ouverte.set(true)"
+          (blur)="ouverte.set(false)"
+        >
+        <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
+      </div>
+      <div class="outils" role="group" aria-label="Raccourcis">
+        <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
+          <span aria-hidden="true">☰</span> Voir tous les titres
+        </button>
+        <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
+          <span aria-hidden="true">⇄</span> Comparer deux titres
+        </button>
+        <button type="button" class="outil outil--discret" (click)="nouvelleConversation()" [disabled]="enCours()">
+          <span aria-hidden="true">↺</span> Nouvelle conversation
+        </button>
+      </div>
     </div>
   </form>
 </main>
