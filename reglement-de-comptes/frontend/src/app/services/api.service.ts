@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { Actif, AnalyseComparative, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
+import { AnalyseQuestion, DemandeAnalyse } from '../models/question.model';
+import { Duel } from '../models/duel.model';
 
 /** Accès HTTP à l'API Python. Les chemins sont relatifs : nginx (ou ng serve) relaie /api/. */
 @Injectable({ providedIn: 'root' })
@@ -24,6 +26,14 @@ export class ApiService {
 
   tailles(): Observable<number[]> {
     return this.http.get<number[]>(`${this.base}/tailles`);
+  }
+
+  analyserQuestion(demande: DemandeAnalyse): Observable<AnalyseQuestion> {
+    return this.http.post<AnalyseQuestion>(`${this.base}/questions/analyser`, demande);
+  }
+
+  duel(profil: string, a: { ticker: string; taille: number }, b: { ticker: string; taille: number }): Observable<Duel> {
+    return this.http.post<Duel>(`${this.base}/duel`, { profil, a, b, mode: 'bedrock' });
   }
 
   ouvrirProces(demande: DemandeProces): Observable<Proces> {

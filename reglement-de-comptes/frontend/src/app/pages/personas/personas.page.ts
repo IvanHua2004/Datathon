@@ -1,14 +1,23 @@
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { EnteteComponent } from '../../components/entete/entete.component';
+
 @Component({
   selector: 'rdc-personas',
+  imports: [EnteteComponent],
+  // Le bandeau du parcours (logo + étapes) au-dessus de la page.
+  styles: `
+    :host { display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr); min-height: 100svh; }
+    .persona-page { min-height: 0; }
+  `,
   template: `
+    <rdc-entete [etape]="1" />
     <main class="menu persona-page">
       <h1>Choisis ton <span>persona</span></h1>
       <div class="persona-grid">
         @for (persona of personas; track persona.id) {
-          <a class="persona-card" [href]="'/tribunal?persona=' + persona.id"
+          <a class="persona-card" [href]="'/question?profil=' + persona.id"
             [class.persona-selected]="selectedPersona() === persona.id"
             [style.--selection-duration]="selectionDuration + 'ms'"
             [attr.aria-label]="'Choisir ' + persona.name"
@@ -95,7 +104,7 @@ export class PersonasPage {
     if (this.selectedPersona()) return;
 
     const openTribunal = () => {
-      void this.router.navigate(['/tribunal'], { queryParams: { persona } }).finally(() => {
+      void this.router.navigate(['/question'], { queryParams: { profil: persona } }).finally(() => {
         this.selectedPersona.set('');
       });
     };
