@@ -41,7 +41,8 @@ function clePortrait(tour: TourDiscussion): string {
         <button class="bouton-verdict" type="button" aria-haspopup="dialog"
           [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
           [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
-          Verdict
+          <img class="icone-verdict" src="assets/tribunal-2/marteau.png" alt="" />
+          <span>Terminé</span>
           @if (impactVerdict()) {
             <span class="eclats-verdict" aria-hidden="true">
               <i></i><i></i><i></i><i></i><i></i><i></i>
@@ -69,7 +70,7 @@ function clePortrait(tour: TourDiscussion): string {
             }
             <picture>
               <source media="(prefers-reduced-motion: reduce)" [srcset]="personnage.image + '.png'">
-              <img [src]="personnage.image + (lectureActive() && tour()?.role === personnage.role ? '.gif' : '.png')" alt="">
+              <img [src]="personnage.image + (preparation() || (lectureActive() && tour()?.role === personnage.role) ? '.gif' : '.png')" alt="">
             </picture>
           </div>
         }
@@ -158,9 +159,16 @@ function clePortrait(tour: TourDiscussion): string {
           </nav>
         </article>
       } @else {
-        <div class="dialogue attente">
-          <h2>Salle d’audience</h2>
-          <p>{{ enCours() ? 'Les parties préparent leurs interventions…' : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
+        <div class="dialogue attente" [class.attente-active]="preparation()">
+          <div>
+            <h2>Salle d’audience</h2>
+            <p role="status">{{ preparation() ? 'Les parties préparent leurs interventions…' : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
+          </div>
+          @if (preparation()) {
+            <button class="son-preparation" type="button" (click)="basculerSon()">
+              {{ sonActive() && !sonBloque() ? 'Couper l’ambiance' : 'Activer l’ambiance' }}
+            </button>
+          }
         </div>
       }
     </section>
@@ -237,6 +245,7 @@ export class AudienceSceneComponent {
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
+  readonly preparation = computed(() => this.enCours() && !this.tour());
   readonly annoncesScene = computed(() => {
     const tour = this.tour();
     if (!tour) return [];
@@ -363,7 +372,8 @@ export class AudienceSceneComponent {
   });
   private readonly replique = viewChild<ElementRef<HTMLElement>>('replique');
   private readonly voixAudience = linkedSignal({ source: this.tours, computation: choisirVoixAudience });
-  private readonly lecteur = inject(SonAudienceService).lecteur;
+  private readonly sonAudience = inject(SonAudienceService);
+  private readonly lecteur = this.sonAudience.lecteur;
   private dernierTourSon?: TourDiscussion;
   private minuterieVerdict?: ReturnType<typeof setTimeout>;
   private readonly ancrageSon = viewChild<ElementRef<HTMLElement>>('ancrageSon');
@@ -371,7 +381,10 @@ export class AudienceSceneComponent {
 
   constructor() {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
+    inject(DestroyRef).onDestroy(() => {
+      clearTimeout(this.minuterieVerdict);
+      this.sonAudience.arreterAmbianceSalle();
+    });
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     afterRenderEffect(() => {
       if (this.verdictRendu()) this.replique()?.nativeElement.focus({ preventScroll: true });
@@ -405,8 +418,12 @@ export class AudienceSceneComponent {
     });
 
     effect((nettoyer) => {
+      const preparation = this.preparation();
+      if (!preparation) this.sonAudience.arreterAmbianceSalle();
       if (!this.sonActive() || this.sonBloque()) return;
-      if (this.annonceActive()) {
+      if (preparation) {
+        this.jouerAmbianceSalle();
+      } else if (this.annonceActive()) {
         if (this.verdictOuvert() || this.rapportOuvert()) return;
         this.jouerImpactAnnonce();
       } else {
@@ -525,7 +542,12 @@ export class AudienceSceneComponent {
     }
     this.sonActive.set(true);
     this.sonBloque.set(false);
-    if (this.lectureActive()) this.jouerVoix();
+    if (this.preparation()) this.jouerAmbianceSalle();
+    else if (this.lectureActive()) this.jouerVoix();
+  }
+
+  private jouerAmbianceSalle(): void {
+    this.surveillerLecture(this.sonAudience.jouerAmbianceSalle());
   }
 
   private jouerImpactAnnonce(): void {
@@ -556,7 +578,11 @@ export class AudienceSceneComponent {
   }
 
   private lancerSon(): void {
-    void this.lecteur.play().catch((erreur: DOMException) => {
+    this.surveillerLecture(this.lecteur.play());
+  }
+
+  private surveillerLecture(lecture: Promise<void>): void {
+    void lecture.catch((erreur: DOMException) => {
       if (erreur.name === 'NotAllowedError') this.sonBloque.set(true);
     });
   }

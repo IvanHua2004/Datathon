@@ -69,22 +69,31 @@
   display: grid;
   place-content: center;
   justify-items: center;
+  gap: 0.15rem;
   flex: 0 0 auto;
   width: 4.5rem;
   height: 4.5rem;
   padding: 0;
-  border: 1px solid #6fa98b;
+  border: 1px solid #bb7d48;
   border-radius: 50%;
-  background: var(--confirm-background);
-  color: #fff;
+  background: #281526;
+  color: #ffe0a6;
   font: inherit;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-weight: 700;
   line-height: 1.15;
   cursor: pointer;
 }
 
-.bouton-verdict:hover { background: var(--confirm-background-hover); }
+.icone-verdict {
+  display: block;
+  width: 2.9rem;
+  height: 2rem;
+  object-fit: contain;
+  object-view-box: inset(0 17% 0 20%);
+  mix-blend-mode: lighten;
+}
+.bouton-verdict:hover { background: #3c2134; border-color: #ffd578; }
 .bouton-verdict:is(:active, .verdict-enfonce) { transform: scale(0.95); }
 .bouton-verdict:focus-visible { outline-color: #fff6eb; }
 
@@ -332,6 +341,7 @@
 .personnage[data-emplacement="centre"] { --position-x: 50%; --position-bas: 48%; --largeur: 20%; }
 .personnage[data-emplacement="droite"] { --position-x: 82%; }
 .personnage img { display: block; width: 100%; height: auto; }
+
 .nom-avocat {
   position: absolute;
   left: 50%;
@@ -453,6 +463,22 @@ p { margin: 0; }
 .compteur { color: #654455; font-size: 0.875rem; white-space: nowrap; }
 :is(button, .replique):focus-visible { outline: 2px solid #773c6f; outline-offset: 2px; }
 .attente { display: block; }
+.attente-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.son-preparation {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #b78b65;
+  border-radius: 0.3rem;
+  background: #fff4e6;
+  color: #58354d;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
 .verdict-final { border-top: 3px solid #a62432; }
 .verdict-final .progression { grid-column: -2 / -1; }
 

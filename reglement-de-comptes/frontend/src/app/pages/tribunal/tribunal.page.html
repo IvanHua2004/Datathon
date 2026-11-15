@@ -120,7 +120,8 @@
     }
 
     @if (versionScene) {
-      <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []" [enCours]="tribunal.enCours()"
+      <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []"
+        [enCours]="tribunal.enCours() || (!!profilDemande() && !!tickerDemande() && tribunal.chargement())"
         [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []"
         (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)" />
     } @else if (proces(); as pr) {
