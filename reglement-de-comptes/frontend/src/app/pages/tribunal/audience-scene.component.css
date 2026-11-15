@@ -133,8 +133,8 @@
   max-width: 100%;
   padding: 0.45rem clamp(0.8rem, 3vw, 2.4rem);
   border-block: 2px solid #ffb1a3;
-  background: #a8172d;
-  color: #fff4e6;
+  background: var(--rouge-action);
+  color: #200e0c;
   box-shadow: 0.4rem 0.45rem 0 #350c1d;
   text-align: center;
   animation: impact-annonce var(--duree-annonce) both;
