@@ -36,6 +36,9 @@ export class ProcesService {
   readonly scenarios = signal<ScenarioAlternatif[] | null>(null);
   readonly chargementScenarios = signal(false);
 
+  readonly chargementPdf = signal(false);
+  readonly succesPdf = signal(false);
+
   chargerReferentiels(): void {
     if (this.profils().length || this.chargement()) {
       return;
@@ -110,6 +113,11 @@ export class ProcesService {
   }
 
   telechargerPdf(profil: string, ticker: string, taille: number, mode: Mode, intentionTexte?: string, choix?: string): void {
+    if (this.chargementPdf()) {
+      return;
+    }
+    this.chargementPdf.set(true);
+    this.succesPdf.set(false);
     this.api.telechargerPdf(profil, ticker, taille, mode, intentionTexte, choix).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
@@ -118,9 +126,14 @@ export class ProcesService {
         a.download = `jugement_tribunal_${profil}_${ticker}.pdf`;
         a.click();
         window.URL.revokeObjectURL(url);
+        this.chargementPdf.set(false);
+        this.succesPdf.set(true);
+        setTimeout(() => this.succesPdf.set(false), 3500);
       },
       error: (e: unknown) => {
         this.erreur.set(this.message(e));
+        this.chargementPdf.set(false);
+        this.succesPdf.set(false);
       },
     });
   }

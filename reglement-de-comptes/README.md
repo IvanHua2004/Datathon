@@ -2,6 +2,9 @@
 
 *Avant d'investir, faites passer votre idée en procès.*
 
+[![CI/CD Pipeline](https://github.com/IvanHua2004/Datathon/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/IvanHua2004/Datathon/actions/workflows/ci-cd.yml)
+[![AWS ECS Deployment](https://img.shields.io/badge/AWS%20ECS-Production%20Live-green)](https://re-a7802df919724e0e835df4e1be537b1a.ecs.us-east-1.on.aws/)
+
 Prototype pour le Datathon PolyFinances 2026 (AlphaForge AI). Un investisseur **fictif**
 soumet une demande (« placer 20 % de mon portefeuille dans NVDA »). Un tribunal d'agents
 examine si elle est cohérente avec le profil qu'il a déclaré, et explique son verdict avec
@@ -9,6 +12,9 @@ des pièces vérifiables.
 
 > Simulation pédagogique. Aucune transaction réelle, aucun conseil financier personnalisé,
 > aucune prédiction de rendement. Les profils et leurs montants sont fictifs.
+
+> 🚀 **Pipeline CI/CD complète de bout en bout** disponible sous `.github/workflows/ci-cd.yml`. Consultez le guide dédié : [PIPELINE_GITHUB.md](PIPELINE_GITHUB.md).
+> Application déployée en direct sur AWS ECS Fargate : [https://re-a7802df919724e0e835df4e1be537b1a.ecs.us-east-1.on.aws/](https://re-a7802df919724e0e835df4e1be537b1a.ecs.us-east-1.on.aws/)
 
 ## Architecture
 

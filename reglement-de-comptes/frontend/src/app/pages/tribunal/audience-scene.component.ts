@@ -1,11 +1,13 @@
 import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
-import { Piece, Position, Proces, TourDiscussion } from '../../models/proces.model';
+import { Piece, Position, Proces, ReponseAnalogie, TourDiscussion } from '../../models/proces.model';
 import { RapportAudienceComponent, argumentsDe, chiffresCles } from './rapport-audience.component';
 import { dollars, pct } from '../../shared/format';
+import { ApiService } from '../../services/api.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { choisirVoixAudience } from './voix-audience';
 
 const MS_PAR_MOT = 230;
+const MS_PAR_MOT_ANALOGIE = 185;
 const DUREE_ANNONCE_MS = 1400;
 const FIN_DE_PHRASE = /[.!?…][»”"]?\s*$/u;
 const PAUSE_COURTE = /[,;:][»”"]?\s*$/u;
@@ -91,6 +93,16 @@ function clePortrait(tour: TourDiscussion): string {
             <div class="etiquettes">
               <h3>{{ tour.acteur }}</h3>
               @if (tour.piece) { <span class="piece">Pièce {{ tour.piece }}</span> }
+              @if (!annonceActive() && tour.role !== 'huissier') {
+                <button type="button" class="bouton-analogie"
+                  [class.actif]="analogieAffichee() && !!analogieCourante()"
+                  [class.chargement]="analogieEnCours()"
+                  (click)="basculerAnalogie()"
+                  [title]="analogieAffichee() && !!analogieCourante() ? 'Masquer l’analogie' : 'Obtenir une analogie vulgarisée pour cette intervention'">
+                  <span class="icone-ampoule" aria-hidden="true">💡</span>
+                  <span>{{ analogieEnCours() ? 'Vulgarisation…' : (analogieAffichee() && !!analogieCourante() ? 'Masquer' : 'Une analogie ?') }}</span>
+                </button>
+              }
             </div>
             <p class="titre-replique">{{ tour.titre }}</p>
             @if (!annonceActive()) {
@@ -104,6 +116,46 @@ function clePortrait(tour: TourDiscussion): string {
               </p>
               @if (tour.non_verifies?.length) {
                 <p class="alerte"><strong>Audit du greffier.</strong> Chiffres absents des pièces scellées : {{ tour.non_verifies.join(', ') }}</p>
+              }
+              @if (analogieAffichee()) {
+                @if (analogieEnCours()) {
+                  <aside class="encart-analogie en-chargement" aria-live="polite">
+                    <div class="entete-analogie">
+                      <span class="icone-analogie" aria-hidden="true">💡</span>
+                      <strong>L’Interprète du Juré cherche une analogie…</strong>
+                    </div>
+                    <p class="texte-chargement">Traduction du jargon en métaphore concrète de la vie courante…</p>
+                  </aside>
+                } @else if (analogieCourante(); as rep) {
+                  <aside class="encart-analogie" aria-live="polite"
+                    (click)="devoilerAnalogieComplete()"
+                    [title]="!analogieFinieDeLire() ? 'Cliquer pour dévoiler toute l’analogie immédiatement' : ''">
+                    <div class="entete-analogie">
+                      <div class="titre-juré">
+                        <span class="icone-analogie" aria-hidden="true">💡</span>
+                        <strong>{{ rep.titre || "L'analogie du juré" }}</strong>
+                        @if (!analogieFinieDeLire()) {
+                          <span class="badge-lecture">Lecture en cours…</span>
+                        } @else {
+                          <span class="badge-lecture badge-termine">Terminée</span>
+                        }
+                      </div>
+                      <button type="button" class="fermer-analogie" (click)="fermerAnalogie(); $event.stopPropagation()" aria-label="Fermer l'analogie">×</button>
+                    </div>
+                    <p class="texte-analogie">
+                      @for (mot of motsAnalogie(); track $index) {
+                        <span [class.mot-masque]="$index > motAnalogieActif()">{{ mot }}</span>
+                      }
+                    </p>
+                    @if (analogieFinieDeLire()) {
+                      <div class="pied-analogie">
+                        <button type="button" class="bouton-continuer" (click)="continuerApresAnalogie(); $event.stopPropagation()">
+                          Reprendre l’audience →
+                        </button>
+                      </div>
+                    }
+                  </aside>
+                }
               }
             }
           </div>
@@ -316,10 +368,23 @@ function clePortrait(tour: TourDiscussion): string {
       </div>
       @if (rapportOuvert() && proces()) {
         <aside class="outils-rapport" aria-label="Emporter le rapport">
-          <button type="button" class="outil-rapport outil-principal" title="Télécharger le rapport en PDF"
-            (click)="telecharger.emit(verdictRendu())">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-            <span>PDF</span>
+          <button type="button" class="outil-rapport outil-principal"
+            [title]="chargementPdf() ? 'Génération du rapport en cours…' : 'Télécharger le rapport en PDF'"
+            (click)="telecharger.emit(verdictRendu())"
+            [disabled]="chargementPdf()"
+            [class.en-chargement]="chargementPdf()">
+            @if (chargementPdf()) {
+              <svg class="icone-spin" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="28 28"/>
+              </svg>
+              <span>Génération…</span>
+            } @else if (succesPdf()) {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <span>Prêt !</span>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+              <span>PDF</span>
+            }
           </button>
           <button type="button" class="outil-rapport" title="Imprimer le rapport" (click)="imprimerRapport()">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>
@@ -338,6 +403,10 @@ export class AudienceSceneComponent {
   readonly proces = input<Proces | null>(null);
   /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
   readonly portefeuille = input<readonly Position[]>([]);
+  /** Indicateur de génération du PDF en cours. */
+  readonly chargementPdf = input(false);
+  /** Indicateur de succès après téléchargement du PDF. */
+  readonly succesPdf = input(false);
   /** Demande de PDF depuis le rapport, avec le camp retenu par l'investisseur. */
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
   /** « Poser plus de questions » : retour au greffier. */
@@ -383,7 +452,28 @@ export class AudienceSceneComponent {
   });
   readonly motActif = linkedSignal({ source: this.tour, computation: () => 0 });
   readonly texteIntegral = linkedSignal({ source: this.tour, computation: () => false });
-  readonly repliqueDevoilee = computed(() => this.texteIntegral() || this.motActif() >= this.mots().length);
+  private readonly api = inject(ApiService);
+  readonly analogieEnCours = signal(false);
+  readonly analogieAffichee = signal(false);
+  readonly cacheAnalogies = signal<Map<number, ReponseAnalogie>>(new Map());
+  readonly analogieCourante = computed(() => {
+    const t = this.tour();
+    return t ? this.cacheAnalogies().get(t.ordre) : undefined;
+  });
+  readonly motsAnalogie = computed(() => motsDe(this.analogieCourante()?.analogie ?? ''));
+  readonly motAnalogieActif = linkedSignal({ source: this.analogieCourante, computation: () => 0 });
+  readonly analogieFinieDeLire = computed(() => {
+    if (!this.analogieAffichee()) return true;
+    if (this.analogieEnCours()) return false;
+    const rep = this.analogieCourante();
+    if (!rep) return false;
+    return this.motAnalogieActif() >= this.motsAnalogie().length;
+  });
+  readonly repliqueDevoilee = computed(() => {
+    const tourDevoile = this.texteIntegral() || this.motActif() >= this.mots().length;
+    if (!this.analogieAffichee()) return tourDevoile;
+    return tourDevoile && this.analogieFinieDeLire();
+  });
   readonly lectureAuto = signal(true);
   readonly sonActive = signal(true);
   readonly sonBloque = signal(false);
@@ -402,10 +492,12 @@ export class AudienceSceneComponent {
     source: this.tours, computation: () => null,
   });
   readonly lectureActive = computed(() =>
-    !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert() && this.lectureAuto()
+    !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert()
+    && !this.analogieAffichee()
+    && this.lectureAuto()
     && this.motActif() < this.mots().length);
   readonly audienceTerminee = computed(() =>
-    !this.verdictRendu() && this.index() === this.tours().length - 1 && this.motActif() >= this.mots().length);
+    !this.verdictRendu() && this.index() === this.tours().length - 1 && this.repliqueDevoilee());
   readonly annonceTerminee = computed(() => !!this.verdictRendu() && this.motActif() >= this.mots().length);
   readonly libelleLecture = computed(() => {
     if (this.annonceTerminee()) return 'Rejouer l’annonce';
@@ -538,11 +630,43 @@ export class AudienceSceneComponent {
       const minuterie = setTimeout(() => {
         if (!this.lectureActive() || this.tour() !== tour || this.motActif() !== indexMot) return;
         if (!this.verdictRendu() && indexMot + 1 === mots.length && this.index() < this.tours().length - 1) {
+          if (this.analogieAffichee() && !this.analogieFinieDeLire()) {
+            this.motActif.set(mots.length);
+            return;
+          }
           this.afficherTour(this.index() + 1);
         } else {
           this.motActif.set(indexMot + 1);
         }
       }, MS_PAR_MOT + pause);
+      nettoyer(() => clearTimeout(minuterie));
+    });
+
+    // Lecture progressive de l'analogie : elle défile mot par mot et empêche le discours de changer tant qu'elle n'est pas finie de lire
+    effect((nettoyer) => {
+      if (!this.analogieAffichee() || this.analogieEnCours()) return;
+      const rep = this.analogieCourante();
+      if (!rep) return;
+      const mots = this.motsAnalogie();
+      const indexMot = this.motAnalogieActif();
+      if (indexMot >= mots.length) {
+        if (this.lectureAuto() && !this.verdictRendu() && this.index() < this.tours().length - 1) {
+          const minuterieFin = setTimeout(() => {
+            if (this.analogieAffichee() && this.analogieFinieDeLire()) {
+              this.fermerAnalogie();
+              this.afficherTour(this.index() + 1);
+            }
+          }, 3500);
+          nettoyer(() => clearTimeout(minuterieFin));
+        }
+        return;
+      }
+      const mot = mots[indexMot];
+      const pause = FIN_DE_PHRASE.test(mot) ? 140 : PAUSE_COURTE.test(mot) ? 70 : 0;
+      const minuterie = setTimeout(() => {
+        if (!this.analogieAffichee() || this.analogieCourante() !== rep || this.motAnalogieActif() !== indexMot) return;
+        this.motAnalogieActif.set(indexMot + 1);
+      }, MS_PAR_MOT_ANALOGIE + pause);
       nettoyer(() => clearTimeout(minuterie));
     });
 
@@ -596,11 +720,31 @@ export class AudienceSceneComponent {
 
   suivant(): void {
     if (this.annonceActive()) return;
+    if (this.analogieAffichee() && !this.analogieFinieDeLire()) {
+      this.motAnalogieActif.set(this.motsAnalogie().length);
+      return;
+    }
     if (!this.repliqueDevoilee()) {
       this.motActif.set(this.mots().length);
       return;
     }
+    if (this.analogieAffichee()) {
+      this.fermerAnalogie();
+    }
     this.afficherTour(this.index() + 1);
+  }
+
+  devoilerAnalogieComplete(): void {
+    if (!this.analogieFinieDeLire()) {
+      this.motAnalogieActif.set(this.motsAnalogie().length);
+    }
+  }
+
+  continuerApresAnalogie(): void {
+    this.fermerAnalogie();
+    if (this.index() < this.tours().length - 1) {
+      this.afficherTour(this.index() + 1);
+    }
   }
 
   afficherTour(index: number): void {
@@ -611,6 +755,53 @@ export class AudienceSceneComponent {
     this.motActif.set(0);
     this.texteIntegral.set(!this.lectureAuto());
     this.dernierTourSon = undefined;
+    this.analogieAffichee.set(false);
+    this.motAnalogieActif.set(0);
+  }
+
+  basculerAnalogie(): void {
+    const tour = this.tour();
+    if (!tour) return;
+    if (this.analogieAffichee() && !!this.analogieCourante()) {
+      this.analogieAffichee.set(false);
+      return;
+    }
+    this.motActif.set(this.mots().length);
+    const existant = this.cacheAnalogies().get(tour.ordre);
+    if (existant) {
+      this.motAnalogieActif.set(0);
+      this.analogieAffichee.set(true);
+      return;
+    }
+    this.motAnalogieActif.set(0);
+    this.analogieEnCours.set(true);
+    this.analogieAffichee.set(true);
+    this.api.demanderAnalogie({
+      texte: tour.texte,
+      acteur: tour.acteur,
+      role: tour.role,
+      mode: 'bedrock',
+    }).subscribe({
+      next: (rep) => {
+        this.cacheAnalogies.update((map) => new Map(map).set(tour.ordre, rep));
+        this.motAnalogieActif.set(0);
+        this.analogieEnCours.set(false);
+      },
+      error: () => {
+        const fallback: ReponseAnalogie = {
+          analogie: "Voyez cela comme une traversée en mer : par vent fort, mieux vaut vérifier que les gilets et amarres sont solides avant d'accélérer.",
+          titre: "L'analogie du juré",
+          source: 'secours',
+        };
+        this.cacheAnalogies.update((map) => new Map(map).set(tour.ordre, fallback));
+        this.motAnalogieActif.set(0);
+        this.analogieEnCours.set(false);
+      },
+    });
+  }
+
+  fermerAnalogie(): void {
+    this.analogieAffichee.set(false);
   }
 
   /** « Terminé » : coup de marteau, puis le choix entre passer au verdict et poser plus de questions. */
