@@ -53,12 +53,6 @@ export class GreffierPage {
   readonly suggestions = computed(() => {
     const p = this.persona();
     if (!p || this.enCours()) return [];
-    // Champ vide : on propose des débuts de phrase seulement au premier échange ou quand
-    // le greffier attend une réponse précise (la part, le titre).
-    const dejaParle = this.messages().some((m) => m.de === 'moi');
-    const derniere = this.messages().at(-1);
-    const choixAffiches = !!derniere?.analyse?.choix?.length;
-    if (!this.saisie().trim() && dejaParle && (!this.enAttente().attente || choixAffiches)) return [];
     return completer(this.saisie(), {
       actifs: this.tribunal.actifs(),
       attente: this.enAttente().attente,
@@ -168,6 +162,7 @@ export class GreffierPage {
     const champ = this.champ()?.nativeElement;
     if (champ) champ.value = '';
     this.ouverte.set(false);
+    this.active.set(-1);
     this.enCours.set(true);
 
     const contexte = this.enAttente();
@@ -176,8 +171,8 @@ export class GreffierPage {
         this.enCours.set(false);
         if (a.agent === 'archiviste') {
           this.repondreArchiviste(a);
-          this.ouverte.set(false);
           champ?.focus();
+          this.ouverte.set(false);
           return;
         }
         this.ajouter({
@@ -198,9 +193,9 @@ export class GreffierPage {
         } else {
           this.enAttente.set({ ticker: null, taille: null, attente: null });
         }
-        // Les suggestions réapparaissent dès qu'on tape, sans cacher la réponse du greffier.
-        this.ouverte.set(false);
+        // Rendre le focus au champ sans recouvrir la réponse qui vient d'apparaître.
         champ?.focus();
+        this.ouverte.set(false);
       },
       error: (e: unknown) => {
         this.enCours.set(false);

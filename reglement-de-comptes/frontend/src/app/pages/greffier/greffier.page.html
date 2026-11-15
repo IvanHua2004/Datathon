@@ -13,7 +13,7 @@
 <main class="scene">
   <h1 class="titre-audience">Audience préliminaire</h1>
 
-  <section #fil class="fil" aria-label="Dialogue avec le greffier" aria-live="polite">
+  <section #fil class="fil" aria-label="Dialogue avec le greffier et l’archiviste" aria-live="polite">
     @for (m of messages(); track $index) {
       @if (m.de === 'greffier') {
         <div class="ligne ligne--greffier">
@@ -77,9 +77,9 @@
         </div>
       } @else if (m.de === 'archiviste') {
         <div class="ligne ligne--greffier">
-          <img class="avatar--greffier" src="assets/greffier-transparent.png" alt="">
+          <img class="avatar--greffier" src="assets/archiviste.png" alt="">
           <div class="bulle bulle--greffier bulle--archiviste">
-            <strong class="auteur">Le greffier</strong>
+            <strong class="auteur">L’archiviste</strong>
             <p>{{ m.texte }}</p>
             @if (m.analyse; as a) {
               @switch (a.statut) {
@@ -201,48 +201,51 @@
   </section>
 
   <form class="compositeur" (submit)="$event.preventDefault(); envoyer()">
-    @if (listeVisible()) {
-      <ul id="suggestions" class="suggestions" role="listbox" aria-label="Compléter la phrase">
-        @for (s of suggestions(); track s; let i = $index) {
-          <li [id]="'suggestion-' + i" role="option" [attr.aria-selected]="i === active()"
-              [class.active]="i === active()"
-              (mousedown)="$event.preventDefault(); accepter(s)">
-            @let parts = morceaux(s);
-            <span>{{ parts.tape }}</span><strong>{{ parts.suite }}</strong>
-          </li>
-        }
-        <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
-      </ul>
-    }
-    <div class="outils" role="group" aria-label="Raccourcis">
-      <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
-        <span aria-hidden="true">☰</span> Voir tous les titres
-      </button>
-      <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
-        <span aria-hidden="true">⇄</span> Comparer deux titres
-      </button>
-    </div>
-    <div class="barre">
-      <label for="champ" class="visually-hidden">Votre question</label>
-      <input
-        #champ
-        id="champ"
-        type="text"
-        autocomplete="off"
-        maxlength="500"
-        placeholder="Posez votre question…"
-        role="combobox"
-        aria-autocomplete="list"
-        aria-controls="suggestions"
-        [attr.aria-expanded]="listeVisible()"
-        [attr.aria-activedescendant]="active() >= 0 ? 'suggestion-' + active() : null"
-        [value]="saisie()"
-        (input)="taper($event)"
-        (keydown)="clavier($event)"
-        (focus)="ouverte.set(true)"
-        (blur)="ouverte.set(false)"
-      >
-      <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
+    <div class="zone-saisie">
+      @if (listeVisible()) {
+        <ul id="suggestions" class="suggestions" role="listbox" aria-label="Compléter la phrase">
+          @for (s of suggestions(); track s; let i = $index) {
+            <li [id]="'suggestion-' + i" role="option" [attr.aria-selected]="i === active()"
+                [class.active]="i === active()"
+                (mousedown)="$event.preventDefault(); accepter(s)">
+              @let parts = morceaux(s);
+              <span>{{ parts.tape }}</span><strong>{{ parts.suite }}</strong>
+            </li>
+          }
+          <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
+        </ul>
+      }
+      <div class="barre">
+        <label for="champ" class="visually-hidden">Votre question</label>
+        <input
+          #champ
+          id="champ"
+          type="text"
+          autocomplete="off"
+          maxlength="500"
+          placeholder="Posez votre question…"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-controls="suggestions"
+          [attr.aria-expanded]="listeVisible()"
+          [attr.aria-activedescendant]="active() >= 0 ? 'suggestion-' + active() : null"
+          [value]="saisie()"
+          (input)="taper($event)"
+          (keydown)="clavier($event)"
+          (focus)="ouverte.set(true)"
+          (click)="ouverte.set(true)"
+          (blur)="ouverte.set(false)"
+        >
+        <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
+      </div>
+      <div class="outils" role="group" aria-label="Raccourcis">
+        <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
+          <span aria-hidden="true">☰</span> Voir tous les titres
+        </button>
+        <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
+          <span aria-hidden="true">⇄</span> Comparer deux titres
+        </button>
+      </div>
     </div>
   </form>
 </main>

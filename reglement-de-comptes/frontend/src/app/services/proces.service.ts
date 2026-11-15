@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
 
 import { Actif, AnalyseComparative, DemandeProces, Mode, Proces, Profil, Sante, ScenarioAlternatif } from '../models/proces.model';
@@ -10,7 +10,13 @@ import { ApiService } from './api.service';
 export class ProcesService {
   private readonly api = inject(ApiService);
 
-  readonly profils = signal<Profil[]>([]);
+  private readonly profilsReference = signal<Profil[]>([]);
+  readonly personaPersonnalise = signal<Profil | null>(null);
+  readonly profils = computed(() => {
+    const reference = this.profilsReference();
+    const personnalise = this.personaPersonnalise();
+    return reference.length && personnalise ? [...reference, personnalise] : reference;
+  });
   readonly actifs = signal<Actif[]>([]);
   readonly tailles = signal<number[]>([]);
   readonly sante = signal<Sante | null>(null);
@@ -39,7 +45,8 @@ export class ProcesService {
       sante: this.api.sante(),
     }).subscribe({
       next: (r) => {
-        this.profils.set(r.profils);
+        this.personaPersonnalise.update((p) => p ?? r.profils.find((profil) => profil.cle === 'personnalise') ?? null);
+        this.profilsReference.set(r.profils.filter((profil) => profil.cle !== 'personnalise'));
         this.actifs.set(r.actifs);
         this.tailles.set(r.tailles);
         this.sante.set(r.sante);
