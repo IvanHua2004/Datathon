@@ -1,10 +1,9 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-
-import { Mode } from '../../models/proces.model';
-
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
 import { PlaidoirieComponent } from '../../components/plaidoirie/plaidoirie.component';
+import { Mode, TourDiscussion } from '../../models/proces.model';
+import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
 
@@ -17,6 +16,7 @@ import { dollars, pct, tonVerdict } from '../../shared/format';
 })
 export class TribunalPage {
   readonly tribunal = inject(ProcesService);
+  private readonly api = inject(ApiService);
   private readonly router = inject(Router);
 
   readonly profilCle = signal('');
@@ -31,6 +31,12 @@ export class TribunalPage {
   /** Bedrock seulement (« Sans modèle » retiré de l'interface). */
   readonly mode = signal<Mode>('bedrock');
   readonly intentionTexte = signal('');
+  readonly explicationIntention = signal('');
+  readonly intentionEnCours = signal(false);
+
+  readonly discussionActive = signal(false);
+  readonly toursAffiches = signal<TourDiscussion[]>([]);
+  private timerDiscussion?: ReturnType<typeof setTimeout>;
 
   readonly pct = pct;
   readonly dollars = dollars;
@@ -77,6 +83,67 @@ export class TribunalPage {
         this.choisirProfil(profil.cle);
       }
     });
+
+    // Déclenche l'animation progressive dès qu'un procès avec discussion arrive
+    effect(() => {
+      const pr = this.proces();
+      if (pr?.discussion && pr.discussion.length > 0) {
+        this.demarrerAnimationDiscussion(pr.discussion);
+      } else {
+        if (this.timerDiscussion) {
+          clearTimeout(this.timerDiscussion);
+        }
+        this.discussionActive.set(false);
+        this.toursAffiches.set([]);
+      }
+    });
+  }
+
+  demarrerAnimationDiscussion(tours: TourDiscussion[]): void {
+    if (!tours || tours.length === 0) {
+      this.discussionActive.set(false);
+      this.toursAffiches.set([]);
+      return;
+    }
+    if (this.timerDiscussion) {
+      clearTimeout(this.timerDiscussion);
+    }
+    this.discussionActive.set(true);
+    this.toursAffiches.set([]);
+    let index = 0;
+
+    const jouerProchainTour = () => {
+      if (index < tours.length) {
+        const tour = tours[index];
+        this.toursAffiches.update((liste) => [...liste, tour]);
+        const pause = tour.pause_ms || 2200;
+        index++;
+        this.timerDiscussion = setTimeout(jouerProchainTour, pause);
+      } else {
+        this.discussionActive.set(false);
+      }
+    };
+
+    jouerProchainTour();
+  }
+
+  passerAnimation(): void {
+    if (this.timerDiscussion) {
+      clearTimeout(this.timerDiscussion);
+      this.timerDiscussion = undefined;
+    }
+    const pr = this.proces();
+    if (pr?.discussion) {
+      this.toursAffiches.set(pr.discussion);
+    }
+    this.discussionActive.set(false);
+  }
+
+  rejouerDiscussion(): void {
+    const pr = this.proces();
+    if (pr?.discussion) {
+      this.demarrerAnimationDiscussion(pr.discussion);
+    }
   }
 
   choisirProfil(cle: string): void {
@@ -85,6 +152,12 @@ export class TribunalPage {
     this.profilCle.set(cle);
     this.ticker.set(profil.demandeExemple.ticker);
     this.taille.set(profil.demandeExemple.taille);
+    this.explicationIntention.set('');
+    if (this.timerDiscussion) {
+      clearTimeout(this.timerDiscussion);
+    }
+    this.toursAffiches.set([]);
+    this.discussionActive.set(false);
     this.tribunal.effacer();
   }
 
@@ -115,6 +188,23 @@ export class TribunalPage {
 
   mettreAJourIntention(event: Event): void {
     this.intentionTexte.set((event.target as HTMLInputElement).value);
+  }
+
+  analyserIntention(): void {
+    const texte = this.intentionTexte().trim();
+    if (!texte || !this.profilCle()) return;
+    this.intentionEnCours.set(true);
+    this.api.interpreterIntention(this.profilCle(), texte).subscribe({
+      next: (res) => {
+        this.ticker.set(res.ticker);
+        this.taille.set(res.taille);
+        this.explicationIntention.set(res.explication);
+        this.intentionEnCours.set(false);
+      },
+      error: () => {
+        this.intentionEnCours.set(false);
+      },
+    });
   }
 
   choisirArbitrage(choix: 'OUI' | 'NON'): void {

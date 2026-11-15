@@ -32,8 +32,17 @@
 
       <h2>La demande</h2>
       <label for="intention">Volonté libre (ex: devrais acheter +30% dans des etf ?)</label>
-      <input id="intention" type="text" [value]="intentionTexte()" (input)="mettreAJourIntention($event)"
-             placeholder="Ex: devrais acheter +30% dans des etf ?" class="champ-texte" />
+      <div class="groupe-intention">
+        <input id="intention" type="text" [value]="intentionTexte()" (input)="mettreAJourIntention($event)"
+               (keydown.enter)="analyserIntention()"
+               placeholder="Ex: devrais acheter +30% dans des etf ?" class="champ-texte" />
+        <button type="button" class="btn-analyser" (click)="analyserIntention()" [disabled]="intentionEnCours() || !intentionTexte()">
+          {{ intentionEnCours() ? '…' : 'Analyser' }}
+        </button>
+      </div>
+      @if (explicationIntention()) {
+        <p class="explication-badge">💡 {{ explicationIntention() }}</p>
+      }
 
       <label for="titre">Titre à ajouter</label>
       <select id="titre" (change)="choisirTicker(valeur($event))">
@@ -78,46 +87,101 @@
       <h2 class="demande">{{ pr.demande.nom }} demande {{ pct(pr.demande.taille, 0) }} du portefeuille dans {{ pr.demande.ticker }}</h2>
       @if (question()) { <p class="note">Question au rôle : « {{ question() }} »</p> }
 
-      <section class="audiences">
-        <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[0]" />
-        <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[1]" />
-        <article class="carte juge" [attr.data-ton]="tonVerdict(pr.decision.verdict)">
-          <h2>Le Juge</h2>
-          <p class="verdict">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              @switch (tonVerdict(pr.decision.verdict)) {
-                @case ('contraire') { <circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path> }
-                @case ('tension') { <path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path> }
-                @case ('indecidable') { <circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"></path> }
-                @default { <path d="M20 6 9 17l-5-5"></path> }
-              }
-            </svg>
-            {{ pr.decision.verdict }}
-          </p>
-          <p class="texte">{{ pr.motivation.texte }}</p>
-          @if (pr.motivation.non_verifies.length) {
-            <p class="greffier greffier--alerte">Greffier : chiffres absents des pièces → {{ pr.motivation.non_verifies.join(', ') }}</p>
-          }
-
-          <div class="actions-arbitrage">
-            <h3>Votre décision d'investisseur :</h3>
-            <div class="boutons-choix">
-              <button type="button" class="btn btn-oui" (click)="choisirArbitrage('OUI')" [disabled]="tribunal.chargementComparaison()">
-                {{ tribunal.chargementComparaison() ? 'Calcul…' : 'OUI (Investir quand même)' }}
-              </button>
-              <button type="button" class="btn btn-non" (click)="choisirArbitrage('NON')" [disabled]="tribunal.chargementComparaison()">
-                {{ tribunal.chargementComparaison() ? 'Calcul…' : 'NON (Suivre la recommandation)' }}
-              </button>
-              <button type="button" class="btn btn-scenarios" (click)="demanderScenarios()" [disabled]="tribunal.chargementScenarios()">
-                {{ tribunal.chargementScenarios() ? 'Recherche d\'alternatives…' : 'D\'autres scénarios ?' }}
-              </button>
-              <button type="button" class="btn btn-pdf" (click)="telechargerPdf()">
-                📄 Jugement Officiel (PDF)
-              </button>
-            </div>
+      <!-- Déroulement vivant du Tribunal : Débat contradictoire cadencé -->
+      @if (pr.discussion && pr.discussion.length > 0) {
+        <div class="barre-audience">
+          <div class="statut-audience">
+            <span class="point-activite" [class.actif]="discussionActive()"></span>
+            <strong>{{ discussionActive() ? "L'audience solennelle est en cours…" : "Audience terminée — Délibéré prononcé" }}</strong>
+            @if (discussionActive()) {
+              <span class="compteur">({{ toursAffiches().length }}/{{ pr.discussion.length }} interventions)</span>
+            }
           </div>
-        </article>
+          <div class="commandes-audience">
+            @if (discussionActive()) {
+              <button type="button" class="btn-controle" (click)="passerAnimation()">
+                ⏩ Passer l'audience
+              </button>
+            } @else {
+              <button type="button" class="btn-controle btn-controle--secondaire" (click)="rejouerDiscussion()">
+                🔄 Rejouer l'audience
+              </button>
+            }
+          </div>
+        </div>
+
+        <section class="fil-discussion" aria-label="Débat du tribunal">
+          @for (tour of toursAffiches(); track tour.ordre) {
+            <article class="bulle-tour bulle--{{ tour.role }}" [class.bulle--alerte]="tour.statut === 'alerte' || tour.non_verifies?.length">
+              <div class="bulle-entete">
+                <span class="bulle-avatar" aria-hidden="true">{{ tour.avatar }}</span>
+                <div class="bulle-meta">
+                  <span class="bulle-acteur">{{ tour.acteur }}</span>
+                  <span class="bulle-titre">{{ tour.titre }}</span>
+                </div>
+                @if (tour.piece) {
+                  <span class="badge-piece">Pièce [{{ tour.piece }}]</span>
+                }
+                @if (tour.verdict) {
+                  <span class="badge-verdict" [attr.data-ton]="tonVerdict(tour.verdict)">{{ tour.verdict }}</span>
+                }
+              </div>
+              <div class="bulle-corps">
+                <p class="bulle-texte">{{ tour.texte }}</p>
+                @if (tour.non_verifies?.length) {
+                  <p class="greffier-alerte">
+                    ⚠️ <strong>Audit Greffier :</strong> Chiffres cités absents des pièces scellées → {{ tour.non_verifies.join(', ') }}
+                  </p>
+                }
+              </div>
+            </article>
+          }
+        </section>
+      } @else {
+        <!-- Affichage de repli statique si aucune timeline de discussion n'est fournie -->
+        <section class="audiences">
+          <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[0]" />
+          <rdc-plaidoirie [plaidoirie]="pr.plaidoiries[1]" />
+          <article class="carte juge" [attr.data-ton]="tonVerdict(pr.decision.verdict)">
+            <h2>Le Juge</h2>
+            <p class="verdict">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                @switch (tonVerdict(pr.decision.verdict)) {
+                  @case ('contraire') { <circle cx="12" cy="12" r="10"></circle><path d="M15 9l-6 6M9 9l6 6"></path> }
+                  @case ('tension') { <path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path> }
+                  @case ('indecidable') { <circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"></path> }
+                  @default { <path d="M20 6 9 17l-5-5"></path> }
+                }
+              </svg>
+              {{ pr.decision.verdict }}
+            </p>
+            <p class="texte">{{ pr.motivation.texte }}</p>
+            @if (pr.motivation.non_verifies.length) {
+              <p class="greffier greffier--alerte">Greffier : chiffres absents des pièces → {{ pr.motivation.non_verifies.join(', ') }}</p>
+            }
+          </article>
+        </section>
+      }
+
+      <!-- Section d'arbitrage de l'investisseur (disponible dès la fin des plaidoiries ou en mode direct) -->
+      <section class="carte carte-arbitrage" aria-label="Arbitrage de l'investisseur">
+        <h2>🎯 Votre arbitrage d'investisseur : quelle est votre décision ?</h2>
+        <p class="note-carte">Le tribunal éclaire les risques et audite les faits, mais le libre arbitre appartient à l'investisseur.</p>
+        <div class="boutons-choix">
+          <button type="button" class="btn btn-oui" (click)="choisirArbitrage('OUI')" [disabled]="tribunal.chargementComparaison()">
+            {{ tribunal.chargementComparaison() ? 'Calcul en cours…' : '👍 OUI (Investir quand même)' }}
+          </button>
+          <button type="button" class="btn btn-non" (click)="choisirArbitrage('NON')" [disabled]="tribunal.chargementComparaison()">
+            {{ tribunal.chargementComparaison() ? 'Calcul en cours…' : '🛑 NON (Suivre la recommandation)' }}
+          </button>
+          <button type="button" class="btn btn-scenarios" (click)="demanderScenarios()" [disabled]="tribunal.chargementScenarios()">
+            {{ tribunal.chargementScenarios() ? 'Recherche d\'alternatives…' : '💡 D\'autres scénarios ?' }}
+          </button>
+          <button type="button" class="btn btn-pdf" (click)="telechargerPdf()">
+            📄 Télécharger la Carte Auditée (PDF)
+          </button>
+        </div>
       </section>
 
       @if (tribunal.comparaison(); as comp) {
