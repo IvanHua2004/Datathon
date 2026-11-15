@@ -54,7 +54,8 @@ def comparer_decision(dossier, decision_tribunal: dict, choix_investisseur: bool
             "Contraire à une contrainte déclarée", "En tension avec le profil déclaré"
         ] else "Décision en accord avec le profil")
 
-        impact = (f"En allouant {dollars(p.capital * taille)} sur {t}, votre perte historique maximale "
+        impact = (f"En allouant {dollars(p.capital * taille)} sur {t}, la perte historique maximale "
+                  f"{'de votre portefeuille' if p.portefeuille_declare else 'du portefeuille de référence'} "
                   f"passe de {dollars(perte_av)} à {dollars(perte_ap)} ({pct(ap['pire_baisse']['profondeur'])} du capital).")
 
         recommandations = []
@@ -95,7 +96,7 @@ def comparer_decision(dossier, decision_tribunal: dict, choix_investisseur: bool
         # L'utilisateur choisit de renoncer à l'investissement
         titre = f"DÉCISION : ABANDON DU PROJET D'ACHAT DANS {t}"
         statut = "Protection du capital et respect strict des règles de prudence"
-        impact = (f"Vous maintenez votre portefeuille de base de {dollars(p.capital)}. "
+        impact = (f"Vous maintenez {p.mot_portefeuille} de base de {dollars(p.capital)}. "
                   f"Votre perte maximale observable reste bornée à {dollars(perte_av)} "
                   f"({pct(av['pire_baisse']['profondeur'])}), préservant une marge de sécurité de {dollars((-budget_dollars) - (-perte_av))} sous votre budget.")
 

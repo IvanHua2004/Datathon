@@ -37,6 +37,8 @@ export interface Profil {
   plafondPosition: number;
   portefeuille: Position[];
   demandeExemple: { ticker: string; taille: number };
+  /** Faux quand la note du persona ne décrit pas ses positions : portefeuille de référence fictif. */
+  portefeuilleDeclare?: boolean;
   configuration?: ConfigurationPersona;
 }
 

@@ -11,13 +11,17 @@ import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { Attente, completer } from '../../shared/autocompletion';
 import { dollars, pct } from '../../shared/format';
-import { cleConversation, cleRetour, ecrire, effacer, lire } from '../../shared/memoire';
+import { AudienceSuspendue, Retour, cleConversation, cleRetour, ecrire, effacer, lire } from '../../shared/memoire';
 
 interface Message {
   de: 'greffier' | 'archiviste' | 'moi';
   texte: string;
   ton?: 'ok' | 'refus' | 'question' | 'erreur' | 'info';
   analyse?: AnalyseQuestion;
+  /** Retour du tribunal : la carte « Audience suspendue » et ses actions. */
+  audience?: AudienceSuspendue;
+  /** Questions toutes prêtes, à cliquer (l'archiviste sur le débat). */
+  suggestions?: string[];
   /** Titres cochés quand l'archiviste fait choisir deux titres à comparer. */
   choisis?: WritableSignal<string[]>;
 }
@@ -86,6 +90,20 @@ export class GreffierPage {
 
   readonly persona = computed(() => this.tribunal.profils().find((p) => p.cle === this.profil()) ?? null);
 
+  /**
+   * Le titre suit le parcours : avant le tribunal, l'audience préliminaire ; au retour, la suite de
+   * l'audience (verdict à rendre) ; après le vote, l'après-verdict.
+   */
+  readonly titre = computed(() => {
+    const audience = [...this.messages()].reverse().find((m) => m.audience)?.audience;
+    if (!audience) return 'Audience préliminaire';
+    return audience.vote || this.tribunal.voteAudience() ? 'Après le verdict' : 'Suite de l’audience';
+  });
+
+  /** « de votre portefeuille », sauf si la note du persona ne décrit pas ses positions. */
+  readonly dePortefeuille = computed(() =>
+    this.persona()?.portefeuilleDeclare === false ? 'du portefeuille de référence' : 'de votre portefeuille');
+
   readonly suggestions = computed(() => {
     const p = this.persona();
     if (!p || this.enCours()) return [];
@@ -126,14 +144,23 @@ export class GreffierPage {
         this.accueillir(p.nom);
       }
       // Retour du tribunal ou du duel : le greffier résume ce qui a été jugé.
-      const retour = lire<{ texte: string }>(cleRetour(p.cle));
+      const retour = lire<Retour>(cleRetour(p.cle));
       if (retour?.texte) {
         effacer(cleRetour(p.cle));
-        this.ajouter({ de: 'greffier', ton: 'info', texte: retour.texte });
-        this.ajouter({ de: 'greffier', ton: 'question', texte: 'Une autre décision à soumettre au tribunal ?' });
+        if (retour.audience) {
+          // La carte reprend l'audience : revenir voter, interroger l'archiviste, ou un autre débat.
+          this.ajouter({ de: 'greffier', ton: 'info', texte: retour.texte, audience: retour.audience });
+          // « Et avec 5 % ? » vise le même titre.
+          this.enAttente.set({ ticker: retour.audience.ticker, taille: null, attente: null });
+        } else {
+          this.ajouter({ de: 'greffier', ton: 'info', texte: retour.texte });
+          this.ajouter({ de: 'greffier', ton: 'question', texte: 'Une autre décision à soumettre au tribunal ?' });
+        }
       }
+      // Au retour d'audience, la carte doit rester visible : pas de focus (qui ouvrirait les suggestions).
+      const carteAudience = !!retour?.audience;
       setTimeout(() => {
-        this.champ()?.nativeElement.focus();
+        if (!carteAudience) this.champ()?.nativeElement.focus();
         const fil = this.fil()?.nativeElement;
         fil?.scrollTo({ top: fil.scrollHeight });
       });
@@ -157,7 +184,7 @@ export class GreffierPage {
       de: 'greffier',
       ton: 'question',
       texte: `Bonjour ${nom}. Quelle décision voulez-vous soumettre au tribunal ? `
-        + 'Nommez un titre et la part de votre portefeuille.',
+        + `Nommez un titre et la part ${this.dePortefeuille()}.`,
     }]);
   }
 
@@ -258,7 +285,11 @@ export class GreffierPage {
     this.enCours.set(true);
 
     const contexte = this.enAttente();
-    this.api.analyserQuestion({ texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille, comparer, action, historique }).subscribe({
+    // L'audience plaidée part avec la question : l'archiviste peut répondre sur le débat.
+    const audience = this.tribunal.dossierAudience(p.cle);
+    this.api.analyserQuestion({
+      texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille, comparer, action, historique, audience,
+    }).subscribe({
       next: (a) => {
         this.enCours.set(false);
         if (a.statut === 'social' && a.motif === 'recommencer') {
@@ -416,7 +447,7 @@ export class GreffierPage {
     this.ajouter({
       de: 'greffier',
       ton: 'question',
-      texte: `Quelle part de votre portefeuille voulez-vous placer dans ${a.nomTitre} (${a.ticker}) ? Jusqu’à 50 %.`,
+      texte: `Quelle part ${this.dePortefeuille()} voulez-vous placer dans ${a.nomTitre} (${a.ticker}) ? Jusqu’à 50 %.`,
     });
     this.ouverte.set(true);
     this.champ()?.nativeElement.focus();
@@ -428,6 +459,54 @@ export class GreffierPage {
     this.sonAudience.amorcer();
     this.router.navigate(['/tribunal-2'], {
       queryParams: { profil: p.cle, ticker: a.ticker, taille: a.taille, question: a.question },
+    });
+  }
+
+  // ----- Retour d'audience -----
+
+  /** Le procès est encore en mémoire et l'investisseur n'a pas voté : il peut revenir voter. */
+  peutRevenirVoter(au: AudienceSuspendue): boolean {
+    const p = this.persona();
+    return !!p && !this.tribunal.voteAudience() && this.tribunal.correspond(p.cle, au.ticker, au.taille);
+  }
+
+  revenirVoter(au: AudienceSuspendue): void {
+    const p = this.persona();
+    if (!p) return;
+    this.router.navigate(['/tribunal-2'], {
+      queryParams: { profil: p.cle, ticker: au.ticker, taille: au.taille, question: au.question || undefined, reprendre: 1 },
+    });
+  }
+
+  interrogerArchiviste(au: AudienceSuspendue): void {
+    const pr = this.tribunal.resultat();
+    const fait = (motif: RegExp) => pr?.pieces.flatMap((x) => x.faits).find((f) => motif.test(f.libelle))?.valeur;
+    const partRisque = fait(/part du risque/i);
+    const pireBaisse = fait(/pire baisse observée, avec/i);
+    this.ajouter({
+      de: 'archiviste',
+      texte: `Posez-moi une question sur le débat ${au.nomTitre} (${au.ticker}) : je réponds à partir des pièces `
+        + 'scellées, sans trancher à votre place.',
+      suggestions: [
+        ...(partRisque ? [`D'où vient le ${partRisque} du Procureur ?`] : []),
+        ...(pireBaisse ? [`D'où vient le ${pireBaisse} de pire baisse ?`] : []),
+        'Sur quoi s\'appuie la Défense ?',
+        'Que contient la pièce P-02 ?',
+        'C\'est quoi la part du risque ?',
+      ].slice(0, 4),
+    });
+    this.champ()?.nativeElement.focus();
+  }
+
+  /** Même titre, autre part : le chemin le plus court pour voir si le verdict bouge. */
+  autresParts(au: AudienceSuspendue): number[] {
+    return [0.05, 0.1, 0.2].filter((t) => Math.abs(t - au.taille) > 1e-9).slice(0, 2);
+  }
+
+  debatAutrePart(au: AudienceSuspendue, taille: number): void {
+    this.ouvrirDebat({
+      ticker: au.ticker, nomTitre: au.nomTitre, taille, raison: '',
+      question: `Devrais-je placer ${Math.round(taille * 100)} % de mon portefeuille dans ${au.nomTitre} (${au.ticker}) ?`,
     });
   }
 

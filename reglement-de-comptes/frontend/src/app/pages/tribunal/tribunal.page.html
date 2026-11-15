@@ -109,7 +109,10 @@
     @if (versionScene) {
       <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []" [enCours]="tribunal.enCours()"
         [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []"
-        (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)" />
+        (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)"
+        (autreQuestion)="versGreffier()"
+        [delibere]="reprise()"
+        (voteRendu)="tribunal.voteAudience.set($event)" />
     } @else if (proces(); as pr) {
       @if (pr.avertissement) {
         <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>
@@ -351,7 +354,7 @@
       @if (profil(); as p) {
         <p class="bandeau">Choisissez un investisseur et une demande, puis ouvrez le procès.</p>
         <section class="carte">
-          <h2>Portefeuille actuel de {{ p.nom }} (fictif)</h2>
+          <h2>{{ p.portefeuilleDeclare === false ? 'Portefeuille de référence (fictif)' : 'Portefeuille actuel de ' + p.nom + ' (fictif)' }}</h2>
           <div class="tableau">
             <table>
               <thead><tr><th scope="col">Titre</th><th scope="col">Poids</th></tr></thead>

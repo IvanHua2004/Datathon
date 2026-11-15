@@ -9,6 +9,7 @@ intention, comparaison, scenarios, rapport_pdf) et renvoie le résultat au forma
 from __future__ import annotations
 
 import json
+import re
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from dataclasses import asdict
@@ -17,7 +18,7 @@ from typing import Annotated, Literal
 from fastapi import FastAPI, HTTPException, Request, Response
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
-from rdc import donnees, greffier, questions, temoins
+from rdc import audience, donnees, greffier, questions, temoins
 from rdc.profils import PROFILS, Profil
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
                         construire_timeline_discussion)
@@ -53,6 +54,9 @@ class Question(BaseModel):
                                   description="Questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
     action: Literal["catalogue", "choisir_deux"] | None = Field(
         default=None, description="Bouton de l'écran : voir tous les titres, ou en choisir deux à comparer")
+    audience: dict | None = Field(
+        default=None, description="L'audience déjà plaidée (titre, pièces scellées, plaidoiries), pour que "
+                                  "l'archiviste réponde sur le débat")
 
 
 class CoteDuel(BaseModel):
@@ -106,7 +110,7 @@ _RISQUES_PERSONA = {
 
 class PersonaPersonnalise(BaseModel):
     nom: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
-    age: int = Field(ge=1, le=120)
+    age: int = Field(ge=18, le=120, description="Simulation réservée aux adultes : 18 ans minimum")
     risque: Literal["faible", "faible_a_modere", "modere", "modere_a_eleve", "eleve"]
     horizon_min: int = Field(ge=1, le=100)
     horizon_max: int = Field(ge=1, le=100)
@@ -118,9 +122,12 @@ class PersonaPersonnalise(BaseModel):
             raise ValueError("L’horizon maximal doit être au moins égal à l’horizon minimal.")
         return self
 
-    def creer_profil(self) -> Profil:
-        # Capital, diversification et plafonds fictifs communs à toutes les simulations personnalisées.
+    def creer_profil(self, univers: dict[str, str] | None = None) -> Profil:
+        # Capital et plafonds fictifs communs à toutes les simulations personnalisées. Le portefeuille
+        # vient de la note quand elle le décrit assez (« SPY 60 %, XBB.TO 40 % ») ; sinon un portefeuille
+        # de référence fictif, que les agents ne présentent jamais comme celui de l'investisseur.
         risque, budget = _RISQUES_PERSONA[self.risque]
+        declare = portefeuille_depuis_note(self.note, univers if univers is not None else _univers_noms())
         horizon = (f"{self.horizon_min} ans" if self.horizon_min == self.horizon_max
                    else f"{self.horizon_min} à {self.horizon_max} ans")
         return Profil(
@@ -134,10 +141,40 @@ class PersonaPersonnalise(BaseModel):
             plafond_position=0.20,
             plafond_secteur=0.40,
             preferences=self.note.strip(),
-            portefeuille={"XIU.TO": 35, "SPY": 25, "XBB.TO": 40},
+            portefeuille=declare or {"XIU.TO": 35, "SPY": 25, "XBB.TO": 40},
             horizon_max_declare=self.horizon_max,
             risque_declare=risque.lower(),
+            portefeuille_declare=bool(declare),
         )
+
+
+_POURCENT = re.compile(r"(\d{1,3}(?:[.,]\d+)?)\s*%")
+_SEPARATEURS = re.compile(r"[,;/+\n]|\bet\b", re.IGNORECASE)
+
+
+def portefeuille_depuis_note(note: str, univers: dict[str, str]) -> dict[str, float]:
+    """Positions décrites dans la note (« SPY 60 %, 40 % en XBB.TO »), en pourcentages.
+
+    La note est jugée assez détaillée seulement si chaque morceau reconnu nomme un seul titre
+    de l'univers avec une part, et si les parts totalisent de 90 % à 110 % ; sinon {}.
+    """
+    if not note or not univers:
+        return {}
+    positions: dict[str, float] = {}
+    for morceau in _SEPARATEURS.split(note):
+        parts = _POURCENT.findall(morceau)
+        titres = questions.trouver_titres(morceau, univers)
+        if len(parts) == 1 and len(titres) == 1:
+            positions[titres[0]] = positions.get(titres[0], 0) + float(parts[0].replace(",", "."))
+    total = sum(positions.values())
+    return positions if positions and 90 <= total <= 110 else {}
+
+
+def _univers_noms() -> dict[str, str]:
+    try:
+        return {t: str(n) for t, n in donnees.charger().univers["name"].items()}
+    except Exception:  # données indisponibles : le portefeuille de référence s'applique
+        return {}
 
 
 _COOKIE_PERSONA = "rdc_persona"
@@ -215,6 +252,7 @@ def _dossier_investisseur(p, univers) -> dict:
         "budgetPerte": p.budget_perte, "plafondPosition": p.plafond_position,
         "plafondSecteur": p.plafond_secteur, "classesExclues": list(p.classes_exclues),
         "filtreEsg": p.filtre_esg, "secteursAJustifier": list(p.secteurs_a_justifier),
+        "portefeuilleDeclare": p.portefeuille_declare,
         "portefeuille": [{"ticker": t, "nomTitre": str(univers.loc[t, "name"]) if t in univers.index else t,
                           "classe": str(univers.loc[t, "asset_class"]) if t in univers.index else "",
                           "poids": v / total} for t, v in p.portefeuille.items()],
@@ -234,6 +272,7 @@ def _profil_public(p: Profil) -> dict:
         "budgetPerte": p.budget_perte,
         "plafondPosition": p.plafond_position,
         "portefeuille": [{"ticker": t, "poids": v / total} for t, v in p.portefeuille.items()],
+        "portefeuilleDeclare": p.portefeuille_declare,
         "demandeExemple": {"ticker": p.demande_exemple[0], "taille": p.demande_exemple[1]},
     }
 
@@ -254,6 +293,14 @@ def enregistrer_persona(persona: PersonaPersonnalise, request: Request, response
     response.set_cookie(_COOKIE_PERSONA, cookie, httponly=True, samesite="lax",
                         secure=request.url.scheme == "https")
     return {**_profil_public(persona.creer_profil()), "configuration": persona.model_dump()}
+
+
+@app.delete("/api/profils/personnalise", status_code=204)
+def oublier_persona(response: Response) -> Response:
+    """Chaque arrivée sur la page des personas repart de zéro : on oublie le persona personnalisé."""
+    response.status_code = 204
+    response.delete_cookie(_COOKIE_PERSONA, httponly=True, samesite="lax")
+    return response
 
 
 @app.get("/api/actifs")
@@ -296,12 +343,22 @@ def analyser_question(q: Question, request: Request) -> dict:
                                  "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
         return questions.Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
                                  fiches=r["fiches"], choix=choix).en_json()
+    if q.audience and audience.concerne_le_debat(q.texte, q.audience):
+        # Question sur le débat qui vient d'être plaidé : l'archiviste répond à partir des pièces.
+        r = audience.repondre(q.texte, q.audience)
+        reponse = questions.Analyse("audience", "audience", r.message, agent="archiviste", extraits=r.extraits)
+        if not profil.portefeuille_declare:
+            questions.adapter_au_portefeuille_de_reference(reponse)
+        return reponse.en_json()
     ticker = q.ticker if q.ticker in univers else None
     analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
                                  resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
                                  historique=[h[:500] for h in q.historique],
                                  profil_info=_dossier_investisseur(profil, _donnees().univers))
+    if not profil.portefeuille_declare:
+        # Persona trop peu détaillé : le greffier ne parle pas d'un portefeuille qu'il ne connaît pas.
+        questions.adapter_au_portefeuille_de_reference(analyse)
     return analyse.en_json()
 
 

@@ -24,6 +24,10 @@ export class ApiService {
     return this.http.post<Profil>(`${this.base}/profils/personnalise`, persona);
   }
 
+  oublierPersona(): Observable<void> {
+    return this.http.delete<void>(`${this.base}/profils/personnalise`);
+  }
+
   actifs(): Observable<Actif[]> {
     return this.http.get<Actif[]>(`${this.base}/actifs`);
   }

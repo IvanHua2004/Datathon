@@ -224,6 +224,7 @@ class Analyse:
     fiches: list[dict] = field(default_factory=list)
     groupes: list[dict] = field(default_factory=list)   # catalogue ou titres à choisir
     selection: str | None = None        # « deux » ou « un_par_groupe » quand il faut choisir
+    extraits: list[dict] = field(default_factory=list)  # pièces de l'audience citées par l'archiviste
 
     def en_json(self) -> dict:
         d = asdict(self)
@@ -504,7 +505,36 @@ def _reponse_profil(norm: str, p: dict) -> str:
         else:
             reponses.append(f"{nom} n'exclut aucune classe d'actifs.")
     debut = " ".join(reponses) + " " if reponses else ""
+    if not p.get("portefeuilleDeclare", True):
+        return (f"{debut}Voici le dossier de {nom}, tel qu'il a été déclaré (profil fictif). "
+                "Sa note ne décrit pas ses positions : le tribunal raisonne donc sur un portefeuille "
+                "de référence fictif, pas sur le sien. Pour le préciser, ajoutez-les dans la note "
+                "du persona (par exemple « SPY 60 %, XBB.TO 40 % »).")
     return f"{debut}Voici le dossier de {nom}, tel qu'il a été déclaré (profil fictif)."
+
+
+_VOTRE_PORTEFEUILLE = [
+    (re.compile(r"\b([Dd])e (?:votre|mon) portefeuille\b"), r"\1u portefeuille de référence"),
+    (re.compile(r"\b(?:votre|mon) portefeuille\b"), "le portefeuille de référence"),
+    (re.compile(r"\b(?:Votre|Mon) portefeuille\b"), "Le portefeuille de référence"),
+]
+
+
+def sans_votre_portefeuille(texte: str) -> str:
+    """Pour un persona dont on ne connaît pas les positions : jamais « votre portefeuille »."""
+    for motif, remplacement in _VOTRE_PORTEFEUILLE:
+        texte = motif.sub(remplacement, texte)
+    return texte
+
+
+def adapter_au_portefeuille_de_reference(a: "Analyse") -> "Analyse":
+    a.message = sans_votre_portefeuille(a.message)
+    if a.question:
+        a.question = sans_votre_portefeuille(a.question)
+    a.reformulations = [sans_votre_portefeuille(r) for r in a.reformulations]
+    for c in a.choix:
+        c.question = sans_votre_portefeuille(c.question)
+    return a
 
 
 def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None = None,

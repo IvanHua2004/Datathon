@@ -28,6 +28,13 @@ class Profil:
     demande_exemple: tuple[str, float] = ("NVDA", 0.20)
     horizon_max_declare: float | None = None
     risque_declare: str | None = None
+    # Faux quand le portefeuille est un portefeuille de référence fictif (persona personnalisé dont
+    # la note ne décrit pas les positions) : les agents ne disent alors jamais « votre portefeuille ».
+    portefeuille_declare: bool = True
+
+    @property
+    def mot_portefeuille(self) -> str:
+        return "votre portefeuille" if self.portefeuille_declare else "le portefeuille de référence"
 
     def avec(self, **changements) -> "Profil":
         return replace(self, **changements)

@@ -1,13 +1,13 @@
-import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
 import { Piece, Position, Proces, TourDiscussion } from '../../models/proces.model';
-import { RapportAudienceComponent } from './rapport-audience.component';
+import { RapportAudienceComponent, argumentsDe, chiffresCles } from './rapport-audience.component';
+import { dollars, pct } from '../../shared/format';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { choisirVoixAudience } from './voix-audience';
 
 const MS_PAR_MOT = 230;
 const FIN_DE_PHRASE = /[.!?…][»”"]?\s*$/u;
 const PAUSE_COURTE = /[,;:][»”"]?\s*$/u;
-const PHRASES = new Intl.Segmenter('fr', { granularity: 'sentence' });
 type Camp = 'avocat_defense' | 'procureur';
 
 function motsDe(texte: string): string[] {
@@ -29,15 +29,13 @@ const PERSONNAGES = [
       <div #ancrageSon hidden></div>
       <div class="plateau">
         @if (tour() && !verdictRendu()) {
-          <button class="bouton-verdict" type="button" aria-haspopup="dialog"
-            [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
-            [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
-            Verdict
-            @if (impactVerdict()) {
-              <span class="eclats-verdict" aria-hidden="true">
-                <i></i><i></i><i></i><i></i><i></i><i></i>
-              </span>
-            }
+          <button class="bouton-terminer" type="button" aria-haspopup="dialog"
+            [class.terminer-attendu]="audienceTerminee() && !finOuverte() && !verdictOuvert()"
+            (click)="ouvrirFin(fenetreFin)">
+            <span class="icone-terminer" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m14 5 5 5M11.5 7.5l5 5M12.8 6.2l3.8-3.7 5 5-3.8 3.7M14 11 4.5 20.5M3 21h8"/></svg>
+            </span>
+            Terminer
           </button>
         }
         @for (personnage of personnages; track personnage.role) {
@@ -138,29 +136,123 @@ const PERSONNAGES = [
         </div>
       }
     </section>
+    <dialog #fenetreFin class="fenetre-fin" aria-labelledby="titre-fin"
+      (close)="finOuverte.set(false)" (click)="$event.target === fenetreFin && fenetreFin.close()">
+      <div class="contenu-fin">
+        <header class="entete-fin">
+          <div>
+            <p class="sur-titre">Fin de l’audience</p>
+            <h2 id="titre-fin" tabindex="-1" autofocus>Les deux camps ont plaidé. Et maintenant ?</h2>
+          </div>
+          <ol class="etapes-verdict" aria-label="Progression">
+            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
+            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
+            <li><span aria-hidden="true">3</span> Verdict</li>
+          </ol>
+          <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreFin.close()">×</button>
+        </header>
+        <div class="portes-fin">
+          <span class="ou-fin" aria-hidden="true">ou</span>
+          <button type="button" class="porte-fin porte-fin--verdict" (click)="passerAuVerdict(fenetreFin, fenetreVerdict)">
+            <span class="pastille-fin">Étape suivante</span>
+            <span class="illustration-fin" aria-hidden="true"><img src="assets/tribunal-2/juge.png" alt=""></span>
+            <span class="titre-porte">Passer au verdict</span>
+            <span class="texte-porte">Départagez la Défense et le Procureur, chiffres clés à l’appui.</span>
+            <span class="action-porte">Passer au verdict
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+          </button>
+          <button type="button" class="porte-fin" (click)="poserQuestions(fenetreFin)">
+            <span class="illustration-fin" aria-hidden="true"><img src="assets/greffier-transparent.png" alt=""></span>
+            <span class="titre-porte">Poser plus de questions</span>
+            <span class="texte-porte">Retournez au greffier : il garde le fil et le résumé de l’audience.</span>
+            <span class="action-porte">Retour au greffier
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+          </button>
+        </div>
+      </div>
+    </dialog>
     <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
       <div class="contenu-verdict">
-        <header>
-          <h2 id="titre-verdict" tabindex="-1" autofocus>À vous de rendre le verdict</h2>
-          <button class="fermer-verdict" type="button" aria-label="Fermer le résumé" (click)="fenetreVerdict.close()">×</button>
+        <header class="entete-verdict">
+          <div>
+            <p class="sur-titre">Délibéré · étape finale</p>
+            <h2 id="titre-verdict" tabindex="-1" autofocus>Qui a gagné le débat ? Votez.</h2>
+          </div>
+          <ol class="etapes-verdict" aria-label="Progression">
+            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
+            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
+            <li><span aria-hidden="true">3</span> Verdict</li>
+          </ol>
+          <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreVerdict.close()">×</button>
         </header>
-        <div class="plaidoiries-verdict">
-          @for (camp of plaidoiries(); track camp.role) {
-            <section class="camp-verdict">
-              <h3>{{ camp.cote }}</h3>
-              <p class="nom-camp">{{ camp.nom }}</p>
-              <p class="extrait-camp">{{ camp.extrait || 'Plaidoirie indisponible.' }}</p>
-              <button type="button" class="bouton-vote" [disabled]="!camp.extrait"
-                [attr.aria-pressed]="vote() === camp.role" (click)="vote.set(camp.role)">
-                {{ camp.role === 'avocat_defense' ? 'Voter pour la défense' : 'Voter pour l’accusation' }}
-              </button>
-            </section>
-          }
+        <div class="corps-verdict">
+          <div class="duel" role="radiogroup" aria-labelledby="titre-verdict">
+            @for (camp of plaidoiries(); track camp.role; let i = $index) {
+              <article class="camp" [attr.data-camp]="camp.role" [class.choisie]="vote() === camp.role"
+                (click)="choisirCamp(camp.role, $any($event.currentTarget))">
+                <input type="radio" name="vote-audience" [id]="'vote-' + camp.role" [value]="camp.role"
+                  [checked]="vote() === camp.role" [disabled]="!camp.arguments.length"
+                  [attr.aria-describedby]="'arguments-' + camp.role" (change)="vote.set(camp.role)">
+                @if (vote() === camp.role) {
+                  <span class="coche-camp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+                }
+                <div class="bande-camp">
+                  <img [src]="camp.image + '.png'" alt="">
+                  <div class="identite-camp">
+                    <span class="lettre-camp" aria-hidden="true">{{ i === 0 ? 'A' : 'B' }}</span>
+                    <h3>{{ camp.cote }}</h3>
+                    <span class="avocat-camp">{{ camp.nom }}</span>
+                    <span class="position-camp">{{ camp.role === 'avocat_defense' ? 'Pour la demande' : 'Contre la demande' }}</span>
+                  </div>
+                </div>
+                @if (camp.chiffre; as c) {
+                  <p class="chiffre-camp"><strong>{{ c.valeur }}</strong><span>{{ c.texte }}</span></p>
+                }
+                @if (camp.arguments.length) {
+                  <ul class="arguments-camp" [id]="'arguments-' + camp.role">
+                    @for (argument of camp.arguments; track $index) { <li>{{ argument }}</li> }
+                  </ul>
+                } @else {
+                  <p class="arguments-camp" [id]="'arguments-' + camp.role">Plaidoirie indisponible.</p>
+                }
+                <label class="voter-camp" [for]="'vote-' + camp.role">
+                  @if (vote() === camp.role) {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+                    Vous votez pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                  } @else {
+                    Voter pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                  }
+                </label>
+              </article>
+            }
+          </div>
+          <aside class="rail-rapport" aria-labelledby="titre-rail">
+            <h3 id="titre-rail">Rapport d’analyse</h3>
+            @if (chiffres(); as c) {
+              <dl class="tuiles-rail">
+                <div [class.alerte]="c.depasse"><dt>Pire baisse</dt><dd><strong>{{ pct(c.apres.pireBaisse) }}</strong><small>avant : {{ pct(c.avant.pireBaisse) }}</small></dd></div>
+                <div><dt>Perte au pire</dt><dd><strong>{{ dollars(c.apres.pireBaisse * (proces()?.demande?.capital ?? 0)) }}</strong></dd></div>
+                <div [class.alerte]="c.apres.partDuRisque > 0.25"><dt>Part du risque</dt><dd><strong>{{ pct(c.apres.partDuRisque, 0) }}</strong></dd></div>
+                <div><dt>Mauvaise année</dt><dd><strong>{{ pct(c.apres.defavorable12Mois) }}</strong><small>avant : {{ pct(c.avant.defavorable12Mois) }}</small></dd></div>
+              </dl>
+            }
+            <p class="scelle-rail">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2"/></svg>
+              La décision du tribunal est révélée après votre vote, pour ne pas vous influencer.
+            </p>
+            <button type="button" class="rapport-complet" (click)="ouvrirRapport()">Ouvrir le rapport complet</button>
+          </aside>
         </div>
-        <footer>
-          <p role="status">{{ vote() ? 'Confirmez votre choix pour clore l’audience.' : 'Choisissez le camp que vous retenez.' }}</p>
+        <footer class="pied-vote">
+          <p role="status">
+            @if (vote(); as v) {
+              Votre choix : <strong>{{ v === 'avocat_defense' ? 'la Défense (A)' : 'le Procureur (B)' }}</strong>. Vous pouvez encore changer.
+            } @else {
+              Choisissez le camp qui vous a convaincu.
+            }
+          </p>
           <button type="button" class="rendre-verdict" [disabled]="!vote()"
-            (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict</button>
+            (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict →</button>
         </footer>
       </div>
     </dialog>
@@ -178,8 +270,10 @@ const PERSONNAGES = [
             [interventions]="interventionsLues()"
             [pieces]="pieces()"
             [vote]="verdictRendu()"
-            [audienceTerminee]="audienceTerminee() || !!verdictRendu()"
-            [portefeuille]="portefeuille()" />
+            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert()"
+            [pendantLeVote]="verdictOuvert()"
+            [portefeuille]="portefeuille()"
+            [masquerDecision]="!verdictRendu()" />
         }
         </div>
       </div>
@@ -209,6 +303,13 @@ export class AudienceSceneComponent {
   readonly portefeuille = input<readonly Position[]>([]);
   /** Demande de PDF depuis le rapport, avec le camp retenu par l'investisseur. */
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
+  /** « Poser plus de questions » : retour au greffier. */
+  readonly autreQuestion = output<void>();
+  /** Le camp retenu, pour que le greffier puisse résumer l'audience au retour. */
+  readonly voteRendu = output<Camp>();
+  /** « Revenir voter » depuis le greffier : l'audience est déjà entendue, on ouvre le délibéré. */
+  readonly delibere = input(false);
+  private delibereOuvert = false;
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly mots = computed(() => motsDe(this.tour()?.texte ?? ''));
@@ -220,13 +321,16 @@ export class AudienceSceneComponent {
   readonly sonBloque = signal(false);
   readonly verdictOuvert = signal(false);
   readonly rapportOuvert = signal(false);
-  readonly impactVerdict = signal(false);
+  readonly finOuverte = signal(false);
+  readonly chiffres = computed(() => chiffresCles(this.proces()));
+  readonly pct = pct;
+  readonly dollars = dollars;
   readonly vote = linkedSignal<readonly TourDiscussion[], Camp | null>({ source: this.tours, computation: () => null });
   readonly verdictRendu = linkedSignal<readonly TourDiscussion[], Camp | null>({
     source: this.tours, computation: () => null,
   });
   readonly lectureActive = computed(() =>
-    !this.verdictOuvert() && !this.rapportOuvert() && this.lectureAuto() && this.motActif() < this.mots().length);
+    !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert() && this.lectureAuto() && this.motActif() < this.mots().length);
   readonly audienceTerminee = computed(() =>
     !this.verdictRendu() && this.index() === this.tours().length - 1 && this.motActif() >= this.mots().length);
   readonly annonceTerminee = computed(() => !!this.verdictRendu() && this.motActif() >= this.mots().length);
@@ -238,8 +342,15 @@ export class AudienceSceneComponent {
   readonly personnages = PERSONNAGES;
   readonly plaidoiries = computed(() => PERSONNAGES.filter((p) => p.role !== 'juge').map((p) => {
     const texte = this.tours().find((tour) => tour.role === p.role)?.texte ?? '';
-    const extrait = Array.from(PHRASES.segment(texte)).slice(0, 2).map(({ segment }) => segment).join('').trim();
-    return { ...p, extrait };
+    const c = this.chiffres();
+    const t = this.proces()?.demande.ticker ?? 'le titre';
+    const budget = this.proces()?.budgetPerte ?? 0;
+    // Le chiffre qui sert le mieux chaque camp : la pire baisse face au budget pour la défense,
+    // la concentration du risque pour l'accusation.
+    const chiffre = !c ? null : p.role === 'avocat_defense'
+      ? { valeur: pct(c.apres.pireBaisse), texte: `pire baisse avec ${t}, pour un budget déclaré de ${pct(budget, 0)}` }
+      : { valeur: pct(c.apres.partDuRisque, 0), texte: `du risque porté par ${t}, pour ${pct(this.proces()?.demande.taille ?? 0, 0)} du portefeuille` };
+    return { ...p, arguments: texte ? argumentsDe(texte, 3) : [], chiffre };
   }));
   readonly campRetenu = computed(() => this.plaidoiries().find((camp) => camp.role === this.verdictRendu()));
   private readonly annonceVerdict = computed<TourDiscussion | undefined>(() => {
@@ -289,13 +400,24 @@ export class AudienceSceneComponent {
   private readonly voixAudience = linkedSignal({ source: this.tours, computation: choisirVoixAudience });
   private readonly lecteur = inject(SonAudienceService).lecteur;
   private dernierTourSon?: TourDiscussion;
-  private minuterieVerdict?: ReturnType<typeof setTimeout>;
   private readonly ancrageSon = viewChild<ElementRef<HTMLElement>>('ancrageSon');
   private readonly fenetreRapport = viewChild<ElementRef<HTMLDialogElement>>('fenetreRapport');
+  private readonly fenetreVerdict = viewChild<ElementRef<HTMLDialogElement>>('fenetreVerdict');
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
+    // Retour depuis le greffier pour voter : dernière réplique affichée en entier, délibéré ouvert.
+    afterRenderEffect(() => {
+      const fenetre = this.fenetreVerdict()?.nativeElement;
+      if (!this.delibere() || this.delibereOuvert || !this.tours().length || !fenetre) return;
+      this.delibereOuvert = true;
+      this.lectureAuto.set(false);
+      this.index.set(this.tours().length - 1);
+      this.texteIntegral.set(true);
+      this.motActif.set(this.mots().length);
+      this.verdictOuvert.set(true);
+      fenetre.showModal();
+    });
     afterRenderEffect(() => {
       if (this.verdictRendu()) this.replique()?.nativeElement.focus({ preventScroll: true });
     });
@@ -363,18 +485,29 @@ export class AudienceSceneComponent {
     this.dernierTourSon = undefined;
   }
 
-  ouvrirVerdict(fenetre: HTMLDialogElement): void {
-    if (this.verdictOuvert()) return;
+  ouvrirFin(fenetre: HTMLDialogElement): void {
+    if (fenetre.open) return;
+    this.finOuverte.set(true);
+    fenetre.showModal();
+  }
+
+  passerAuVerdict(fin: HTMLDialogElement, verdict: HTMLDialogElement): void {
+    fin.close();
     this.verdictOuvert.set(true);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      fenetre.showModal();
-      return;
-    }
-    this.impactVerdict.set(true);
-    this.minuterieVerdict = setTimeout(() => {
-      this.impactVerdict.set(false);
-      fenetre.showModal();
-    }, 230);
+    verdict.showModal();
+  }
+
+  /** Un clic n'importe où sur la carte choisit le camp et y met le focus (flèches ↑ ↓ ensuite). */
+  choisirCamp(camp: Camp, carte: HTMLElement): void {
+    const radio = carte.querySelector('input');
+    if (!radio || radio.disabled) return;
+    this.vote.set(camp);
+    radio.focus({ preventScroll: true });
+  }
+
+  poserQuestions(fin: HTMLDialogElement): void {
+    fin.close();
+    this.autreQuestion.emit();
   }
 
   ouvrirRapport(): void {
@@ -388,6 +521,7 @@ export class AudienceSceneComponent {
     const choix = this.vote();
     if (!choix) return;
     this.verdictRendu.set(choix);
+    this.voteRendu.emit(choix);
     this.lectureAuto.set(true);
     const panneau = this.replique()?.nativeElement;
     if (panneau) panneau.scrollTop = 0;

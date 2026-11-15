@@ -2,7 +2,28 @@
 
 export type StatutQuestion =
   | 'recevable' | 'choix' | 'incomplet' | 'refus'
-  | 'fiche' | 'comparaison' | 'catalogue' | 'selection' | 'profil' | 'definition' | 'social';
+  | 'fiche' | 'comparaison' | 'catalogue' | 'selection' | 'profil' | 'definition' | 'social' | 'audience';
+
+/** Une pièce de l'audience citée par l'archiviste (statut « audience »). */
+export interface ExtraitPiece {
+  numero: string;
+  temoin: string;
+  description: string;
+  faits: { libelle: string; valeur: string }[];
+  source: string;
+  periode: string;
+  limites: string;
+}
+
+/** L'audience plaidée envoyée avec la question, pour que l'archiviste réponde sur le débat. */
+export interface AudienceDossier {
+  ticker: string;
+  nomTitre: string;
+  taille: number;
+  pieces: { numero: string; temoin: string; description: string; faits: { libelle: string; valeur: string }[];
+    source: string; periode: string; limites: string }[];
+  plaidoiries: { camp: 'defense' | 'accusation'; texte: string; nonVerifies: string[] }[];
+}
 
 /** Un dossier que le greffier propose quand la question est vague ou porte sur plusieurs titres. */
 export interface ChoixDossier {
@@ -35,6 +56,8 @@ export interface AnalyseQuestion {
   profil: DossierInvestisseur | null;
   /** Terme du glossaire (statut « definition »). */
   definition: { terme: string; texte: string; exemple: string | null } | null;
+  /** Pièces de l'audience citées par l'archiviste (statut « audience »). */
+  extraits?: ExtraitPiece[];
 }
 
 export interface DossierInvestisseur {
@@ -52,6 +75,7 @@ export interface DossierInvestisseur {
   filtreEsg: boolean;
   secteursAJustifier: string[];
   portefeuille: { ticker: string; nomTitre: string; classe: string; poids: number }[];
+  portefeuilleDeclare?: boolean;
 }
 
 export interface TitreCatalogue {
@@ -92,4 +116,6 @@ export interface DemandeAnalyse {
   action?: 'catalogue' | 'choisir_deux';
   /** Questions précédentes, de la plus ancienne à la plus récente (la plus récente a priorité). */
   historique?: string[];
+  /** L'audience plaidée, si l'investisseur revient du tribunal : l'archiviste répond sur le débat. */
+  audience?: AudienceDossier;
 }
