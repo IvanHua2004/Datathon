@@ -30,6 +30,58 @@ class Profil:
     def avec(self, **changements) -> "Profil":
         return replace(self, **changements)
 
+    @property
+    def esg_strict(self) -> bool:
+        """Conforme Roadmap Issue 1.3."""
+        return self.filtre_esg
+
+    @property
+    def crypto_allowed(self) -> bool:
+        """Conforme Roadmap Issue 1.3."""
+        return "crypto" not in self.classes_exclues
+
+    @property
+    def horizon_max(self) -> float:
+        """Conforme Roadmap Issue 1.3."""
+        if self.cle == "amira":
+            return 25.0
+        elif self.cle == "mateo":
+            return 12.0
+        return 5.0
+
+    @property
+    def risque(self) -> str:
+        """Conforme Roadmap Issue 1.3."""
+        if self.cle == "amira":
+            return "élevé"
+        elif self.cle == "mateo":
+            return "modéré"
+        return "faible à modéré"
+
+    def to_dict(self) -> dict:
+        """Retourne un dictionnaire des contraintes lisible par les agents LLM."""
+        return {
+            "cle": self.cle,
+            "nom": self.nom,
+            "resume": self.resume,
+            "objectif": self.objectif,
+            "capital": self.capital,
+            "horizon_ans": self.horizon_ans,
+            "horizon_max": self.horizon_max,
+            "budget_perte": self.budget_perte,
+            "plafond_position": self.plafond_position,
+            "plafond_secteur": self.plafond_secteur,
+            "classes_exclues": list(self.classes_exclues),
+            "crypto_allowed": self.crypto_allowed,
+            "filtre_esg": self.filtre_esg,
+            "esg_strict": self.esg_strict,
+            "risque": self.risque,
+            "secteurs_a_justifier": list(self.secteurs_a_justifier),
+            "preferences": self.preferences,
+            "portefeuille": dict(self.portefeuille),
+            "demande_exemple": self.demande_exemple,
+        }
+
 
 PROFILS: dict[str, Profil] = {
     "amira": Profil(
@@ -84,3 +136,6 @@ PROFILS: dict[str, Profil] = {
         demande_exemple=("NVDA", 0.20),
     ),
 }
+
+# Dictionnaire standardisé des contraintes de personas (conforme Roadmap Épic 1 - Issue 1.3)
+PROFILS_DICTS: dict[str, dict] = {cle: p.to_dict() for cle, p in PROFILS.items()}

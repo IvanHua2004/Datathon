@@ -327,3 +327,228 @@ details summary {
 code {
   font-size: 0.85em;
 }
+
+.champ-texte {
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 1px solid #b9a690;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #200e0c;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.champ-texte:focus {
+  outline: 2px solid #773c6f;
+  border-color: #773c6f;
+}
+
+.actions-arbitrage {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px dashed #d5c3ab;
+}
+
+.actions-arbitrage h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  color: #4a2a40;
+}
+
+.boutons-choix {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.btn {
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, background-color 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-oui {
+  background: #c53030;
+  color: #ffffff;
+}
+
+.btn-oui:hover:not(:disabled) {
+  background: #9b2c2c;
+}
+
+.btn-non {
+  background: #2f855a;
+  color: #ffffff;
+}
+
+.btn-non:hover:not(:disabled) {
+  background: #276749;
+}
+
+.btn-scenarios {
+  background: #d69e2e;
+  color: #200e0c;
+}
+
+.btn-scenarios:hover:not(:disabled) {
+  background: #b7791f;
+  color: #ffffff;
+}
+
+.btn-pdf {
+  background: #3182ce;
+  color: #ffffff;
+}
+
+.btn-pdf:hover:not(:disabled) {
+  background: #2b6cb0;
+}
+
+.carte-comparaison {
+  border-left: 6px solid #d69e2e;
+}
+
+.carte-comparaison[data-statut='investi'] {
+  border-left-color: #e53e3e;
+}
+
+.carte-comparaison[data-statut='refuse'] {
+  border-left-color: #38a169;
+}
+
+.statut-badge {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border-radius: 4px;
+  background: #edf2f7;
+  color: #2d3748;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 1rem;
+}
+
+.grille-comparaison {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.element-comp {
+  background: #fdfaf4;
+  border: 1px solid #ebdcc9;
+  border-radius: 6px;
+  padding: 0.6rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.element-comp .libelle {
+  font-size: 0.78rem;
+  color: #665248;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.element-comp .valeur {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #200e0c;
+}
+
+.element-comp .valeur.alerte {
+  color: #c53030;
+}
+
+.commentaire {
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #3b2820;
+}
+
+.liste-recommandations {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  color: #2c1d17;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.grille-scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.scenario-carte {
+  background: #fdfaf4;
+  border: 1px solid #d5c3ab;
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.scenario-carte h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #4a2a40;
+}
+
+.scenario-verdict {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #276749;
+  margin: 0;
+}
+
+.scenario-desc {
+  font-size: 0.9rem;
+  color: #3d2a22;
+  margin: 0.2rem 0;
+}
+
+.scenario-stats {
+  margin: 0.4rem 0;
+  font-size: 0.88rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.5rem;
+}
+
+.scenario-stats dt {
+  font-weight: 600;
+  color: #665248;
+}
+
+.scenario-stats dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.scenario-pourquoi {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e8d9c4;
+  font-size: 0.84rem;
+  color: #554035;
+  line-height: 1.4;
+}

@@ -1,0 +1,120 @@
+{
+  "ticker": "ESGV",
+  "nom": "Vanguard ESG U.S. Stock ETF",
+  "classe_actif": "etf_equity",
+  "marche": "Cboe BZX",
+  "devise_origine": "USD",
+  "secteur": "Broad market (U.S., ESG-screened)",
+  "prix": {
+    "dernier_prix_cad": 190.0,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 78.5,
+    "prix_max_5ans_cad": 196.97
+  },
+  "rendements": {
+    "cumule_5ans": 0.8306,
+    "cagr_annualise": 0.1239,
+    "rendement_1an": 0.1363,
+    "rendement_3ans": 0.7528,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1769,
+    "volatilite_baisse_semi_deviation": 0.123,
+    "pire_baisse_globale": -0.26862861491564693,
+    "pire_baisse_2022": -0.25958534393478916,
+    "creux_date": "2022-06-16",
+    "sommet_date": "2021-12-27",
+    "annees_sous_le_sommet": 1.94,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0175,
+    "cvar_95_expected_shortfall": 0.0257,
+    "var_95_cornish_fisher": 0.0162,
+    "var_99_quotidienne": 0.0307,
+    "cvar_99_expected_shortfall": 0.0398,
+    "var_95_1mois_estimee": 0.08
+  },
+  "distribution": {
+    "skewness": 0.045,
+    "excess_kurtosis": 6.318,
+    "statistique_jb": 2169.29,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1239,
+    "volatilite_annuelle": 0.1769,
+    "volatilite_baisse_sortino": 0.123,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.5,
+    "ratio_sortino": 0.72,
+    "ratio_calmar": 0.46
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 1.07,
+    "alpha_annuel_vs_spy": -0.0231,
+    "correlation_vs_spy": 0.99,
+    "beta_xiu_canada": 0.93,
+    "alpha_annuel_vs_xiu.to": -0.0008,
+    "correlation_vs_xiu.to": 0.67,
+    "correlation_variation_usdcad": 0.02,
+    "correlation_taux_10y_canada": -0.11,
+    "correlation_taux_10y_us": -0.05,
+    "correlation_taux_directeur_boc": 0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.217,
+      "pire_baisse_pendant_regime": -0.2596
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0395,
+      "pire_baisse_pendant_regime": -0.0449
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2648,
+      "pire_baisse_pendant_regime": -0.0887
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 1.472,
+    "rendement_dividende_pct": 0.0077,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-09-18",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [
+    {
+      "type": "attestation",
+      "nature": "fait_etabli",
+      "fait": "FNB appliquant un filtrage ESG strict excluant les combustibles fossiles, le charbon thermique, les armes et le tabac.",
+      "source": "Prospectus Vanguard ESG U.S. Stock ETF (ESGV)",
+      "url": "https://investor.vanguard.com",
+      "date_document": "2024-01-15"
+    }
+  ],
+  "fnb_composition_top_holdings": {
+    "MSFT": 0.075,
+    "AAPL": 0.072,
+    "NVDA": 0.065,
+    "AMZN": 0.04,
+    "GOOGL": 0.025,
+    "TSLA": 0.019,
+    "JPM": 0.014
+  },
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Broad market (U.S., ESG-screened)",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement"
+  ],
+  "synthese_agent_llm": "Vanguard ESG U.S. Stock ETF (ESGV) est un actif de type etf_equity (Broad market (U.S., ESG-screened)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.4% pour une volatilité de 17.7% (ratio de Sharpe de 0.5). Sa VaR quotidienne à 95% est de 1.8%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S., ESG-screened), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+}

@@ -1,5 +1,6 @@
 /** Types des réponses de l'API Python (backend/api.py). */
 
+/** « gabarit » reste accepté par l'API pour les tests hors ligne; l'interface utilise Bedrock. */
 export type Mode = 'gabarit' | 'bedrock';
 
 export type Verdict =
@@ -42,7 +43,44 @@ export interface DemandeProces {
   profil: string;
   ticker: string;
   taille: number;
-  mode: Mode;
+  mode?: Mode;
+  intention_texte?: string;
+}
+
+export interface IntentionResultat {
+  ticker: string;
+  taille: number;
+  nomTitre: string;
+  classe: string;
+  explication: string;
+}
+
+export interface AnalyseComparative {
+  choix: boolean;
+  titre_decision: string;
+  statut_conformite: string;
+  impact_capital: string;
+  delta_perte_dollars: number;
+  perte_max_dollars: number;
+  budget_depasse: boolean;
+  montant_depassement: number;
+  volatilite_finale: number;
+  delta_volatilite: number;
+  temps_recuperation: string;
+  commentaire_conseil: string;
+  recommandations: string[];
+}
+
+export interface ScenarioAlternatif {
+  nom: string;
+  type: string;
+  description: string;
+  allocation: Record<string, number>;
+  pire_baisse: number;
+  perte_dollars: number;
+  volatilite: number;
+  verdict: Verdict;
+  pourquoi: string;
 }
 
 export interface Motif {
@@ -83,6 +121,24 @@ export interface Piece {
   limites: string;
 }
 
+export interface TourDiscussion {
+  ordre: number;
+  etape: string;
+  acteur: string;
+  role: 'huissier' | 'greffier' | 'avocat_defense' | 'procureur' | 'temoin' | 'juge' | string;
+  avatar: string;
+  titre: string;
+  texte: string;
+  pause_ms: number;
+  statut?: 'valide' | 'alerte' | string;
+  non_verifies?: string[];
+  pieces_associees?: string[];
+  piece?: string;
+  temoin?: string;
+  verdict?: Verdict;
+  convoques?: string[];
+}
+
 export interface Proces {
   demande: {
     profil: string;
@@ -107,4 +163,6 @@ export interface Proces {
   courbe: PointCourbe[];
   budgetPerte: number;
   pieces: Piece[];
+  rapport_explicabilite?: string;
+  discussion?: TourDiscussion[];
 }

@@ -1,0 +1,104 @@
+{
+  "ticker": "FTS.TO",
+  "nom": "Fortis",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Utilities",
+  "prix": {
+    "dernier_prix_cad": 84.43,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 41.99,
+    "prix_max_5ans_cad": 85.79
+  },
+  "rendements": {
+    "cumule_5ans": 0.8191,
+    "cagr_annualise": 0.1226,
+    "rendement_1an": 0.1816,
+    "rendement_3ans": 0.7477,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1443,
+    "volatilite_baisse_semi_deviation": 0.0967,
+    "pire_baisse_globale": -0.24010774527174017,
+    "pire_baisse_2022": -0.24010774527174017,
+    "creux_date": "2022-10-12",
+    "sommet_date": "2022-05-24",
+    "annees_sous_le_sommet": 2.23,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0136,
+    "cvar_95_expected_shortfall": 0.019,
+    "var_95_cornish_fisher": 0.014,
+    "var_99_quotidienne": 0.0221,
+    "cvar_99_expected_shortfall": 0.0268,
+    "var_95_1mois_estimee": 0.0621
+  },
+  "distribution": {
+    "skewness": 0.074,
+    "excess_kurtosis": 1.203,
+    "statistique_jb": 79.9,
+    "p_valeur_jb": 4.463599776988178e-18,
+    "est_normale": false,
+    "diagnostic": "Distribution proche d'une loi normale"
+  },
+  "ratios_performance": {
+    "cagr": 0.1226,
+    "volatilite_annuelle": 0.1443,
+    "volatilite_baisse_sortino": 0.0967,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.61,
+    "ratio_sortino": 0.91,
+    "ratio_calmar": 0.51
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.02,
+    "alpha_annuel_vs_spy": 0.0852,
+    "correlation_vs_spy": 0.03,
+    "beta_xiu_canada": 0.23,
+    "alpha_annuel_vs_xiu.to": 0.0654,
+    "correlation_vs_xiu.to": 0.2,
+    "correlation_variation_usdcad": -0.05,
+    "correlation_taux_10y_canada": -0.31,
+    "correlation_taux_10y_us": -0.29,
+    "correlation_taux_directeur_boc": 0.03
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1543,
+      "pire_baisse_pendant_regime": -0.2401
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.1022,
+      "pire_baisse_pendant_regime": -0.0585
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.1313,
+      "pire_baisse_pendant_regime": -0.0743
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 3.175,
+    "rendement_dividende_pct": 0.0376,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-08-19",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Utilities",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)",
+    "Vulnérable aux Taux d'Intérêt"
+  ],
+  "synthese_agent_llm": "Fortis (FTS.TO) est un actif de type equity (Utilities). Sur la période observée de 5 ans, il affiche un rendement annualisé de 12.3% pour une volatilité de 14.4% (ratio de Sharpe de 0.61). Sa VaR quotidienne à 95% est de 1.4%. Son profil se caractérise par : Action Individuelle, Utilities, Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+}

@@ -1,0 +1,115 @@
+{
+  "ticker": "ZST.TO",
+  "nom": "BMO Ultra Short-Term Bond ETF",
+  "classe_actif": "etf_bond",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Bonds (Canada ultra short-term)",
+  "prix": {
+    "dernier_prix_cad": 49.07,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 41.34,
+    "prix_max_5ans_cad": 49.09
+  },
+  "rendements": {
+    "cumule_5ans": 0.1827,
+    "cagr_annualise": 0.033,
+    "rendement_1an": 0.0243,
+    "rendement_3ans": 0.1111,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.0055,
+    "volatilite_baisse_semi_deviation": 0.0028,
+    "pire_baisse_globale": -0.004282735592724407,
+    "pire_baisse_2022": -0.004282735592724296,
+    "creux_date": "2022-06-30",
+    "sommet_date": "2022-03-01",
+    "annees_sous_le_sommet": 0.46,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0004,
+    "cvar_95_expected_shortfall": 0.0006,
+    "var_95_cornish_fisher": 0.0004,
+    "var_99_quotidienne": 0.0008,
+    "cvar_99_expected_shortfall": 0.001,
+    "var_95_1mois_estimee": 0.0019
+  },
+  "distribution": {
+    "skewness": 0.339,
+    "excess_kurtosis": 5.452,
+    "statistique_jb": 1640.05,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.033,
+    "volatilite_annuelle": 0.0055,
+    "volatilite_baisse_sortino": 0.0028,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": -0.37,
+    "ratio_sortino": -0.72,
+    "ratio_calmar": 7.7
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.0,
+    "alpha_annuel_vs_spy": -0.0023,
+    "correlation_vs_spy": 0.09,
+    "beta_xiu_canada": 0.01,
+    "alpha_annuel_vs_xiu.to": -0.0027,
+    "correlation_vs_xiu.to": 0.15,
+    "correlation_variation_usdcad": -0.03,
+    "correlation_taux_10y_canada": -0.34,
+    "correlation_taux_10y_us": -0.26,
+    "correlation_taux_directeur_boc": -0.0
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": 0.0033,
+      "pire_baisse_pendant_regime": -0.0043
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0072,
+      "pire_baisse_pendant_regime": -0.0012
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.0454,
+      "pire_baisse_pendant_regime": -0.001
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 1.33,
+    "rendement_dividende_pct": 0.0271,
+    "nb_paiements_total_5ans": 60,
+    "frequence_dividende": "Mensuel",
+    "derniere_date_ex": "2026-10-29",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [
+    {
+      "type": "attestation",
+      "nature": "fait_etabli",
+      "fait": "FNB d obligations ultra court terme à haute notation crédit, sans exposition directe aux activités fossiles spéculatives.",
+      "source": "Fiche de fonds BMO Gestion Mondiale d Actifs",
+      "url": "https://www.bmogam.com",
+      "date_document": "2024-03-31"
+    }
+  ],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Bonds (Canada ultra short-term)",
+    "Défensif / Faible Volatilité",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)",
+    "Vulnérable aux Taux d'Intérêt"
+  ],
+  "synthese_agent_llm": "BMO Ultra Short-Term Bond ETF (ZST.TO) est un actif de type etf_bond (Bonds (Canada ultra short-term)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 3.3% pour une volatilité de 0.5% (ratio de Sharpe de -0.37). Sa VaR quotidienne à 95% est de 0.0%. Son profil se caractérise par : FNB Indiciel, Bonds (Canada ultra short-term), Défensif / Faible Volatilité, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+}

@@ -1,0 +1,105 @@
+{
+  "ticker": "TD.TO",
+  "nom": "Toronto-Dominion Bank",
+  "classe_actif": "equity",
+  "marche": "TSX",
+  "devise_origine": "CAD",
+  "secteur": "Financials",
+  "prix": {
+    "dernier_prix_cad": 176.69,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 65.1,
+    "prix_max_5ans_cad": 178.93
+  },
+  "rendements": {
+    "cumule_5ans": 1.3377,
+    "cagr_annualise": 0.1783,
+    "rendement_1an": 0.5686,
+    "rendement_3ans": 1.404,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1736,
+    "volatilite_baisse_semi_deviation": 0.1254,
+    "pire_baisse_globale": -0.2606497934775678,
+    "pire_baisse_2022": -0.26064979347756745,
+    "creux_date": "2022-07-14",
+    "sommet_date": "2022-02-10",
+    "annees_sous_le_sommet": 3.28,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.017,
+    "cvar_95_expected_shortfall": 0.0263,
+    "var_95_cornish_fisher": 0.0185,
+    "var_99_quotidienne": 0.0335,
+    "cvar_99_expected_shortfall": 0.0421,
+    "var_95_1mois_estimee": 0.078
+  },
+  "distribution": {
+    "skewness": -0.675,
+    "excess_kurtosis": 3.677,
+    "statistique_jb": 833.55,
+    "p_valeur_jb": 9.938726264397014e-182,
+    "est_normale": false,
+    "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1783,
+    "volatilite_annuelle": 0.1736,
+    "volatilite_baisse_sortino": 0.1254,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.83,
+    "ratio_sortino": 1.14,
+    "ratio_calmar": 0.68
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.43,
+    "alpha_annuel_vs_spy": 0.0986,
+    "correlation_vs_spy": 0.4,
+    "beta_xiu_canada": 0.84,
+    "alpha_annuel_vs_xiu.to": 0.0619,
+    "correlation_vs_xiu.to": 0.62,
+    "correlation_variation_usdcad": -0.2,
+    "correlation_taux_10y_canada": -0.05,
+    "correlation_taux_10y_us": -0.01,
+    "correlation_taux_directeur_boc": -0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.0897,
+      "pire_baisse_pendant_regime": -0.2606
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": -0.0868,
+      "pire_baisse_pendant_regime": -0.147
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": -0.0577,
+      "pire_baisse_pendant_regime": -0.1286
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 5.45,
+    "rendement_dividende_pct": 0.0308,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-10-09",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Financials",
+    "Queues Épaisses (Fat Tails)",
+    "Asymétrie Baissière",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Toronto-Dominion Bank (TD.TO) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 17.8% pour une volatilité de 17.4% (ratio de Sharpe de 0.83). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Asymétrie Baissière, Dividende Régulier, Bêta Défensif (<0.7)."
+}

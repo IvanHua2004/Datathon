@@ -1,9 +1,10 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import { Mode } from '../../models/proces.model';
 
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
 import { PlaidoirieComponent } from '../../components/plaidoirie/plaidoirie.component';
-import { Mode } from '../../models/proces.model';
 import { ProcesService } from '../../services/proces.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
 
@@ -16,11 +17,20 @@ import { dollars, pct, tonVerdict } from '../../shared/format';
 })
 export class TribunalPage {
   readonly tribunal = inject(ProcesService);
+  private readonly router = inject(Router);
 
   readonly profilCle = signal('');
   readonly ticker = signal('');
   readonly taille = signal(0.2);
-  readonly mode = signal<Mode>('gabarit');
+  /** Paramètres d'URL envoyés par la page du greffier : /tribunal?profil=…&ticker=…&taille=…&question=… */
+  readonly profilDemande = input<string>('', { alias: 'profil' });
+  readonly tickerDemande = input<string>('', { alias: 'ticker' });
+  readonly tailleDemande = input<string>('', { alias: 'taille' });
+  readonly question = input<string>('');
+  private demandeLancee = false;
+  /** Bedrock seulement (« Sans modèle » retiré de l'interface). */
+  readonly mode = signal<Mode>('bedrock');
+  readonly intentionTexte = signal('');
 
   readonly pct = pct;
   readonly dollars = dollars;
@@ -51,7 +61,18 @@ export class TribunalPage {
     this.tribunal.chargerReferentiels();
     effect(() => {
       const profils = this.tribunal.profils();
-      if (profils.length && !this.profilCle()) {
+      if (!profils.length || this.profilCle()) return;
+      const demande = profils.find((p) => p.cle === this.profilDemande());
+      const taille = Number(this.tailleDemande());
+      if (demande && this.tickerDemande() && taille > 0 && !this.demandeLancee) {
+        // Arrivée depuis le greffier : le procès s'ouvre tout seul.
+        this.demandeLancee = true;
+        this.profilCle.set(demande.cle);
+        this.ticker.set(this.tickerDemande());
+        this.taille.set(taille);
+        this.ouvrir();
+      } else {
+        // Arrivée depuis la page des personas : /tribunal?persona=robert
         const profil = profils.find((p) => p.cle === persona) ?? profils[0];
         this.choisirProfil(profil.cle);
       }
@@ -75,8 +96,10 @@ export class TribunalPage {
     this.taille.set(Number(valeur));
   }
 
-  choisirMode(mode: Mode): void {
-    this.mode.set(mode);
+  /** Pour l'instant, « Ouvrir le procès » mène au greffier (maquette C) avec le persona choisi. */
+  versGreffier(): void {
+    if (!this.profilCle()) return;
+    this.router.navigate(['/question'], { queryParams: { profil: this.profilCle() } });
   }
 
   ouvrir(): void {
@@ -86,7 +109,34 @@ export class TribunalPage {
       ticker: this.ticker(),
       taille: this.taille(),
       mode: this.mode(),
+      intention_texte: this.intentionTexte() || this.question() || undefined,
     });
+  }
+
+  mettreAJourIntention(event: Event): void {
+    this.intentionTexte.set((event.target as HTMLInputElement).value);
+  }
+
+  choisirArbitrage(choix: 'OUI' | 'NON'): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.choisirArbitrage(choix, this.profilCle(), this.ticker(), this.taille());
+  }
+
+  demanderScenarios(): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.genererScenarios(this.profilCle(), this.ticker(), this.taille(), this.intentionTexte());
+  }
+
+  telechargerPdf(choix?: string): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.telechargerPdf(
+      this.profilCle(),
+      this.ticker(),
+      this.taille(),
+      this.mode(),
+      this.intentionTexte(),
+      choix
+    );
   }
 
   valeur(event: Event): string {

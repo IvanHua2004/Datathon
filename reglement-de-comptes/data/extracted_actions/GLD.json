@@ -1,0 +1,103 @@
+{
+  "ticker": "GLD",
+  "nom": "SPDR Gold Shares",
+  "classe_actif": "etf_commodity",
+  "marche": "NYSE Arca",
+  "devise_origine": "USD",
+  "secteur": "Gold",
+  "prix": {
+    "dernier_prix_cad": 505.9,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 203.62,
+    "prix_max_5ans_cad": 671.17
+  },
+  "rendements": {
+    "cumule_5ans": 1.308,
+    "cagr_annualise": 0.1754,
+    "rendement_1an": -0.0563,
+    "rendement_3ans": 1.0175,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1806,
+    "volatilite_baisse_semi_deviation": 0.1266,
+    "pire_baisse_globale": -0.2599925169596923,
+    "pire_baisse_2022": -0.17367865365069557,
+    "creux_date": "2026-10-30",
+    "sommet_date": "2026-01-28",
+    "annees_sous_le_sommet": 0.79,
+    "a_recupere_sommet": false,
+    "var_95_quotidienne": 0.0166,
+    "cvar_95_expected_shortfall": 0.0266,
+    "var_95_cornish_fisher": 0.0184,
+    "var_99_quotidienne": 0.0319,
+    "cvar_99_expected_shortfall": 0.0434,
+    "var_95_1mois_estimee": 0.076
+  },
+  "distribution": {
+    "skewness": -0.646,
+    "excess_kurtosis": 7.065,
+    "statistique_jb": 2802.64,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Risque de queue négative (chutes asymétriques) ; Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1754,
+    "volatilite_annuelle": 0.1806,
+    "volatilite_baisse_sortino": 0.1266,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.78,
+    "ratio_sortino": 1.11,
+    "ratio_calmar": 0.67
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.1,
+    "alpha_annuel_vs_spy": 0.1297,
+    "correlation_vs_spy": 0.09,
+    "beta_xiu_canada": 0.34,
+    "alpha_annuel_vs_xiu.to": 0.1072,
+    "correlation_vs_xiu.to": 0.24,
+    "correlation_variation_usdcad": -0.01,
+    "correlation_taux_10y_canada": -0.24,
+    "correlation_taux_10y_us": -0.24,
+    "correlation_taux_directeur_boc": -0.03
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.022,
+      "pire_baisse_pendant_regime": -0.1737
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0786,
+      "pire_baisse_pendant_regime": -0.0241
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.3912,
+      "pire_baisse_pendant_regime": -0.05
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 0.0,
+    "rendement_dividende_pct": 0.0,
+    "nb_paiements_dividendes": 0,
+    "frequence_dividende": "Aucun dividende",
+    "splits": []
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Gold",
+    "Queues Épaisses (Fat Tails)",
+    "Asymétrie Baissière",
+    "Sans Dividende / Réinvestissement",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "SPDR Gold Shares (GLD) est un actif de type etf_commodity (Gold). Sur la période observée de 5 ans, il affiche un rendement annualisé de 17.5% pour une volatilité de 18.1% (ratio de Sharpe de 0.78). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : FNB Indiciel, Gold, Queues Épaisses (Fat Tails), Asymétrie Baissière, Sans Dividende / Réinvestissement, Bêta Défensif (<0.7)."
+}

@@ -1,0 +1,412 @@
+:host {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 1fr);
+  height: 100svh;
+  color: #ffe5bf;
+}
+
+.dossier {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.4rem 0 0.25rem;
+  border-radius: 999px;
+  color: #ffe5bf;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.dossier:hover .changer { text-decoration: underline; }
+.dossier:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.pastille {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ffe5bf;
+  color: #773c6f;
+  font-weight: 800;
+}
+
+.changer { color: #ffc247; font-weight: 700; }
+
+.scene {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
+  background-image:
+    linear-gradient(180deg, rgb(40 21 35 / 74%), rgb(40 21 35 / 95%) 72%),
+    url('/assets/courtroom.png');
+  background-size: cover;
+  background-position: center top;
+}
+
+.titre-audience {
+  margin: 0;
+  padding: 1.25rem 1rem 0.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 229 191 / 80%);
+}
+
+.fil {
+  min-height: 0;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 54rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 1rem clamp(1rem, 3vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ligne { display: flex; gap: 0.75rem; align-items: flex-end; }
+.ligne--moi { justify-content: flex-end; }
+
+.avatar {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #ffc247;
+  color: #200e0c;
+  font-weight: 800;
+}
+
+.bulle.bulle--archiviste { max-width: min(46rem, calc(100% - 3.5rem)); }
+
+.avatar--archiviste { background: #fff8ec; color: #773c6f; border: 2px solid #773c6f; }
+
+.fiche {
+  margin-top: 0.25rem;
+  padding: 0.85rem;
+  border: 1px solid rgb(119 60 111 / 30%);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.fiche-tete { display: flex; flex-direction: column; gap: 0.1rem; margin-bottom: 0.6rem; }
+.fiche-tete strong { font-size: 1.05rem; }
+.fiche-tete span { font-size: 0.8rem; color: #5c4a55; }
+
+.fiche-faits {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr));
+  gap: 0.6rem 1rem;
+}
+
+.fiche-faits dt { font-size: 0.8rem; color: #5c4a55; }
+.fiche-faits dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.fiche-faits dd.aide-fait { font-weight: 400; font-size: 0.75rem; color: #6b5a64; }
+.fiche-limites { margin: 0.7rem 0 0; font-size: 0.75rem; color: #6b5a64; }
+
+.tableau-defile { overflow-x: auto; margin-top: 0.25rem; }
+
+.comparaison {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.comparaison th, .comparaison td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid rgb(119 60 111 / 15%);
+  text-align: left;
+  vertical-align: top;
+}
+
+.comparaison thead th { font-size: 0.95rem; border-bottom: 2px solid rgb(119 60 111 / 35%); }
+.comparaison thead th span, .comparaison td span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b5a64;
+}
+.comparaison tbody th { font-weight: 400; color: #5c4a55; min-width: 9rem; }
+
+.groupe h3 {
+  margin: 0.5rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: #773c6f;
+}
+.groupe h3 span { font-weight: 400; color: #6b5a64; }
+
+.pastilles { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.pastille-titre {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-height: 2.75rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid rgb(119 60 111 / 35%);
+  border-radius: 4px;
+  background: #fff;
+  color: #200e0c;
+  text-align: left;
+  line-height: 1.25;
+  font-size: 0.85rem;
+}
+.pastille-titre span { font-size: 0.75rem; color: #6b5a64; }
+.pastille-titre:hover:not(:disabled) { border-color: #773c6f; background: rgb(255 194 71 / 18%); }
+.pastille-titre.choisie { border: 2px solid #773c6f; background: rgb(255 194 71 / 35%); }
+
+.marque { font-style: normal; font-size: 0.7rem; font-weight: 700; padding: 0.05rem 0.35rem; border-radius: 2px; }
+.marque--portefeuille { background: rgb(46 139 87 / 15%); color: #1e6b3c; }
+.marque--exclu { background: rgb(179 38 30 / 12%); color: #8a1c1c; }
+
+.bulle {
+  min-width: 0;
+  max-width: min(36rem, calc(100% - 3.5rem));
+  padding: 0.85rem 1rem;
+  line-height: 1.5;
+  animation: arrivee 220ms ease-out;
+}
+
+.bulle p { margin: 0; }
+
+.bulle--greffier {
+  background: #fff8ec;
+  color: #200e0c;
+  border-radius: 6px 6px 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-left: 5px solid transparent;
+}
+
+.bulle--greffier[data-ton='ok'] { border-left-color: #2e8b57; }
+.bulle--greffier[data-ton='refus'] { border-left-color: #e0a21b; }
+.bulle--greffier[data-ton='erreur'] { border-left-color: #b3261e; }
+
+.bulle--moi {
+  background: #773c6f;
+  color: #ffe5bf;
+  border-radius: 6px 6px 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.auteur { font-size: 0.8rem; color: #773c6f; }
+.statut--ok { color: #1e7a3c; }
+
+.actions, .reformulations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.reformulations { flex-direction: column; align-items: flex-start; gap: 0.3rem; font-size: 0.9rem; color: #5c4a55; }
+
+button { font: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 0.55; }
+
+.principal {
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border: 0;
+  border-radius: 2px;
+  background: #ffc247;
+  color: #200e0c;
+  font-weight: 700;
+}
+
+.principal:hover:not(:disabled) { background: #fbde85; }
+
+.secondaire {
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border: 1px solid #773c6f;
+  border-radius: 2px;
+  background: transparent;
+  color: #773c6f;
+  font-weight: 700;
+}
+
+.secondaire:hover:not(:disabled) { background: rgb(119 60 111 / 8%); }
+
+.lien {
+  padding: 0.2rem 0;
+  border: 0;
+  background: none;
+  color: #773c6f;
+  font-weight: 700;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
+
+.choix {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+  gap: 0.5rem;
+}
+
+.dossier-choix {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgb(119 60 111 / 35%);
+  border-radius: 4px;
+  background: #fff;
+  color: #200e0c;
+  text-align: left;
+  line-height: 1.35;
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.dossier-choix:hover { border-color: #773c6f; background: rgb(255 194 71 / 18%); }
+.choix-tete { display: flex; flex-direction: column; }
+.choix-symbole { font-size: 0.8rem; color: #5c4a55; }
+.choix-raison { font-size: 0.875rem; color: #4a3a44; }
+.choix-action { margin-top: auto; padding-top: 0.2rem; font-size: 0.85rem; font-weight: 700; color: #773c6f; }
+.dossier-choix:hover .choix-action { text-decoration: underline; }
+
+.bulle--attente { padding: 1rem 1.1rem; }
+.points { display: inline-flex; gap: 0.3rem; }
+.points i {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #773c6f;
+  animation: point 1s ease-in-out infinite;
+}
+.points i:nth-child(2) { animation-delay: 150ms; }
+.points i:nth-child(3) { animation-delay: 300ms; }
+
+.compositeur {
+  position: relative;
+  width: 100%;
+  max-width: 54rem;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0.5rem clamp(1rem, 3vw, 1.5rem) 1.5rem;
+}
+
+.barre {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border-radius: 6px;
+  background: #fff8ec;
+  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
+}
+
+.barre input {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #200e0c;
+  font: 400 1.1rem Aptos, 'Segoe UI', Arial, sans-serif;
+}
+
+.barre input::placeholder { color: #7a6873; }
+
+.suggestions {
+  position: absolute;
+  left: clamp(1rem, 3vw, 1.5rem);
+  right: clamp(1rem, 3vw, 1.5rem);
+  bottom: calc(100% - 0.25rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: #fff8ec;
+  color: #200e0c;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 -2px 0 rgb(0 0 0 / 10%), 0 8px 24px rgb(0 0 0 / 40%);
+}
+
+.suggestions li[role='option'] {
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  border-top: 1px solid rgb(32 14 12 / 8%);
+  overflow-wrap: anywhere;
+}
+
+.suggestions li[role='option']:first-child { border-top: 0; }
+.suggestions li[role='option']:hover, .suggestions li.active { background: rgb(255 194 71 / 35%); }
+.suggestions strong { font-weight: 700; }
+
+.aide {
+  padding: 0.35rem 1rem;
+  font-size: 0.75rem;
+  color: #5c4a55;
+  border-top: 1px solid rgb(32 14 12 / 8%);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@keyframes arrivee {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes point {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bulle, .points i { animation: none; }
+  .dossier-choix { transition: none; }
+}
+
+@media (max-width: 40rem) {
+  .avatar { width: 2.25rem; height: 2.25rem; }
+  .ligne { gap: 0.5rem; }
+}
+
+.outils { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+
+.outil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  border: 1px solid rgb(255 229 191 / 45%);
+  border-radius: 999px;
+  background: rgb(40 21 35 / 70%);
+  color: #ffe5bf;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.outil:hover:not(:disabled) { border-color: #ffc247; color: #ffc247; }
+
+.duel { align-self: flex-start; margin-top: 0.25rem; }

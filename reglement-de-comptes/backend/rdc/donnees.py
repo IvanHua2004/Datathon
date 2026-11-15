@@ -21,24 +21,55 @@ import pandas as pd
 RACINE = Path(__file__).resolve().parent.parent
 
 
+def _charger_env() -> None:
+    for dossier in [RACINE.parent, RACINE]:
+        chemin = dossier / ".env"
+        if chemin.exists():
+            with open(chemin, encoding="utf-8") as f:
+                for ligne in f:
+                    ligne = ligne.strip()
+                    if ligne and not ligne.startswith("#") and "=" in ligne:
+                        k, v = ligne.split("=", 1)
+                        k, v = k.strip(), v.strip().strip("\"'")
+                        if k not in os.environ:
+                            os.environ[k] = v
+            break
+
+
+_charger_env()
+
+
 def dossier_donnees() -> Path:
-    """Dossier du jeu de départ : variable RDC_DATA_DIR, sinon le dossier des organisateurs."""
+    """Dossier du jeu de départ : variable RDC_DATA_DIR, dossier local data/, sinon Datathon2026."""
     env = os.environ.get("RDC_DATA_DIR")
-    if env:
+    if env and Path(env).exists():
         return Path(env)
+    local_data = RACINE.parent / "data"
+    if local_data.exists():
+        return local_data
     return RACINE.parent.parent / "Datathon2026" / "alphaforge_starter"
 
 
 def lire_csv(nom: str) -> pd.DataFrame:
-    """Lit un CSV depuis S3 si RDC_S3_BUCKET est défini, sinon depuis le disque."""
+    """Lit un CSV depuis S3 si RDC_S3_BUCKET est défini, sinon depuis le disque local."""
     bucket = os.environ.get("RDC_S3_BUCKET")
     if bucket:
-        import boto3  # importé ici pour que le mode local n'exige pas AWS
+        try:
+            import boto3
+            from botocore.config import Config
 
-        prefixe = os.environ.get("RDC_S3_PREFIX", "")
-        region = os.environ.get("AWS_REGION") or "us-east-1"
-        objet = boto3.client("s3", region_name=region).get_object(Bucket=bucket, Key=f"{prefixe}{nom}")
-        return pd.read_csv(io.BytesIO(objet["Body"].read()))
+            prefixe = os.environ.get("RDC_S3_PREFIX", "")
+            region = os.environ.get("AWS_REGION") or "us-east-1"
+            config = Config(connect_timeout=2, read_timeout=5, retries={"max_attempts": 2})
+            s3 = boto3.client("s3", region_name=region, config=config)
+            objet = s3.get_object(Bucket=bucket, Key=f"{prefixe}{nom}")
+            return pd.read_csv(io.BytesIO(objet["Body"].read()))
+        except Exception as e:
+            # En cas d'échec réseau ou environnement local sans connexion, repli sur le disque local
+            chemin_local = dossier_donnees() / nom
+            if chemin_local.exists():
+                return pd.read_csv(chemin_local)
+            raise e
     return pd.read_csv(dossier_donnees() / nom)
 
 
@@ -83,6 +114,14 @@ def charger() -> Donnees:
         debut=str(rendements.index[0].date()),
         fin=str(rendements.index[-1].date()),
     )
+
+
+def load_market_data() -> Donnees:
+    """Charge les données de marché (prix, univers, rendements en CAD).
+    
+    Conforme à l'Issue 1.1 de la Roadmap (chargement hybride S3/local avec cache).
+    """
+    return charger()
 
 
 @lru_cache(maxsize=1)

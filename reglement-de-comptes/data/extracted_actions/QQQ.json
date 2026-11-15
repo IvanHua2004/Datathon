@@ -1,0 +1,110 @@
+{
+  "ticker": "QQQ",
+  "nom": "Invesco QQQ Trust (Nasdaq-100)",
+  "classe_actif": "etf_equity",
+  "marche": "NASDAQ",
+  "devise_origine": "USD",
+  "secteur": "Broad market (U.S. growth/tech-heavy)",
+  "prix": {
+    "dernier_prix_cad": 980.99,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 341.38,
+    "prix_max_5ans_cad": 1080.69
+  },
+  "rendements": {
+    "cumule_5ans": 1.038,
+    "cagr_annualise": 0.1475,
+    "rendement_1an": 0.1477,
+    "rendement_3ans": 0.853,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.2234,
+    "volatilite_baisse_semi_deviation": 0.1555,
+    "pire_baisse_globale": -0.3205008768748686,
+    "pire_baisse_2022": -0.31018786970976675,
+    "creux_date": "2022-06-16",
+    "sommet_date": "2021-12-27",
+    "annees_sous_le_sommet": 1.68,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0218,
+    "cvar_95_expected_shortfall": 0.0323,
+    "var_95_cornish_fisher": 0.0207,
+    "var_99_quotidienne": 0.0371,
+    "cvar_99_expected_shortfall": 0.048,
+    "var_95_1mois_estimee": 0.0999
+  },
+  "distribution": {
+    "skewness": 0.075,
+    "excess_kurtosis": 5.084,
+    "statistique_jb": 1405.68,
+    "p_valeur_jb": 5.756359399376643e-306,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1475,
+    "volatilite_annuelle": 0.2234,
+    "volatilite_baisse_sortino": 0.1555,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.5,
+    "ratio_sortino": 0.72,
+    "ratio_calmar": 0.46
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 1.29,
+    "alpha_annuel_vs_spy": -0.0228,
+    "correlation_vs_spy": 0.95,
+    "beta_xiu_canada": 1.03,
+    "alpha_annuel_vs_xiu.to": 0.0129,
+    "correlation_vs_xiu.to": 0.59,
+    "correlation_variation_usdcad": 0.01,
+    "correlation_taux_10y_canada": -0.09,
+    "correlation_taux_10y_us": -0.03,
+    "correlation_taux_directeur_boc": 0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.2802,
+      "pire_baisse_pendant_regime": -0.3102
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0941,
+      "pire_baisse_pendant_regime": -0.0308
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2592,
+      "pire_baisse_pendant_regime": -0.128
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 3.785,
+    "rendement_dividende_pct": 0.0039,
+    "nb_paiements_total_5ans": 21,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-09-21",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {
+    "AAPL": 0.088,
+    "MSFT": 0.084,
+    "NVDA": 0.079,
+    "AMZN": 0.052,
+    "GOOGL": 0.048,
+    "TSLA": 0.028
+  },
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Broad market (U.S. growth/tech-heavy)",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement"
+  ],
+  "synthese_agent_llm": "Invesco QQQ Trust (Nasdaq-100) (QQQ) est un actif de type etf_equity (Broad market (U.S. growth/tech-heavy)). Sur la période observée de 5 ans, il affiche un rendement annualisé de 14.8% pour une volatilité de 22.3% (ratio de Sharpe de 0.5). Sa VaR quotidienne à 95% est de 2.2%. Son profil se caractérise par : FNB Indiciel, Broad market (U.S. growth/tech-heavy), Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+}
