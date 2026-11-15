@@ -503,3 +503,21 @@ rdc-menu {
     clip-path: inset(50%);
   }
 }
+
+/* Impression du rapport d'analyse du tribunal : seul le rapport s'imprime. */
+@media print {
+  body.impression-rapport * { visibility: hidden; }
+  body.impression-rapport .fenetre-rapport,
+  body.impression-rapport .fenetre-rapport * { visibility: visible; }
+  body.impression-rapport .fenetre-rapport {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+  body.impression-rapport .fenetre-rapport .fermer-verdict { display: none; }
+}

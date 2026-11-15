@@ -1,5 +1,6 @@
-import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, signal, viewChild } from '@angular/core';
-import { Piece, TourDiscussion } from '../../models/proces.model';
+import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { Piece, Position, Proces, TourDiscussion } from '../../models/proces.model';
+import { RapportAudienceComponent } from './rapport-audience.component';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { choisirVoixAudience } from './voix-audience';
 
@@ -21,6 +22,7 @@ const PERSONNAGES = [
 
 @Component({
   selector: 'rdc-audience-scene',
+  imports: [RapportAudienceComponent],
   styleUrl: './audience-scene.component.css',
   template: `
     <section class="scene" aria-label="Audience du Tribunal 2">
@@ -169,35 +171,14 @@ const PERSONNAGES = [
           <button class="fermer-verdict" type="button" aria-label="Fermer le rapport" (click)="fenetreRapport.close()">×</button>
         </header>
         @if (rapportOuvert()) {
-          <ol class="interventions-rapport">
-            @for (entree of interventionsLues(); track entree.tour.ordre) {
-              <li>
-                <h3>{{ entree.tour.acteur }} · {{ entree.tour.titre }}</h3>
-                <p>{{ entree.extrait }}{{ entree.complet ? '' : '…' }}</p>
-                @if (entree.complet && entree.tour.non_verifies?.length) {
-                  <p class="alerte">Chiffres non vérifiés : {{ entree.tour.non_verifies.join(', ') }}</p>
-                }
-              </li>
-            } @empty {
-              <li>Les interventions apparaîtront au fil de l’audience.</li>
-            }
-          </ol>
-          @if (piecesLues().length) {
-            <section class="pieces-rapport">
-              <h3>Pièces citées</h3>
-              @for (piece of piecesLues(); track piece.numero) {
-                <details>
-                  <summary>{{ piece.numero }} · {{ piece.description }}</summary>
-                  <dl>
-                    @for (fait of piece.faits; track $index) {
-                      <dt>{{ fait.libelle }}</dt><dd>{{ fait.valeur }}</dd>
-                    }
-                  </dl>
-                  <p>{{ piece.source }} · {{ piece.periode }}</p>
-                </details>
-              }
-            </section>
-          }
+          <rdc-rapport-audience
+            [proces]="proces()"
+            [interventions]="interventionsLues()"
+            [pieces]="pieces()"
+            [vote]="verdictRendu()"
+            [audienceTerminee]="audienceTerminee() || !!verdictRendu()"
+            [portefeuille]="portefeuille()"
+            (telecharger)="telecharger.emit($event)" />
         }
       </div>
     </dialog>
@@ -207,6 +188,12 @@ export class AudienceSceneComponent {
   readonly tours = input<readonly TourDiscussion[]>([]);
   readonly pieces = input<readonly Piece[]>([]);
   readonly enCours = input(false);
+  /** Le procès complet (verdict, courbe, salle…) pour le rapport d'analyse. */
+  readonly proces = input<Proces | null>(null);
+  /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
+  readonly portefeuille = input<readonly Position[]>([]);
+  /** Demande de PDF depuis le rapport, avec le camp retenu par l'investisseur. */
+  readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly mots = computed(() => motsDe(this.tour()?.texte ?? ''));

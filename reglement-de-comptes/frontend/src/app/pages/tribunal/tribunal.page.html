@@ -107,7 +107,9 @@
     }
 
     @if (versionScene) {
-      <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []" [enCours]="tribunal.enCours()" />
+      <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []" [enCours]="tribunal.enCours()"
+        [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []"
+        (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)" />
     } @else if (proces(); as pr) {
       @if (pr.avertissement) {
         <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>
