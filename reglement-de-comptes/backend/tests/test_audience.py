@@ -50,3 +50,25 @@ def test_question_sur_le_debat_ou_nouvelle_demande():
     assert audience.concerne_le_debat("C'est quoi la part du risque ?", AUDIENCE)
     assert not audience.concerne_le_debat("Et avec 5 % ?", AUDIENCE)
     assert not audience.concerne_le_debat("Devrais-je placer 20 % dans SPY ?", AUDIENCE)
+
+
+def test_phrase_sans_rapport_avec_un_titre_retenu():
+    from rdc import questions
+    univers = {"SPY": "SPDR S&P 500 ETF Trust", "AAPL": "Apple"}
+    for texte in ("blablabla", "quelle est la météo demain ?", "raconte moi une blague"):
+        a = questions.analyser(texte, univers, ticker_en_attente="SPY")
+        assert a.statut == "refus" and a.motif == "hors_sujet", texte
+        assert "Je ne peux pas répondre" in a.message
+    # Une vraie relance reste comprise.
+    assert questions.analyser("et pour 20 % ?", univers, ticker_en_attente="SPY").statut == "recevable"
+    assert questions.analyser("ses chiffres ?", univers, ticker_en_attente="SPY").statut != "refus"
+
+
+def test_ok_ne_relance_pas_le_meme_proces():
+    from fastapi.testclient import TestClient
+    import api
+    r = TestClient(api.app).post("/api/questions/analyser", json={
+        "texte": "ok", "profil": "robert", "ticker": "SPY",
+        "historique": ["Devrais-je placer 10 % de mon portefeuille dans SPY ?"],
+        "audience": {**AUDIENCE, "taille": 0.1}}).json()
+    assert r["motif"] == "deja_plaide" and "vient d'être plaidé" in r["message"]
