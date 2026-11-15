@@ -6,6 +6,7 @@ et quantifie immédiatement les répercussions de son choix sur son patrimoine.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from . import moteur
 from .format import dollars, pct, annees
 
 
@@ -15,6 +16,10 @@ class AnalyseComparative:
     titre_decision: str
     statut_conformite: str
     impact_capital: str
+    profit_initial: float
+    profit_final: float
+    periode_debut: str
+    periode_fin: str
     delta_perte_dollars: float
     perte_max_dollars: float
     budget_depasse: bool
@@ -33,6 +38,14 @@ def comparer_decision(dossier, decision_tribunal: dict, choix_investisseur: bool
     taille = dossier.taille
     av = dossier.avant
     ap = dossier.apres
+    profit_initial = dossier.profit_initial
+    profit_final = profit_initial
+    if choix_investisseur:
+        poids_finaux = moteur.ajouter_position(p.portefeuille, t, taille)
+        profit_final = moteur.profit_portefeuille(
+            dossier.donnees.rendements, poids_finaux, p.capital,
+            dossier.debut, dossier.fin,
+        )
 
     perte_av = av["pire_baisse"]["profondeur"] * p.capital
     perte_ap = ap["pire_baisse"]["profondeur"] * p.capital
@@ -82,6 +95,10 @@ def comparer_decision(dossier, decision_tribunal: dict, choix_investisseur: bool
             titre_decision=titre,
             statut_conformite=statut,
             impact_capital=impact,
+            profit_initial=profit_initial,
+            profit_final=profit_final,
+            periode_debut=dossier.debut,
+            periode_fin=dossier.fin,
             delta_perte_dollars=delta_perte,
             perte_max_dollars=perte_ap,
             budget_depasse=depasse,
@@ -114,6 +131,10 @@ def comparer_decision(dossier, decision_tribunal: dict, choix_investisseur: bool
             titre_decision=titre,
             statut_conformite=statut,
             impact_capital=impact,
+            profit_initial=profit_initial,
+            profit_final=profit_final,
+            periode_debut=dossier.debut,
+            periode_fin=dossier.fin,
             delta_perte_dollars=0.0,
             perte_max_dollars=perte_av,
             budget_depasse=False,

@@ -97,6 +97,7 @@ class DemandeComparaison(BaseModel):
     ticker: str = Field(description="Titre de l'univers")
     taille: float = Field(gt=0, le=0.5, description="Taille de la position")
     choix_investisseur: Literal["OUI", "NON"] = Field(description="Choix de l'investisseur face au verdict")
+    profit_initial: float | None = Field(default=None, description="Profit initial conservé au début du procès")
 
 
 class DemandeScenarios(BaseModel):
@@ -479,6 +480,7 @@ def proces(demande: DemandeProces, request: Request) -> dict:
             "intention_texte": demande.intention_texte or "",
         },
         "periode": {"debut": dossier.debut, "fin": dossier.fin},
+        "profit_initial": dossier.profit_initial,
         "mode": p.mode,
         "avertissement": p.avertissement,
         "decision": p.decision,
@@ -588,6 +590,11 @@ def comparer(demande: DemandeComparaison, request: Request) -> dict:
     decision = regle_verdict(dossier)
     choix_bool = demande.choix_investisseur == "OUI"
     comp = comparer_decision(dossier, decision, choix_bool)
+    if demande.profit_initial is not None and abs(demande.profit_initial - comp.profit_initial) > 0.01:
+        raise HTTPException(
+            status_code=409,
+            detail="Le profit initial conservé ne correspond plus aux données du dossier. Recommencez le procès.",
+        )
     return asdict(comp)
 
 

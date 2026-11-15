@@ -134,7 +134,9 @@
         (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)"
         (autreQuestion)="versGreffier()"
         [delibere]="reprise()"
-        (voteRendu)="tribunal.voteAudience.set($event)" />
+        (voteRendu)="tribunal.voteAudience.set($event)"
+        [reprendreVote]="retourVote()" [voteReprise]="tribunal.voteAudience()"
+        (continuerComparaison)="ouvrirRapportComparatif()" />
     } @else if (proces(); as pr) {
       @if (pr.avertissement) {
         <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>

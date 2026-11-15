@@ -264,6 +264,20 @@ function clePortrait(tour: TourDiscussion): string {
         </div>
       </div>
     </dialog>
+    @if (annonceTerminee()) {
+      <section class="decision-finale" aria-labelledby="titre-decision-finale">
+        <h2 id="titre-decision-finale">Rapport comparatif</h2>
+        @if (secondesAvantRapport() > 0) {
+          <p class="attente-rapport" role="status">
+            Ouverture dans {{ secondesAvantRapport() }} s
+            <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i></span>
+          </p>
+        } @else {
+          <button type="button" class="voir-comparaison"
+            (click)="continuerComparaison.emit()">Ouvrir le rapport comparatif →</button>
+        }
+      </section>
+    }
     <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
       <div class="contenu-verdict">
         <header class="entete-verdict">
@@ -363,8 +377,8 @@ function clePortrait(tour: TourDiscussion): string {
             [interventions]="interventionsLues()"
             [pieces]="pieces()"
             [vote]="verdictRendu()"
-            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert()"
             [pendantLeVote]="verdictOuvert()"
+            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert() || annonceTerminee()"
             [portefeuille]="portefeuille()"
             [masquerDecision]="!verdictRendu()" />
         }
@@ -407,6 +421,8 @@ export class AudienceSceneComponent {
   readonly proces = input<Proces | null>(null);
   /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
   readonly portefeuille = input<readonly Position[]>([]);
+  readonly reprendreVote = input(false);
+  readonly voteReprise = input<Camp | null>(null);
   /** Indicateur de génération du PDF en cours. */
   readonly chargementPdf = input(false);
   /** Indicateur de succès après téléchargement du PDF. */
@@ -420,6 +436,8 @@ export class AudienceSceneComponent {
   /** « Revenir voter » depuis le greffier : l'audience est déjà entendue, on ouvre le délibéré. */
   readonly delibere = input(false);
   private delibereOuvert = false;
+  readonly continuerComparaison = output<void>();
+  readonly secondesAvantRapport = signal(0);
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly preparation = computed(() => this.enCours() && !this.tour());
@@ -499,6 +517,7 @@ export class AudienceSceneComponent {
   readonly verdictRendu = linkedSignal<readonly TourDiscussion[], Camp | null>({
     source: this.tours, computation: () => null,
   });
+  private readonly repriseAppliquee = signal(false);
   readonly lectureActive = computed(() =>
     !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert()
     && !this.analogieAffichee()
@@ -530,6 +549,7 @@ export class AudienceSceneComponent {
     const camp = this.campRetenu();
     if (!camp) return;
     const cote = camp.role === 'avocat_defense' ? 'la défense' : 'l’accusation';
+    const verdict = this.proces()?.decision.verdict;
     return {
       ordre: this.tours().length + 1,
       etape: 'ANNONCE_VERDICT',
@@ -537,7 +557,9 @@ export class AudienceSceneComponent {
       role: 'juge',
       avatar: '👨‍⚖️',
       titre: 'Votre verdict',
-      texte: `J’annonce votre verdict : vous avez tranché en faveur de ${cote}, représentée par ${camp.nom}. L’audience est levée.`,
+      texte: `Vous avez tranché en faveur de ${cote}, représentée par ${camp.nom}. `
+        + (verdict ? `Le verdict du tribunal est « ${verdict} ». ` : '')
+        + 'L’audience est levée.',
       pause_ms: 0,
     };
   });
@@ -602,6 +624,21 @@ export class AudienceSceneComponent {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
     inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
+    effect((nettoyer) => {
+      if (!this.annonceTerminee() || this.reprendreVote()) return;
+      let secondes = 3;
+      this.secondesAvantRapport.set(secondes);
+      const minuterie = setInterval(() => {
+        this.secondesAvantRapport.set(--secondes);
+        if (secondes > 0) return;
+        clearInterval(minuterie);
+        this.continuerComparaison.emit();
+      }, 1000);
+      nettoyer(() => {
+        clearInterval(minuterie);
+        this.secondesAvantRapport.set(0);
+      });
+    });
     // Retour depuis le greffier pour voter : dernière réplique affichée en entier, délibéré ouvert.
     afterRenderEffect(() => {
       const fenetre = this.fenetreVerdict()?.nativeElement;
@@ -614,12 +651,23 @@ export class AudienceSceneComponent {
       this.verdictOuvert.set(true);
       fenetre.showModal();
     });
+    effect(() => {
+      if (!this.reprendreVote() || this.repriseAppliquee()) return;
+      const camp = this.voteReprise();
+      if (!camp || !this.tours().length) return;
+      this.vote.set(camp);
+      this.verdictRendu.set(camp);
+      this.lectureAuto.set(false);
+      this.texteIntegral.set(true);
+      this.motActif.set(this.mots().length);
+      this.repriseAppliquee.set(true);
+    });
     effect((nettoyer) => {
       if (!this.tours().length) return;
       let minuterie: ReturnType<typeof setTimeout>;
       const lancer = () => {
         if (this.verdictRendu() || this.audienceTerminee()) return;
-        if (document.hidden || this.annonceActive() || this.verdictOuvert() || this.rapportOuvert()) {
+        if (document.hidden || this.annonceActive() || this.finOuverte() || this.verdictOuvert() || this.rapportOuvert()) {
           minuterie = setTimeout(lancer, 800);
           return;
         }

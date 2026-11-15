@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from rdc import donnees, intention, comparaison, scenarios, rapport_pdf, proces
+from rdc import donnees, intention, comparaison, moteur, scenarios, rapport_pdf, proces
 from rdc.profils import PROFILS
 from rdc.proces import ouvrir_proces, construire_dossier, regle_verdict, construire_timeline_discussion
 
@@ -67,6 +67,35 @@ def test_comparer_decision_oui_versus_non(data_marche):
     assert "Protection du capital" in comp_non.statut_conformite
     assert comp_non.delta_perte_dollars == 0.0
     assert comp_non.budget_depasse is False
+
+
+def test_comparaison_calcule_profit_initial_et_profit_selon_le_choix(data_marche):
+    profil = PROFILS["robert"]
+    ticker = "NVDA"
+    taille = 0.20
+    dossier = construire_dossier(profil, ticker, taille)
+    decision = regle_verdict(dossier)
+
+    rendements_initiaux = moteur.rendements_portefeuille(data_marche.rendements, profil.portefeuille)
+    profit_initial_attendu = profil.capital * moteur.rendement_periode(
+        rendements_initiaux, dossier.debut, dossier.fin
+    )
+    poids_apres = moteur.ajouter_position(profil.portefeuille, ticker, taille)
+    rendements_finaux = moteur.rendements_portefeuille(data_marche.rendements, poids_apres)
+    profit_final_oui_attendu = profil.capital * moteur.rendement_periode(
+        rendements_finaux, dossier.debut, dossier.fin
+    )
+
+    oui = comparaison.comparer_decision(dossier, decision, choix_investisseur=True)
+    non = comparaison.comparer_decision(dossier, decision, choix_investisseur=False)
+
+    assert dossier.profit_initial == pytest.approx(profit_initial_attendu)
+    assert oui.profit_initial == pytest.approx(profit_initial_attendu)
+    assert oui.profit_final == pytest.approx(profit_final_oui_attendu)
+    assert non.profit_initial == pytest.approx(profit_initial_attendu)
+    assert non.profit_final == pytest.approx(profit_initial_attendu)
+    assert oui.periode_debut == dossier.debut
+    assert oui.periode_fin == dossier.fin
 
 
 def test_generer_scenarios_alternatifs(data_marche):
