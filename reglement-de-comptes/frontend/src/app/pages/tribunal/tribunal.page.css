@@ -2,9 +2,8 @@
   display: block;
   min-height: 100svh;
   color: #ffe5bf;
-  background:
-    repeating-linear-gradient(90deg, rgb(255 229 191 / 6%) 0 1px, transparent 1px 32px),
-    radial-gradient(ellipse at 50% 0%, #4a2a40, #281523 70%);
+  background-color: #281523;
+  background-image: var(--fond-ligne-parcours);
 }
 
 .barre {
@@ -57,10 +56,6 @@
 }
 
 .version-tribunal:hover { background: rgb(255 229 191 / 14%); }
-
-:host(.tribunal-scene) {
-  background: radial-gradient(ellipse at 55% 15%, #503038, #21131f 72%);
-}
 
 :host(.tribunal-scene) .disposition { width: 100%; max-width: none; gap: clamp(0.9rem, 2vw, 1.5rem); }
 .dossier-colonne { display: contents; }

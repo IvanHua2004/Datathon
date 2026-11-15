@@ -196,11 +196,10 @@
   (close)="finOuverte.set(false)" (click)="$event.target === fenetreFin && fenetreFin.close()">
   <div class="contenu-fin">
     <header class="entete-fin">
-      <h2 id="titre-fin" tabindex="-1" autofocus>Les deux camps ont plaidé. Et maintenant ?</h2>
+      <h2 id="titre-fin" class="titre-style-persona" tabindex="-1" autofocus>Les deux camps ont plaidé. <span>Et maintenant ?</span></h2>
       <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreFin.close()">×</button>
     </header>
     <div class="portes-fin">
-      <span class="ou-fin" aria-hidden="true">ou</span>
       <button type="button" class="porte-fin porte-fin--verdict" (click)="passerAuVerdict(fenetreFin, fenetreVerdict)">
         <span class="illustration-fin" aria-hidden="true"><img src="assets/tribunal-2/juge.png" alt=""></span>
         <span class="titre-porte">Passer au verdict</span>
@@ -233,7 +232,7 @@
 <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
   <div class="contenu-verdict">
     <header class="entete-verdict">
-      <h2 id="titre-verdict" tabindex="-1" autofocus>Qui a gagné le débat ? Votez.</h2>
+      <h2 id="titre-verdict" class="titre-style-persona" tabindex="-1" autofocus>Qui a gagné le débat ? <span>Votez.</span></h2>
       <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreVerdict.close()">×</button>
     </header>
     <div class="corps-verdict">
