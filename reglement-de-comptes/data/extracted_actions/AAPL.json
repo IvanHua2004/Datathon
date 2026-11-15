@@ -1,0 +1,104 @@
+{
+  "ticker": "AAPL",
+  "nom": "Apple",
+  "classe_actif": "equity",
+  "marche": "NASDAQ",
+  "devise_origine": "USD",
+  "secteur": "Information Technology",
+  "prix": {
+    "dernier_prix_cad": 505.88,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 164.57,
+    "prix_max_5ans_cad": 505.88
+  },
+  "rendements": {
+    "cumule_5ans": 1.7501,
+    "cagr_annualise": 0.2159,
+    "rendement_1an": 0.2995,
+    "rendement_3ans": 0.973,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.2729,
+    "volatilite_baisse_semi_deviation": 0.1832,
+    "pire_baisse_globale": -0.3424065114931236,
+    "pire_baisse_2022": -0.2693327084244772,
+    "creux_date": "2025-04-08",
+    "sommet_date": "2024-12-26",
+    "annees_sous_le_sommet": 0.84,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0269,
+    "cvar_95_expected_shortfall": 0.0384,
+    "var_95_cornish_fisher": 0.0232,
+    "var_99_quotidienne": 0.0475,
+    "cvar_99_expected_shortfall": 0.0583,
+    "var_95_1mois_estimee": 0.1232
+  },
+  "distribution": {
+    "skewness": 0.337,
+    "excess_kurtosis": 7.186,
+    "statistique_jb": 2830.44,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.2159,
+    "volatilite_annuelle": 0.2729,
+    "volatilite_baisse_sortino": 0.1832,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.66,
+    "ratio_sortino": 0.99,
+    "ratio_calmar": 0.63
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 1.17,
+    "alpha_annuel_vs_spy": 0.0586,
+    "correlation_vs_spy": 0.7,
+    "beta_xiu_canada": 0.92,
+    "alpha_annuel_vs_xiu.to": 0.092,
+    "correlation_vs_xiu.to": 0.43,
+    "correlation_variation_usdcad": 0.04,
+    "correlation_taux_10y_canada": -0.1,
+    "correlation_taux_10y_us": -0.03,
+    "correlation_taux_directeur_boc": 0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.1448,
+      "pire_baisse_pendant_regime": -0.2693
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.1451,
+      "pire_baisse_pendant_regime": -0.0359
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.2242,
+      "pire_baisse_pendant_regime": -0.1366
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 1.07,
+    "rendement_dividende_pct": 0.0021,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-11-12",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Information Technology",
+    "Volatilité Élevée",
+    "Queues Épaisses (Fat Tails)",
+    "Sans Dividende / Réinvestissement"
+  ],
+  "synthese_agent_llm": "Apple (AAPL) est un actif de type equity (Information Technology). Sur la période observée de 5 ans, il affiche un rendement annualisé de 21.6% pour une volatilité de 27.3% (ratio de Sharpe de 0.66). Sa VaR quotidienne à 95% est de 2.7%. Son profil se caractérise par : Action Individuelle, Information Technology, Volatilité Élevée, Queues Épaisses (Fat Tails), Sans Dividende / Réinvestissement."
+}

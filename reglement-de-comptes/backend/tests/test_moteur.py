@@ -49,7 +49,8 @@ def test_donnees_sans_trou_et_en_cad():
 
 
 def test_verdicts_des_trois_demandes_types():
-    attendus = {"robert": V_CONTRAINTE, "amira": V_TENSION, "mateo": V_INDECIDABLE}
+    # Avec les preuves ESG désormais documentées pour ENB.TO, Mateo est en rejet de contrainte dure (V_CONTRAINTE)
+    attendus = {"robert": V_CONTRAINTE, "amira": V_TENSION, "mateo": V_CONTRAINTE}
     for cle, attendu in attendus.items():
         p = PROFILS[cle]
         proces = ouvrir_proces(p, *p.demande_exemple)

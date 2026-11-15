@@ -1,0 +1,104 @@
+{
+  "ticker": "JNJ",
+  "nom": "Johnson & Johnson",
+  "classe_actif": "equity",
+  "marche": "NYSE",
+  "devise_origine": "USD",
+  "secteur": "Health Care",
+  "prix": {
+    "dernier_prix_cad": 404.16,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 174.61,
+    "prix_max_5ans_cad": 404.16
+  },
+  "rendements": {
+    "cumule_5ans": 1.2414,
+    "cagr_annualise": 0.1688,
+    "rendement_1an": 0.4088,
+    "rendement_3ans": 1.1369,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1802,
+    "volatilite_baisse_semi_deviation": 0.12,
+    "pire_baisse_globale": -0.15549399662240782,
+    "pire_baisse_2022": -0.10387507864756806,
+    "creux_date": "2025-05-14",
+    "sommet_date": "2025-03-10",
+    "annees_sous_le_sommet": 0.43,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.016,
+    "cvar_95_expected_shortfall": 0.0238,
+    "var_95_cornish_fisher": 0.0168,
+    "var_99_quotidienne": 0.0281,
+    "cvar_99_expected_shortfall": 0.0384,
+    "var_95_1mois_estimee": 0.0734
+  },
+  "distribution": {
+    "skewness": 0.053,
+    "excess_kurtosis": 4.45,
+    "statistique_jb": 1076.72,
+    "p_valeur_jb": 1.556799258810092e-234,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.1688,
+    "volatilite_annuelle": 0.1802,
+    "volatilite_baisse_sortino": 0.12,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.74,
+    "ratio_sortino": 1.12,
+    "ratio_calmar": 1.09
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.15,
+    "alpha_annuel_vs_spy": 0.1179,
+    "correlation_vs_spy": 0.14,
+    "beta_xiu_canada": 0.1,
+    "alpha_annuel_vs_xiu.to": 0.1242,
+    "correlation_vs_xiu.to": 0.07,
+    "correlation_variation_usdcad": 0.2,
+    "correlation_taux_10y_canada": -0.12,
+    "correlation_taux_10y_us": -0.07,
+    "correlation_taux_directeur_boc": 0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": 0.0714,
+      "pire_baisse_pendant_regime": -0.1039
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0625,
+      "pire_baisse_pendant_regime": -0.0328
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.1014,
+      "pire_baisse_pendant_regime": -0.0973
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 6.58,
+    "rendement_dividende_pct": 0.0163,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-08-25",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Health Care",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)"
+  ],
+  "synthese_agent_llm": "Johnson & Johnson (JNJ) est un actif de type equity (Health Care). Sur la période observée de 5 ans, il affiche un rendement annualisé de 16.9% pour une volatilité de 18.0% (ratio de Sharpe de 0.74). Sa VaR quotidienne à 95% est de 1.6%. Son profil se caractérise par : Action Individuelle, Health Care, Queues Épaisses (Fat Tails), Dividende Régulier, Bêta Défensif (<0.7)."
+}

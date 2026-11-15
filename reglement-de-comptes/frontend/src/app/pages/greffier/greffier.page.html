@@ -1,6 +1,6 @@
 <rdc-entete [etape]="2">
   @if (persona(); as p) {
-    <a class="dossier" routerLink="/persona" aria-label="Changer de persona">
+    <a class="dossier" routerLink="/personas" aria-label="Changer de persona">
       <span class="pastille" aria-hidden="true">{{ p.nom[0] }}</span>
       Dossier {{ p.nom }} <span class="changer">Changer</span>
     </a>
@@ -48,6 +48,11 @@
                     </li>
                   }
                 </ul>
+                @if (peutDueler(a)) {
+                  <button type="button" class="principal duel" (click)="ouvrirDuel(a)">
+                    <span aria-hidden="true">⚔</span> Juger les deux en duel
+                  </button>
+                }
               }
               @if (a.statut === 'refus' && a.reformulations.length) {
                 <div class="reformulations">
@@ -96,7 +101,7 @@
                         <tr>
                           <th scope="col"><span class="visually-hidden">Chiffre</span></th>
                           @for (f of a.fiches; track f.ticker) {
-                            <th scope="col">{{ f.nomTitre }}<span>{{ f.ticker }} · {{ f.classe }}</span></th>
+                            <th scope="col">{{ f.nomTitre }}<span>{{ f.ticker.startsWith('MOY:') ? f.classe + ' : ' + f.secteur : f.ticker + ' · ' + f.classe }}</span></th>
                           }
                         </tr>
                       </thead>
@@ -148,7 +153,7 @@
                                     [attr.aria-pressed]="estChoisi(m, t.ticker, gi)"
                                     [disabled]="!estDerniere(m)" (click)="basculer(m, t.ticker, gi)">
                               <strong>{{ t.nomTitre }}</strong>
-                              <span>{{ t.ticker }}</span>
+                              <span>{{ t.ticker.startsWith('MOY:') ? t.secteur : t.ticker }}</span>
                             </button>
                           </li>
                         }
@@ -199,6 +204,14 @@
         <li class="aide" aria-hidden="true">Tab pour compléter · ↑↓ pour choisir · Entrée pour envoyer</li>
       </ul>
     }
+    <div class="outils" role="group" aria-label="Raccourcis">
+      <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
+        <span aria-hidden="true">☰</span> Voir tous les titres
+      </button>
+      <button type="button" class="outil" (click)="choisirDeuxTitres()" [disabled]="enCours()">
+        <span aria-hidden="true">⇄</span> Comparer deux titres
+      </button>
+    </div>
     <div class="barre">
       <label for="champ" class="visually-hidden">Votre question</label>
       <input

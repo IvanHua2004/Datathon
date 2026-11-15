@@ -1,0 +1,103 @@
+{
+  "ticker": "JPM",
+  "nom": "JPMorgan Chase",
+  "classe_actif": "equity",
+  "marche": "NYSE",
+  "devise_origine": "USD",
+  "secteur": "Financials",
+  "prix": {
+    "dernier_prix_cad": 488.69,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 127.98,
+    "prix_max_5ans_cad": 506.17
+  },
+  "rendements": {
+    "cumule_5ans": 1.6388,
+    "cagr_annualise": 0.2062,
+    "rendement_1an": 0.1656,
+    "rendement_3ans": 1.3456,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.2339,
+    "volatilite_baisse_semi_deviation": 0.1601,
+    "pire_baisse_globale": -0.32244951941892874,
+    "pire_baisse_2022": -0.32112640819010374,
+    "creux_date": "2022-10-11",
+    "sommet_date": "2021-11-23",
+    "annees_sous_le_sommet": 1.65,
+    "a_recupere_sommet": true,
+    "var_95_quotidienne": 0.0222,
+    "cvar_95_expected_shortfall": 0.0339,
+    "var_95_cornish_fisher": 0.0207,
+    "var_99_quotidienne": 0.0412,
+    "cvar_99_expected_shortfall": 0.0519,
+    "var_95_1mois_estimee": 0.1016
+  },
+  "distribution": {
+    "skewness": 0.161,
+    "excess_kurtosis": 6.556,
+    "statistique_jb": 2341.16,
+    "p_valeur_jb": 0.0,
+    "est_normale": false,
+    "diagnostic": "Queues épaisses (leptokurtique : chocs extrêmes plus fréquents qu'une loi normale)"
+  },
+  "ratios_performance": {
+    "cagr": 0.2062,
+    "volatilite_annuelle": 0.2339,
+    "volatilite_baisse_sortino": 0.1601,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": 0.73,
+    "ratio_sortino": 1.07,
+    "ratio_calmar": 0.64
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.85,
+    "alpha_annuel_vs_spy": 0.0826,
+    "correlation_vs_spy": 0.59,
+    "beta_xiu_canada": 0.95,
+    "alpha_annuel_vs_xiu.to": 0.0798,
+    "correlation_vs_xiu.to": 0.52,
+    "correlation_variation_usdcad": -0.0,
+    "correlation_taux_10y_canada": 0.04,
+    "correlation_taux_10y_us": 0.12,
+    "correlation_taux_directeur_boc": -0.01
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.2084,
+      "pire_baisse_pendant_regime": -0.3211
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": -0.0119,
+      "pire_baisse_pendant_regime": -0.1207
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.4136,
+      "pire_baisse_pendant_regime": -0.0938
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 7.65,
+    "rendement_dividende_pct": 0.0157,
+    "nb_paiements_total_5ans": 20,
+    "frequence_dividende": "Trimestriel",
+    "derniere_date_ex": "2026-10-06",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "Action Individuelle",
+    "Financials",
+    "Queues Épaisses (Fat Tails)",
+    "Dividende Régulier"
+  ],
+  "synthese_agent_llm": "JPMorgan Chase (JPM) est un actif de type equity (Financials). Sur la période observée de 5 ans, il affiche un rendement annualisé de 20.6% pour une volatilité de 23.4% (ratio de Sharpe de 0.73). Sa VaR quotidienne à 95% est de 2.2%. Son profil se caractérise par : Action Individuelle, Financials, Queues Épaisses (Fat Tails), Dividende Régulier."
+}

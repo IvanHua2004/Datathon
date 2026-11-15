@@ -1,0 +1,30 @@
+/** Réponse de POST /api/duel : deux procès sur le même profil, puis une décision A contre B. */
+
+export interface ChiffreDuel {
+  libelle: string;
+  valeur: string;
+  avant: string;
+  alerte: boolean;
+}
+
+export interface CoteDuel {
+  ticker: string;
+  nomTitre: string;
+  taille: number;
+  verdict: string;
+  gravite: number;
+  motifs: string[];
+  juge: string;
+  defense: string;
+  procureur: string;
+  avertissement: string | null;
+  mode: string;
+  chiffres: ChiffreDuel[];
+}
+
+export interface Duel {
+  profil: string;
+  nom: string;
+  cotes: [CoteDuel, CoteDuel];
+  decision: { gagnant: string | null; raison: string; regle: number; titre: string; texte: string };
+}

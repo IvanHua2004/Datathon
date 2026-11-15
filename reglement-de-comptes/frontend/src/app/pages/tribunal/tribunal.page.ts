@@ -1,5 +1,7 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import { Mode } from '../../models/proces.model';
 
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
 import { PlaidoirieComponent } from '../../components/plaidoirie/plaidoirie.component';
@@ -26,6 +28,9 @@ export class TribunalPage {
   readonly tailleDemande = input<string>('', { alias: 'taille' });
   readonly question = input<string>('');
   private demandeLancee = false;
+  /** Bedrock seulement (« Sans modèle » retiré de l'interface). */
+  readonly mode = signal<Mode>('bedrock');
+  readonly intentionTexte = signal('');
 
   readonly pct = pct;
   readonly dollars = dollars;
@@ -52,8 +57,8 @@ export class TribunalPage {
   });
 
   constructor() {
+    const persona = inject(ActivatedRoute).snapshot.queryParamMap.get('persona');
     this.tribunal.chargerReferentiels();
-    // Premier profil sélectionné dès que les référentiels arrivent.
     effect(() => {
       const profils = this.tribunal.profils();
       if (!profils.length || this.profilCle()) return;
@@ -67,7 +72,9 @@ export class TribunalPage {
         this.taille.set(taille);
         this.ouvrir();
       } else {
-        this.choisirProfil(profils[0].cle);
+        // Arrivée depuis la page des personas : /tribunal?persona=robert
+        const profil = profils.find((p) => p.cle === persona) ?? profils[0];
+        this.choisirProfil(profil.cle);
       }
     });
   }
@@ -101,8 +108,35 @@ export class TribunalPage {
       profil: this.profilCle(),
       ticker: this.ticker(),
       taille: this.taille(),
-      mode: 'bedrock',
+      mode: this.mode(),
+      intention_texte: this.intentionTexte() || this.question() || undefined,
     });
+  }
+
+  mettreAJourIntention(event: Event): void {
+    this.intentionTexte.set((event.target as HTMLInputElement).value);
+  }
+
+  choisirArbitrage(choix: 'OUI' | 'NON'): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.choisirArbitrage(choix, this.profilCle(), this.ticker(), this.taille());
+  }
+
+  demanderScenarios(): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.genererScenarios(this.profilCle(), this.ticker(), this.taille(), this.intentionTexte());
+  }
+
+  telechargerPdf(choix?: string): void {
+    if (!this.profilCle() || !this.ticker()) return;
+    this.tribunal.telechargerPdf(
+      this.profilCle(),
+      this.ticker(),
+      this.taille(),
+      this.mode(),
+      this.intentionTexte(),
+      choix
+    );
   }
 
   valeur(event: Event): string {

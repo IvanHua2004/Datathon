@@ -75,7 +75,7 @@ export class GreffierPage {
     effect(() => {
       const profils = this.tribunal.profils();
       if (profils.length && !this.persona()) {
-        this.router.navigate(['/persona']);
+        this.router.navigate(['/personas']);
       }
     });
 
@@ -158,9 +158,11 @@ export class GreffierPage {
 
   // ----- Dialogue avec le greffier -----
 
-  envoyer(texte = this.saisie()): void {
+  envoyer(texte = this.saisie(), comparer?: [string, string], action?: 'catalogue' | 'choisir_deux'): void {
     const p = this.persona();
     if (!p || this.enCours() || !texte.trim()) return;
+    // Les questions précédentes partent avec la nouvelle : le greffier relit la conversation.
+    const historique = this.messages().filter((m) => m.de === 'moi').map((m) => m.texte).slice(-10);
     this.ajouter({ de: 'moi', texte: texte.trim() });
     this.saisie.set('');
     const champ = this.champ()?.nativeElement;
@@ -169,7 +171,7 @@ export class GreffierPage {
     this.enCours.set(true);
 
     const contexte = this.enAttente();
-    this.api.analyserQuestion({ texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille }).subscribe({
+    this.api.analyserQuestion({ texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille, comparer, action, historique }).subscribe({
       next: (a) => {
         this.enCours.set(false);
         if (a.agent === 'archiviste') {
@@ -267,7 +269,37 @@ export class GreffierPage {
 
   comparerSelection(m: Message): void {
     const [a, b] = (m.choisis?.() ?? []).filter(Boolean);
-    if (a && b) this.envoyer(`Compare ${a} et ${b}`);
+    if (!a || !b) return;
+    const titres = (m.analyse?.groupes ?? []).flatMap((g) =>
+      g.titres.map((t) => ({ ...t, nom: t.ticker.startsWith('MOY:')
+        ? `la moyenne de ${g.nom.toLowerCase()}`.replace('de les ', 'des ').replace('de le ', 'du ')
+        : t.nomTitre })));
+    const nom = (x: string) => titres.find((t) => t.ticker === x)?.nom ?? x;
+    this.envoyer(`Compare ${nom(a)} et ${nom(b)}`, [a, b]);
+  }
+
+  /** Boutons sous la conversation : le catalogue sans avoir à le demander. */
+  voirTousLesTitres(): void {
+    this.envoyer('Voir tous les titres', undefined, 'catalogue');
+  }
+
+  choisirDeuxTitres(): void {
+    this.envoyer('Comparer deux titres', undefined, 'choisir_deux');
+  }
+
+  /** Duel : les deux dossiers proposés passent devant le tribunal, puis une règle fixe tranche. */
+  peutDueler(a: AnalyseQuestion): boolean {
+    const tickers = new Set(a.choix.map((c) => c.ticker));
+    return (a.motif === 'comparaison' || a.motif === 'plusieurs_titres') && a.choix.length === 2 && tickers.size === 2;
+  }
+
+  ouvrirDuel(a: AnalyseQuestion): void {
+    const p = this.persona();
+    if (!p || !this.peutDueler(a)) return;
+    const [x, y] = a.choix;
+    this.router.navigate(['/duel'], {
+      queryParams: { profil: p.cle, a: `${x.ticker}:${x.taille}`, b: `${y.ticker}:${y.taille}` },
+    });
   }
 
   voirFiche(ticker: string): void {

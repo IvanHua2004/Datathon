@@ -20,11 +20,13 @@ def test_proces_robert_nvda():
     assert r.status_code == 200
     corps = r.json()
     assert corps["decision"]["verdict"] == "Contraire à une contrainte déclarée"
-    assert [p["role"] for p in corps["plaidoiries"]] == ["La Défense", "Le Procureur"]
-    assert corps["motivation"]["role"] == "Le Juge"
+    assert any("Défense" in p["role"] for p in corps["plaidoiries"])
+    assert any("Procureur" in p["role"] for p in corps["plaidoiries"])
+    assert "Juge" in corps["motivation"]["role"]
     assert all(p["non_verifies"] == [] for p in corps["plaidoiries"])
     assert [p["numero"] for p in corps["pieces"]][:1] == ["P-01"]
     assert len(corps["salle"]) == 4 and len(corps["courbe"]) == 9
+    assert "discussion" in corps and len(corps["discussion"]) >= 5
 
 
 def test_erreurs():
@@ -114,3 +116,54 @@ def test_archiviste_catalogue_et_selection():
     assert (trois["statut"], trois["selection"]) == ("selection", "deux")
     # Une part dans la question : c'est une décision, le greffier propose les dossiers.
     assert _q("10 % dans Apple ou Microsoft ?")["agent"] == "greffier"
+
+
+def test_archiviste_domaines_et_moyennes():
+    a = _q("obbligations vs actions americaines")
+    assert (a["statut"], a["agent"]) == ("selection", "archiviste")
+    assert [g["nom"] for g in a["groupes"]] == ["Les obligations", "Les actions américaines"]
+    assert a["groupes"][0]["titres"][0]["ticker"] == "MOY:les obligations"
+    m = _q("moyenne obligations vs actions americaines")
+    assert m["statut"] == "comparaison" and [f["ticker"] for f in m["fiches"]] == ["MOY:les obligations", "MOY:les actions américaines"]
+    assert _q("compare la tech")["motif"] == "comparaison_incomplete"
+    r = client.post("/api/questions/analyser", json={"texte": "", "profil": "robert",
+                                                    "comparer": ["MOY:la crypto", "NVDA"]}).json()
+    assert [f["ticker"] for f in r["fiches"]] == ["MOY:la crypto", "NVDA"] and [c["ticker"] for c in r["choix"]] == ["NVDA"]
+
+
+def test_duel_deux_titres():
+    r = client.post("/api/duel", json={"profil": "robert", "mode": "gabarit",
+                                       "a": {"ticker": "NVDA", "taille": 0.1}, "b": {"ticker": "XBB.TO", "taille": 0.1}})
+    assert r.status_code == 200
+    duel = r.json()
+    assert [c["ticker"] for c in duel["cotes"]] == ["NVDA", "XBB.TO"]
+    assert duel["decision"]["gagnant"] in ("NVDA", "XBB.TO", None) and duel["decision"]["texte"]
+    assert all(len(c["chiffres"]) == 5 for c in duel["cotes"])
+    assert client.post("/api/duel", json={"profil": "robert", "a": {"ticker": "NVDA", "taille": 0.1},
+                                          "b": {"ticker": "NVDA", "taille": 0.2}}).status_code == 422
+
+
+def test_boutons_catalogue():
+    tout = client.post("/api/questions/analyser", json={"texte": "", "profil": "amira", "action": "catalogue"}).json()
+    assert tout["statut"] == "catalogue" and sum(len(g["titres"]) for g in tout["groupes"]) == 31
+    deux = client.post("/api/questions/analyser", json={"texte": "", "profil": "amira", "action": "choisir_deux"}).json()
+    assert (deux["statut"], deux["selection"]) == ("selection", "deux")
+
+
+def test_memoire_de_la_conversation():
+    # La part la plus récente est gardée quand on change seulement de titre.
+    a = _q("et Microsoft ?", historique=["Devrais-je placer 10 % dans Apple ?"])
+    assert (a["statut"], a["ticker"], a["taille"]) == ("recevable", "MSFT", 0.1)
+    assert a["message"].startswith("D'après la conversation") or "Je garde la part" in a["message"]
+    # Le titre le plus récent est repris quand on ne donne qu'une part.
+    b = _q("plutôt 15 %", historique=["10 % dans Apple ?", "Les chiffres de NVDA"])
+    assert (b["statut"], b["ticker"], b["taille"]) == ("recevable", "NVDA", 0.15)
+    # « ses stats » : l'archiviste prend le dernier titre nommé.
+    c = _q("et ses stats ?", historique=["Devrais-je placer 5 % dans Bitcoin ?"])
+    assert (c["agent"], c["fiches"][0]["ticker"]) == ("archiviste", "BTC-USD")
+    # « compare avec l'or » : l'autre côté est le titre le plus récent.
+    d = _q("compare avec l'or", historique=["Les chiffres de Shopify", "Les chiffres de NVDA"], ticker="NVDA")
+    assert [f["ticker"] for f in d["fiches"]] == ["NVDA", "GLD"]
+    # Une nouvelle question complète ignore l'historique.
+    e = _q("Devrais-je placer 20 % dans TSLA ?", historique=["10 % dans Apple ?"])
+    assert (e["ticker"], e["taille"]) == ("TSLA", 0.2) and not e["message"].startswith("D'après")

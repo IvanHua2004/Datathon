@@ -1,0 +1,104 @@
+{
+  "ticker": "TLT",
+  "nom": "iShares 20+ Year Treasury Bond ETF",
+  "classe_actif": "etf_bond",
+  "marche": "NASDAQ",
+  "devise_origine": "USD",
+  "secteur": "Bonds (U.S. long Treasury)",
+  "prix": {
+    "dernier_prix_cad": 113.64,
+    "date_dernier_prix": "2026-11-12",
+    "prix_min_5ans_cad": 99.47,
+    "prix_max_5ans_cad": 165.04
+  },
+  "rendements": {
+    "cumule_5ans": -0.2635,
+    "cagr_annualise": -0.0574,
+    "rendement_1an": -0.0651,
+    "rendement_3ans": -0.0324,
+    "nb_jours_observes": 1304,
+    "date_debut": "2021-11-15",
+    "date_fin": "2026-11-12"
+  },
+  "risque": {
+    "volatilite_annuelle": 0.1574,
+    "volatilite_baisse_semi_deviation": 0.112,
+    "pire_baisse_globale": -0.39728200151688386,
+    "pire_baisse_2022": -0.29918659838823336,
+    "creux_date": "2023-10-19",
+    "sommet_date": "2021-12-03",
+    "annees_sous_le_sommet": 4.94,
+    "a_recupere_sommet": false,
+    "var_95_quotidienne": 0.0167,
+    "cvar_95_expected_shortfall": 0.0216,
+    "var_95_cornish_fisher": 0.0162,
+    "var_99_quotidienne": 0.025,
+    "cvar_99_expected_shortfall": 0.0289,
+    "var_95_1mois_estimee": 0.0766
+  },
+  "distribution": {
+    "skewness": 0.047,
+    "excess_kurtosis": 0.723,
+    "statistique_jb": 28.88,
+    "p_valeur_jb": 5.345882034700328e-07,
+    "est_normale": false,
+    "diagnostic": "Distribution proche d'une loi normale"
+  },
+  "ratios_performance": {
+    "cagr": -0.0574,
+    "volatilite_annuelle": 0.1574,
+    "volatilite_baisse_sortino": 0.112,
+    "taux_sans_risque_utilise": 0.035,
+    "ratio_sharpe": -0.59,
+    "ratio_sortino": -0.82,
+    "ratio_calmar": -0.14
+  },
+  "sensibilites_marche_et_macro": {
+    "beta_spy_cad": 0.07,
+    "alpha_annuel_vs_spy": -0.0999,
+    "correlation_vs_spy": 0.07,
+    "beta_xiu_canada": 0.01,
+    "alpha_annuel_vs_xiu.to": -0.0938,
+    "correlation_vs_xiu.to": 0.01,
+    "correlation_variation_usdcad": 0.25,
+    "correlation_taux_10y_canada": -0.76,
+    "correlation_taux_10y_us": -0.83,
+    "correlation_taux_directeur_boc": -0.02
+  },
+  "regimes_historiques": {
+    "choc_taux_et_inflation_2022": {
+      "periode": "2022-01-03 au 2022-10-14",
+      "rendement_cumule": -0.2613,
+      "pire_baisse_pendant_regime": -0.2428
+    },
+    "crise_bancaire_us_2023": {
+      "periode": "2023-03-01 au 2023-05-01",
+      "rendement_cumule": 0.0169,
+      "pire_baisse_pendant_regime": -0.0516
+    },
+    "expansion_technologique_ia_2024": {
+      "periode": "2024-01-02 au 2024-11-01",
+      "rendement_cumule": 0.0001,
+      "pire_baisse_pendant_regime": -0.0816
+    }
+  },
+  "actions_corporatives": {
+    "dividende_annuel_estime": 4.235,
+    "rendement_dividende_pct": 0.0373,
+    "nb_paiements_total_5ans": 60,
+    "frequence_dividende": "Mensuel",
+    "derniere_date_ex": "2026-11-02",
+    "splits": [],
+    "nb_splits": 0
+  },
+  "esg_preuves": [],
+  "fnb_composition_top_holdings": {},
+  "tags_semantiques": [
+    "FNB Indiciel",
+    "Bonds (U.S. long Treasury)",
+    "Dividende Régulier",
+    "Bêta Défensif (<0.7)",
+    "Vulnérable aux Taux d'Intérêt"
+  ],
+  "synthese_agent_llm": "iShares 20+ Year Treasury Bond ETF (TLT) est un actif de type etf_bond (Bonds (U.S. long Treasury)). Sur la période observée de 5 ans, il affiche un rendement annualisé de -5.7% pour une volatilité de 15.7% (ratio de Sharpe de -0.59). Sa VaR quotidienne à 95% est de 1.7%. Son profil se caractérise par : FNB Indiciel, Bonds (U.S. long Treasury), Dividende Régulier, Bêta Défensif (<0.7), Vulnérable aux Taux d'Intérêt."
+}

@@ -122,8 +122,14 @@ THEMES: list[tuple[str, tuple[str, ...], list[tuple[str, str]]]] = [
                   r"(?:\bou|\bet|\bvs|\bversus|\bcontre|\ben) (?:l')?or\b", r"^l?'?or\b"), [
         ("GLD", "Le prix de l'or, souvent stable quand les actions chutent"),
     ]),
+    ("les obligations", (r"\bob+lig", r"\bbonds?\b", r"revenu fixe", r"\bfnb d'obligations"), [
+        ("XBB.TO", "Obligations canadiennes, toutes échéances"),
+        ("ZST.TO", "Obligations à très court terme, le plus stable"),
+        ("AGG", "Obligations américaines, toutes échéances"),
+        ("TLT", "Obligations du Trésor américain à long terme, plus sensibles aux taux"),
+    ]),
     ("plus de prudence", (r"prudent", r"securi", r"moins (?:de )?risqu", r"\bstable", r"proteger mon capital",
-                          r"obligation", r"\bfixe\b", r"preserver"), [
+                          r"\bfixe\b", r"preserver"), [
         ("XBB.TO", "Obligations canadiennes, toutes échéances"),
         ("ZST.TO", "Obligations à très court terme, le plus stable"),
         ("AGG", "Obligations américaines, toutes échéances"),
@@ -158,6 +164,11 @@ THEMES: list[tuple[str, tuple[str, ...], list[tuple[str, str]]]] = [
         ("XIU.TO", "Les 60 plus grandes entreprises canadiennes"),
         ("RY.TO", "Première banque canadienne"),
         ("CNR.TO", "Chemin de fer canadien"),
+    ]),
+    ("les actions américaines", (r"actions? americ", r"bourse americ"), [
+        ("SPY", "Les 500 plus grandes entreprises américaines"),
+        ("QQQ", "Les 100 plus grandes technos américaines"),
+        ("AAPL", "Apple"), ("MSFT", "Microsoft"), ("NVDA", "NVIDIA"), ("JPM", "JPMorgan Chase"),
     ]),
     ("le marché américain", (r"americ", r"etats-unis", r"\busa?\b", r"wall street"), [
         ("SPY", "Les 500 plus grandes entreprises américaines"),
@@ -280,15 +291,28 @@ def theme_reconnu(texte_norm: str) -> tuple[str, list[tuple[str, str]]] | None:
 
 
 def themes_reconnus(texte_norm: str) -> list[tuple[str, list[tuple[str, str]]]]:
-    return [(nom, candidats) for nom, motifs, candidats in THEMES
-            if any(re.search(m, texte_norm) for m in motifs)]
+    """Thèmes nommés dans le texte. Un thème plus précis cache un thème plus large qui
+    reconnaît les mêmes mots (« actions américaines » cache « marché américain »)."""
+    trouves, positions = [], []
+    for nom, motifs, candidats in THEMES:
+        spans = [m.span() for p in motifs for m in [re.search(p, texte_norm)] if m]
+        if spans and not any(a <= s0 < b for s0, _ in spans for a, b in positions):
+            trouves.append((nom, candidats))
+            positions += spans
+    return trouves
+
+
+def titres_du_theme(nom: str) -> list[str]:
+    for n, _, candidats in THEMES:
+        if n == nom:
+            return [t for t, _ in candidats]
+    return []
 
 
 def _parts_proposees(ticker: str, univers: dict[str, str]) -> list[Choix]:
-    base = part_par_defaut(ticker)
+    parts = (0.02, 0.05, 0.10) if part_par_defaut(ticker) < 0.10 else (0.05, 0.10, 0.20)
     return [Choix(ticker, univers[ticker], x, formuler(ticker, x, univers), libelle)
-            for x, libelle in ((base / 2, "Une petite part"), (base, "Une part moyenne"),
-                               (base * 2, "Une part importante"))]
+            for x, libelle in zip(parts, ("Une petite part", "Une part moyenne", "Une part importante"))]
 
 
 def _archiviste(norm: str, titres: list[str], univers: dict[str, str],
@@ -313,18 +337,40 @@ def _archiviste(norm: str, titres: list[str], univers: dict[str, str],
             r = archiviste.catalogue(portefeuille, classes_exclues)
         return Analyse("catalogue", "catalogue", r["message"], agent="archiviste", groupes=r["groupes"])
 
-    # 2. Une comparaison : exactement deux titres, sinon on fait préciser.
+    comparaison_explicite = re.search(r"compar|\bvs\.?\b|\bversus\b|\bcontre\b|difference", norm)
+    veut_moyenne = re.search(r"\bmoyenn", norm)
+
+    # 2a. « La moyenne des obligations vs les actions américaines » : paniers à parts égales.
+    if nb_groupes == 2 and veut_moyenne and themes:
+        cotes = titres + [archiviste.PREFIXE_MOYENNE + nom if len(ts) > 1 else ts[0] for nom, ts in themes]
+        r = archiviste.comparer(*cotes)
+        return Analyse("comparaison", "comparaison", r["message"], agent="archiviste", fiches=r["fiches"],
+                       choix=[Choix(t, univers[t], part_par_defaut(t), formuler(t, part_par_defaut(t), univers),
+                                    "Soumettre ce titre au tribunal") for t in cotes if t in univers])
+
+    # 2b. Une comparaison dont un seul côté est reconnu : on demande l'autre.
+    if nb_groupes == 1 and comparaison_explicite:
+        connu = univers[titres[0]] if titres else themes[0][0]
+        return Analyse("incomplet", "comparaison_incomplete",
+                       f"J'ai reconnu « {connu} », mais pas l'autre côté de la comparaison. Avec quoi "
+                       "voulez-vous le comparer ? Un titre (NVDA, SPY…) ou un domaine (obligations, or, "
+                       "crypto, tech…).", agent="archiviste")
+
+    # 2c. Une comparaison : exactement deux titres, sinon on fait préciser.
     if nb_groupes >= 2 and (veut_comparer or veut_chiffres):
         uniques = titres + [ts[0] for _, ts in themes if len(ts) == 1]
         if nb_groupes == 2 and len(uniques) == 2:
             a, b = uniques
             r = archiviste.comparer(a, b)
             choix = [Choix(t, univers[t], part_par_defaut(t), formuler(t, part_par_defaut(t), univers),
-                           "Soumettre ce titre au tribunal") for t in (a, b)]
+                           "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
             return Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
                            fiches=r["fiches"], choix=choix)
         groupes = ([{"nom": univers[t], "titres": [titre(t)]} for t in titres]
-                   + [{"nom": nom.capitalize(), "titres": [titre(t) for t in ts]} for nom, ts in themes])
+                   + [{"nom": nom.capitalize(),
+                       "titres": ([archiviste.option_moyenne(nom, len(ts))] if len(ts) > 1 else [])
+                                 + [titre(t) for t in ts]}
+                      for nom, ts in themes])
         if len(groupes) == 2:
             r = archiviste.selection(groupes, un_par_groupe=True)
         else:
@@ -395,11 +441,51 @@ def interpreter_avec_modele(texte: str, univers: dict[str, str], resume_profil: 
         return []
 
 
+# --------------------------------------------------------------------------- mémoire de la conversation
+# Une relance courte (« et Microsoft ? », « plutôt 15 % », « compare-le avec l'or », « ses stats »)
+# se lit avec les questions précédentes. La plus récente a priorité : on remonte l'historique
+# du dernier message vers le premier et on prend la première information trouvée.
+RELANCE = (
+    r"^(?:et|ou|plutot|sinon|alors|avec|pareil|meme chose|idem|aussi|maintenant|ok|d'accord)\b",
+    r"\b(?:le|la|les|ce|cet|cette|celui|celle|ca|cela|lui|il|elle|son|sa|ses|leur|leurs)\b"
+    r"(?:-(?:ci|la))?\s*(?:\?|$|titre|actif|action|dernier|meme|stats?|chiffres|performance)",
+    r"-(?:le|la|les|lui)\b", r"\bmeme titre\b", r"\bcelui-(?:ci|la)\b",
+)
+
+
+@dataclass
+class Contexte:
+    titres: list[str]          # titres nommés, du plus récent au plus ancien
+    part: float | None         # dernière part citée
+    theme: str | None          # dernier domaine cité
+
+
+def lire_contexte(historique: list[str], univers: dict[str, str]) -> Contexte:
+    titres: list[str] = []
+    part = None
+    theme = None
+    for message in reversed(historique[-10:]):
+        for t in trouver_titres(message, univers):
+            if t not in titres:
+                titres.append(t)
+        if part is None:
+            x = trouver_part(message)
+            part = x if x is not None and PART_MIN <= x <= PART_MAX else None
+        if theme is None:
+            th = theme_reconnu(_normaliser(message))
+            theme = th[0] if th else None
+    return Contexte(titres, part, theme)
+
+
+def est_une_relance(texte_norm: str) -> bool:
+    return len(texte_norm.split()) <= 6 or any(re.search(m, texte_norm) for m in RELANCE)
+
+
 def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None = None,
              taille_en_attente: float | None = None, titre_exemple: str = "SPY",
              resume_profil: str = "", portefeuille: set[str] = frozenset(),
-             classes_exclues: set[str] = frozenset()) -> Analyse:
-    """Analyse une réponse au greffier.
+             classes_exclues: set[str] = frozenset(), historique: list[str] | None = None) -> Analyse:
+    """Analyse une réponse au greffier, en tenant compte des questions précédentes.
 
     univers : ticker -> nom. ticker_en_attente / taille_en_attente : ce que le greffier
     sait déjà d'un échange précédent (« Et pour 20 % ? » après avoir nommé le titre).
@@ -410,6 +496,40 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
 
     titres = trouver_titres(texte, univers)
     part = trouver_part(texte)
+    rappel = None   # ce que le greffier a repris de la conversation, dit à l'investisseur
+
+    contexte = lire_contexte(historique or [], univers)
+    autres_themes = [nom for nom, cands in themes_reconnus(norm) if not any(t in titres for t, _ in cands)]
+    if historique and est_une_relance(norm) and not autres_themes:
+        from . import archiviste
+        demande_donnees = archiviste.demande_des_chiffres(norm) or archiviste.demande_une_comparaison(norm)
+        if not titres and contexte.titres and (part is not None or demande_donnees
+                                              or any(re.search(m, norm) for m in RELANCE)):
+            # « plutôt 15 % », « ses stats ? » : le titre vient du message le plus récent qui en nomme un.
+            if not (ticker_en_attente and part is not None):
+                titres = [contexte.titres[0]]
+                rappel = f"D'après la conversation, il s'agit de {univers[titres[0]]} ({titres[0]})."
+        elif len(titres) == 1 and re.search(r"compar|\bvs\b|\bversus\b|\bcontre\b|\bavec\b", norm):
+            # « compare avec l'or » : l'autre côté est le titre le plus récent de la conversation.
+            autre = next((t for t in contexte.titres if t != titres[0]), None)
+            if autre:
+                titres = [autre, titres[0]]
+                rappel = f"D'après la conversation, je compare avec {univers[autre]} ({autre})."
+        if len(titres) == 1 and part is None and contexte.part is not None and not demande_donnees:
+            # « et Microsoft ? » après « 10 % dans Apple ? » : on garde la part la plus récente.
+            part = contexte.part
+            rappel = (rappel + " " if rappel else "") + f"Je garde la part de {round(part * 100):g} %."
+
+    analyse = _analyser(texte, norm, titres, part, univers, ticker_en_attente, taille_en_attente,
+                        titre_exemple, resume_profil, portefeuille, classes_exclues)
+    if rappel:
+        analyse.message = f"{rappel} {analyse.message}"
+    return analyse
+
+
+def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univers: dict[str, str],
+              ticker_en_attente: str | None, taille_en_attente: float | None, titre_exemple: str,
+              resume_profil: str, portefeuille: set[str], classes_exclues: set[str]) -> Analyse:
     exemple = titres[0] if titres else (ticker_en_attente or titre_exemple)
     exemple_part = part if part and PART_MIN <= part <= PART_MAX else (taille_en_attente or 0.10)
 
@@ -425,13 +545,16 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
         return Analyse(
             "refus", "prediction",
             "Le tribunal ne prédit pas les cours. Il juge si une décision convient à votre "
-            "profil, à partir de l'historique 2015–2025.",
+            "profil, à partir de l'historique des prix.",
             reformulations=[formuler(exemple, exemple_part, univers)],
         )
 
     # Questions de données (liste des actifs, chiffres, comparaison), sans décision à juger :
     # c'est l'archiviste qui répond, pas le greffier.
-    if part is None and not ticker_en_attente:
+    from . import archiviste as _arch
+    demande_explicite = (_arch.demande_des_chiffres(norm) or _arch.demande_le_catalogue(norm)
+                         or re.search(r"compar|\bvs\.?\b|\bversus\b|\bcontre\b|difference", norm))
+    if part is None and (not ticker_en_attente or demande_explicite):
         reponse = _archiviste(norm, titres, univers, portefeuille, classes_exclues)
         if reponse is not None:
             return reponse
@@ -485,7 +608,7 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
     if part is None:
         part = taille_en_attente
     if part is None:
-        parts = (0.02, 0.05, 0.10) if ticker in ("BTC-USD", "ETH-USD") else (0.05, 0.10, 0.20)
+        parts = (0.02, 0.05, 0.10) if part_par_defaut(ticker) < 0.10 else (0.05, 0.10, 0.20)
         choix = [Choix(ticker, univers[ticker], t, formuler(ticker, t, univers),
                        "Une petite part" if i == 0 else "Une part moyenne" if i == 1 else "Une part importante")
                  for i, t in enumerate(parts)]

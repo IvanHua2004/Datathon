@@ -65,4 +65,10 @@ export interface DemandeAnalyse {
   profil: string;
   ticker?: string | null;
   taille?: number | null;
+  /** Deux titres (ou « MOY:<domaine> ») choisis à l'écran pour une comparaison. */
+  comparer?: [string, string];
+  /** Boutons de l'écran : voir tous les titres, ou en choisir deux à comparer. */
+  action?: 'catalogue' | 'choisir_deux';
+  /** Questions précédentes, de la plus ancienne à la plus récente (la plus récente a priorité). */
+  historique?: string[];
 }

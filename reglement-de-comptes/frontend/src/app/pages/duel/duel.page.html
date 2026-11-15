@@ -1,0 +1,83 @@
+<rdc-entete [etape]="3">
+  <a class="retour" routerLink="/question" [queryParams]="{ profil: profil() }">← Le greffier</a>
+</rdc-entete>
+
+<main class="scene">
+  <p class="sur-titre">Duel au tribunal</p>
+
+  @if (cotes()[0] && cotes()[1]) {
+    <h1>{{ cotes()[0]!.ticker }} <span aria-hidden="true">⚔</span><span class="visually-hidden">contre</span> {{ cotes()[1]!.ticker }}</h1>
+  }
+
+  @if (erreur(); as e) {
+    <p class="bandeau bandeau--erreur" role="alert">{{ e }}</p>
+  }
+
+  @if (enCours()) {
+    <div class="attente" role="status">
+      <span class="points" aria-hidden="true"><i></i><i></i><i></i></span>
+      <p>Deux procès se tiennent en même temps. Avec Bedrock, comptez environ 30 secondes.</p>
+    </div>
+  }
+
+  @if (duel(); as d) {
+    @if (avertissement(); as av) {
+      <p class="bandeau bandeau--avertissement" role="status">{{ av }}</p>
+    }
+
+    <section class="decision" [class.egalite]="!d.decision.gagnant" aria-live="polite">
+      <span class="sceau" aria-hidden="true">⚖</span>
+      <div>
+        <h2>{{ d.decision.titre }}</h2>
+        <p>{{ d.decision.raison }}.</p>
+        <p class="regle">Règle fixe du duel : le verdict le moins grave l'emporte ; à verdict égal, la plus petite
+          pire baisse du portefeuille. Ce n'est pas un conseil financier : la décision vous appartient.</p>
+      </div>
+    </section>
+
+    <div class="cotes">
+      @for (c of d.cotes; track c.ticker) {
+        <article class="cote" [class.gagnante]="gagnant(c.ticker)" [attr.data-ton]="tonVerdict(c.verdict)">
+          <header>
+            @if (gagnant(c.ticker)) { <span class="ruban">L'emporte</span> }
+            <h3>{{ c.nomTitre }}</h3>
+            <p>{{ c.ticker }} · {{ pct(c.taille, 0) }} du portefeuille de {{ d.nom }}</p>
+          </header>
+
+          <p class="verdict">{{ c.verdict }}</p>
+
+          <table>
+            <caption class="visually-hidden">Le portefeuille avant et après</caption>
+            <thead><tr><th scope="col">Portefeuille</th><th scope="col">Avant</th><th scope="col">Après</th></tr></thead>
+            <tbody>
+              @for (x of c.chiffres; track x.libelle) {
+                <tr [class.alerte]="x.alerte">
+                  <th scope="row">{{ x.libelle }}</th>
+                  <td>{{ x.avant }}</td>
+                  <td><strong>{{ x.valeur }}</strong></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          @if (c.motifs.length) {
+            <h4>Motifs du juge</h4>
+            <ul class="motifs">
+              @for (m of c.motifs; track $index) { <li>{{ m }}</li> }
+            </ul>
+          }
+
+          <details>
+            <summary>Les plaidoiries</summary>
+            <p><strong>La Défense.</strong> {{ c.defense }}</p>
+            <p><strong>Le Procureur.</strong> {{ c.procureur }}</p>
+            <p><strong>Le Juge.</strong> {{ c.juge }}</p>
+          </details>
+
+          <a class="secondaire" routerLink="/tribunal"
+             [queryParams]="{ profil: d.profil, ticker: c.ticker, taille: c.taille }">Voir le procès complet →</a>
+        </article>
+      }
+    </div>
+  }
+</main>
