@@ -19,6 +19,7 @@ import pandas as pd
 
 from reportlab.graphics.shapes import Drawing, Rect, String, Line, Group, Circle, Polygon
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 from . import moteur
 from .format import dollars, pct, annees
@@ -511,19 +512,19 @@ def creer_graphique_simulations(simu: ResultatSimulation) -> Drawing:
                fillColor=colors.HexColor("#F1F5F9"), strokeColor=colors.HexColor("#CBD5E1"),
                strokeWidth=0.8, rx=3, ry=3))
 
-    seuil_str = f"Seuil de perte max autorisé (Budget {pct(simu.budget_perte_pct, 0)}) : {dollars(simu.seuil_perte_capital)} (-{dollars(simu.budget_perte_dollars)})"
-    d.add(String(bar_x + 12, bar_y + 7.5,
-                 f"⚖️ RÈGLE DU TRIBUNAL : {seuil_str}",
-                 fontName="Helvetica-Bold", fontSize=7.2,
+    seuil_str = f"RÈGLE : Seuil max (Budget {pct(simu.budget_perte_pct, 0)}) : {dollars(simu.seuil_perte_capital)} (-{dollars(simu.budget_perte_dollars)})"
+    d.add(String(bar_x + 10, bar_y + 8,
+                 f"⚖️ {seuil_str}",
+                 fontName="Helvetica-Bold", fontSize=6.8,
                  fillColor=colors.HexColor("#B91C1C") if not simu.pire_cas.conforme_budget else colors.HexColor("#1A365D")))
 
     rep_str = (
-        f"Pire creux projeté : {dollars(simu.pire_cas.capital_final)} "
+        f"Pire creux : {dollars(simu.pire_cas.capital_final)} "
         f"({'DÉPASSEMENT CRITIQUE ⛔' if not simu.pire_cas.conforme_budget else 'MARGE RESPECTÉE ✅'})"
     )
-    d.add(String(bar_x + bar_w - 12, bar_y + 7.5,
+    d.add(String(bar_x + bar_w - 10, bar_y + 8,
                  rep_str,
-                 fontName="Helvetica-Bold", fontSize=7.2,
+                 fontName="Helvetica-Bold", fontSize=6.8,
                  fillColor=colors.HexColor("#DC2626") if not simu.pire_cas.conforme_budget else colors.HexColor("#16A34A"),
                  textAnchor="end"))
 
@@ -531,18 +532,24 @@ def creer_graphique_simulations(simu: ResultatSimulation) -> Drawing:
 
 
 def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
-    """Génère un graphique vectoriel ReportLab de qualité institutionnelle.
+    """Génère un graphique vectoriel ReportLab haute lisibilité et qualité institutionnelle.
 
-    Améliorations majeures :
-    - En-tête dégagé avec titre à gauche et pilules de légendes distinctes à droite (zéro chevauchement).
-    - Corridor des possibles ombré (Polygon fan-chart) entre pire et meilleur cas.
-    - Grille de référence horizontale subtile avec repères en k$ sur l'axe Y.
-    - Anti-collision dynamique (smart staggering) empêchant tout télescopage entre valeurs proches à 5 ans.
-    - Seuil de perte maximal intégré dans un cartouche intérieur (zéro débordement hors marge droite).
-    - Trajectoire de stress-test réaliste (choc au creux puis redressement progressif).
+    Améliorations d'ergonomie et de lisibilité :
+    - En-tête structuré à 2 niveaux : Titre à gauche, sous-titre à droite, et bandeau de légendes
+      dédié en dessous (zéro chevauchement entre le titre et les légendes).
+    - Zéro collision sur l'axe des ordonnées : marge gauche élargie (x=60) évitant tout débordement
+      du libellé 'Initial: ...' hors du cadre.
+    - Seuil de perte maximal intégré sans obstruction : ligne rouge pointillée traversante avec
+      badge propre et compact placé hors de trajectoire des points de données (fini le cartouche
+      qui chevauchait la colonne Horizon 1 An).
+    - Badges de valeurs (pilules avec fond teinté et bordure) pour chaque point clé (1 an, 3 ans, 5 ans) :
+      fond pastel opaque garantissant 100 % de lisibilité même si une ligne de grille passe derrière.
+    - Algorithme anti-collision vertical et dynamique adapté à tous les profils (Robert, Mateo, Amira),
+      écartant automatiquement les valeurs proches et plaçant les étiquettes dans les zones d'espacement libres.
+    - Échelle verticale aérée avec marge dynamique haute et basse.
     """
     largeur = 540
-    hauteur = 175
+    hauteur = 180
     d = Drawing(largeur, hauteur)
 
     # Fond de carte global
@@ -550,34 +557,50 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
                fillColor=colors.HexColor("#FFFFFF"),
                strokeColor=colors.HexColor("#CBD5E1"),
                strokeWidth=1, rx=5, ry=5))
-    d.add(Rect(1, hauteur - 26, largeur - 2, 25,
+
+    # Bandeau d'en-tête (30pt de hauteur)
+    header_h = 30
+    d.add(Rect(1, hauteur - header_h, largeur - 2, header_h - 1,
+               fillColor=colors.HexColor("#F8FAFC"),
+               strokeColor=None, rx=4, ry=4))
+    # Masquage de l'arrondi en bas du bandeau d'en-tête
+    d.add(Rect(1, hauteur - header_h, largeur - 2, 8,
                fillColor=colors.HexColor("#F8FAFC"),
                strokeColor=None))
-
-    # Titre principal à gauche
-    d.add(String(16, hauteur - 16,
-                 "PROJECTIONS DU CAPITAL SELON LES RÉGIMES DE MARCHÉ",
-                 fontName="Helvetica-Bold", fontSize=8.5,
-                 fillColor=colors.HexColor("#1A365D")))
-
-    # Légendes compactes parfaitement calées à droite (zéro collision avec le titre)
-    leg_y = hauteur - 16
-    # Statu Quo (Gris pointillé)
-    d.add(Line(238, leg_y + 2.5, 246, leg_y + 2.5, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.5, strokeDashArray=[2, 2]))
-    d.add(String(250, leg_y, "Statu Quo", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#475569")))
-
-    d.add(Circle(310, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#DC2626"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
-    d.add(String(316, leg_y, "Pire cas (Crise)", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#991B1B")))
-
-    d.add(Circle(380, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#2563EB"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
-    d.add(String(386, leg_y, "Cas moyen (CAGR)", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#1E40AF")))
-
-    d.add(Circle(462, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#16A34A"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
-    d.add(String(468, leg_y, "Meilleur rallye", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#166534")))
-
-    # Ligne de séparation sous l'en-tête
-    d.add(Line(0, hauteur - 26, largeur, hauteur - 26,
+    d.add(Line(0, hauteur - header_h, largeur, hauteur - header_h,
                strokeColor=colors.HexColor("#E2E8F0"), strokeWidth=0.8))
+
+    # Ligne 1 d'en-tête : Titre principal à gauche + Horizon à droite
+    d.add(String(14, hauteur - 12,
+                 "PROJECTIONS DU CAPITAL SELON LES RÉGIMES DE MARCHÉ",
+                 fontName="Helvetica-Bold", fontSize=8.0,
+                 fillColor=colors.HexColor("#1A365D")))
+    d.add(String(largeur - 14, hauteur - 12,
+                 "Modélisation prospective (1 an · 3 ans · 5 ans)",
+                 fontName="Helvetica-Oblique", fontSize=6.2,
+                 fillColor=colors.HexColor("#64748B"), textAnchor="end"))
+
+    # Ligne 2 d'en-tête : Légendes parfaitement distribuées
+    leg_y = hauteur - 23
+    # Statu Quo
+    d.add(Line(14, leg_y + 2.5, 24, leg_y + 2.5, strokeColor=colors.HexColor("#64748B"), strokeWidth=1.5, strokeDashArray=[2, 2]))
+    d.add(String(28, leg_y, "Statu Quo", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#475569")))
+
+    # Pire cas
+    d.add(Circle(96, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#DC2626"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
+    d.add(String(103, leg_y, "Pire cas (Crise)", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#991B1B")))
+
+    # Cas moyen
+    d.add(Circle(195, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#2563EB"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
+    d.add(String(202, leg_y, "Cas moyen (CAGR)", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#1E40AF")))
+
+    # Meilleur rallye
+    d.add(Circle(302, leg_y + 2.5, 3.2, fillColor=colors.HexColor("#16A34A"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.5))
+    d.add(String(309, leg_y, "Meilleur rallye", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#166534")))
+
+    # Seuil toléré
+    d.add(Line(402, leg_y + 2.5, 414, leg_y + 2.5, strokeColor=colors.HexColor("#DC2626"), strokeWidth=1.5, strokeDashArray=[3, 2]))
+    d.add(String(418, leg_y, f"Seuil toléré ({dollars(simu.seuil_perte_capital)})", fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#B91C1C")))
 
     # Données par horizon
     c0 = simu.capital_initial
@@ -587,21 +610,18 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
     seuil_cap = simu.seuil_perte_capital
 
     # 4 points dans le temps : 0 an, 1 an, 3 ans, 5 ans
-    # Trajectoire de crise : choc maximal au creux (1 an), puis redressement graduel
     val_pire = [
         c0,
         c0 * (1 + pb),
         c0 * (1 + pb * 0.75 + 0.02 * 2),
         c0 * (1 + pb * 0.45 + 0.03 * 4),
     ]
-    # Trajectoire moyenne : taux composé CAGR
     val_moyen = [
         c0,
         c0 * (1 + cagr),
         c0 * ((1 + cagr) ** 3),
         c0 * ((1 + cagr) ** 5)
     ]
-    # Trajectoire d'expansion : rallye haussier
     taux_expansion = max(cagr + 0.04, g_1y * 0.70)
     val_max = [
         c0,
@@ -609,8 +629,6 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
         c0 * (1 + g_1y) * ((1 + taux_expansion * 0.65) ** 2),
         c0 * (1 + g_1y) * ((1 + taux_expansion * 0.55) ** 4)
     ]
-
-    # Trajectoire Statu Quo (sans décision) : progression au taux CAGR du portefeuille actuel
     cagr_av = float(simu.avant.get("cagr_pct", 0.08))
     val_statu_quo = [
         c0,
@@ -620,16 +638,17 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
     ]
 
     # Bornes du repère
-    plot_x_min = 55
-    plot_x_max = 485
-    plot_y_min = 27
-    plot_y_max = hauteur - 39
+    plot_x_min = 60
+    plot_x_max = 480
+    plot_y_min = 32
+    plot_y_max = hauteur - 42
     plot_h = plot_y_max - plot_y_min
 
     x_coords = [plot_x_min + i * (plot_x_max - plot_x_min) / 3.0 for i in range(4)]
 
     val_toutes = val_pire + val_moyen + val_max + val_statu_quo + [seuil_cap, c0]
-    min_val = min(val_toutes) * 0.92
+    # Marge verticale généreuse pour une respiration visuelle optimale
+    min_val = min(val_toutes) * 0.88
     max_val = max(val_toutes) * 1.08
 
     def to_y(val: float) -> float:
@@ -639,13 +658,13 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
     # -------------------------------------------------------------------------
     # Grille horizontale discrète (Paliers Y en k$)
     # -------------------------------------------------------------------------
-    step = 100_000.0 if (max_val - min_val) < 650_000 else 200_000.0
+    step = 50_000.0 if (max_val - min_val) < 250_000 else (100_000.0 if (max_val - min_val) < 650_000 else 200_000.0)
     val_courante = (int(min_val / step) + 1) * step
     while val_courante < max_val:
         y_g = to_y(val_courante)
         d.add(Line(plot_x_min - 4, y_g, plot_x_max + 4, y_g,
                    strokeColor=colors.HexColor("#F1F5F9"), strokeWidth=0.6, strokeDashArray=[2, 3]))
-        d.add(String(plot_x_min - 8, y_g - 2.5, f"{int(val_courante / 1000)} k$",
+        d.add(String(plot_x_min - 6, y_g - 2.0, f"{int(val_courante / 1000)} k$",
                      fontName="Helvetica", fontSize=5.5, fillColor=colors.HexColor("#94A3B8"), textAnchor="end"))
         val_courante += step
 
@@ -665,92 +684,103 @@ def creer_graphique_horizons(simu: ResultatSimulation) -> Drawing:
     y_c0 = to_y(c0)
     d.add(Line(plot_x_min - 4, y_c0, plot_x_max + 4, y_c0,
                strokeColor=colors.HexColor("#94A3B8"), strokeWidth=0.7, strokeDashArray=[2, 2]))
-    d.add(String(plot_x_min - 8, y_c0 - 2, f"Initial: {dollars(c0)}",
-                 fontName="Helvetica-Oblique", fontSize=5.5, fillColor=colors.HexColor("#64748B"), textAnchor="end"))
+    d.add(String(plot_x_min - 6, y_c0 - 2.0, f"Initial: {dollars(c0)}",
+                 fontName="Helvetica-Bold", fontSize=5.5, fillColor=colors.HexColor("#475569"), textAnchor="end"))
 
-    # Ligne critique de Seuil de Perte Maximal (Budget) & Cartouche INTERNE (zéro coupure à droite)
+    # Ligne critique de Seuil de Perte Maximal (Budget) & Repère dégagé
     y_seuil = to_y(seuil_cap)
     d.add(Line(plot_x_min - 4, y_seuil, plot_x_max + 4, y_seuil,
-               strokeColor=colors.HexColor("#DC2626"), strokeWidth=1, strokeDashArray=[4, 3]))
-    
-    cart_x = plot_x_min + 14
-    cart_y = y_seuil + 2.5 if (y_seuil + 16) < plot_y_max else y_seuil - 12
-    cart_w = 145
-    d.add(Rect(cart_x, cart_y, cart_w, 10,
+               strokeColor=colors.HexColor("#DC2626"), strokeWidth=1.0, strokeDashArray=[4, 3]))
+
+    # Badge de seuil propre dans la marge droite (dégagé de toute courbe)
+    seuil_badge_texte = f"Seuil {dollars(seuil_cap)}"
+    d.add(Rect(plot_x_max + 4, y_seuil - 5, 50, 10,
                fillColor=colors.HexColor("#FEF2F2"), strokeColor=colors.HexColor("#EF4444"), strokeWidth=0.5, rx=2, ry=2))
-    d.add(String(cart_x + cart_w / 2, cart_y + 2.5,
-                 f"⚠️ Seuil de perte toléré : {dollars(seuil_cap)}",
-                 fontName="Helvetica-Bold", fontSize=5.8, fillColor=colors.HexColor("#991B1B"), textAnchor="middle"))
+    d.add(String(plot_x_max + 29, y_seuil - 2.2, seuil_badge_texte,
+                 fontName="Helvetica-Bold", fontSize=5.0, fillColor=colors.HexColor("#991B1B"), textAnchor="middle"))
+
+    # Mini-badge indicatif sur la gauche (entre T0 et Horizon 1, sans collision)
+    cart_w = 95
+    cart_x = plot_x_min + 6
+    cart_y = y_seuil + 1.5 if (y_seuil + 12 < plot_y_max) else (y_seuil - 9.5)
+    d.add(Rect(cart_x, cart_y, cart_w, 8.5,
+               fillColor=colors.HexColor("#FEF2F2"), strokeColor=colors.HexColor("#FCA5A5"), strokeWidth=0.4, rx=2, ry=2))
+    d.add(String(cart_x + cart_w / 2, cart_y + 2.0,
+                 f"⚠️ Seuil de perte toléré ({dollars(seuil_cap)})",
+                 fontName="Helvetica-Bold", fontSize=5.2, fillColor=colors.HexColor("#991B1B"), textAnchor="middle"))
 
     # -------------------------------------------------------------------------
     # Tracé des 4 courbes (Statu Quo + 3 Scénarios)
     # -------------------------------------------------------------------------
-    # 0. Trajectoire Statu Quo (Gris pointillé)
     for i in range(3):
+        # 0. Statu Quo (Gris pointillé)
         d.add(Line(x_coords[i], to_y(val_statu_quo[i]), x_coords[i+1], to_y(val_statu_quo[i+1]),
                    strokeColor=colors.HexColor("#94A3B8"), strokeWidth=1.2, strokeDashArray=[2.5, 2.5]))
-    for i in range(1, 4):
-        d.add(Circle(x_coords[i], to_y(val_statu_quo[i]), 2, fillColor=colors.HexColor("#94A3B8"), strokeColor=None))
-
-    # 1. Trajectoire Pire Cas (Rouge)
-    for i in range(3):
+        # 1. Pire Cas (Rouge)
         d.add(Line(x_coords[i], to_y(val_pire[i]), x_coords[i+1], to_y(val_pire[i+1]),
                    strokeColor=colors.HexColor("#DC2626"), strokeWidth=1.7))
-
-    # 2. Trajectoire Cas Moyen (Bleu)
-    for i in range(3):
+        # 2. Cas Moyen (Bleu)
         d.add(Line(x_coords[i], to_y(val_moyen[i]), x_coords[i+1], to_y(val_moyen[i+1]),
-                   strokeColor=colors.HexColor("#2563EB"), strokeWidth=2))
-
-    # 3. Trajectoire Meilleur Cas (Vert)
-    for i in range(3):
+                   strokeColor=colors.HexColor("#2563EB"), strokeWidth=2.0))
+        # 3. Meilleur Cas (Vert)
         d.add(Line(x_coords[i], to_y(val_max[i]), x_coords[i+1], to_y(val_max[i+1]),
                    strokeColor=colors.HexColor("#16A34A"), strokeWidth=1.7))
 
+    for i in range(1, 4):
+        d.add(Circle(x_coords[i], to_y(val_statu_quo[i]), 2, fillColor=colors.HexColor("#94A3B8"), strokeColor=None))
+
+    # Point de départ unique à T0
+    d.add(Circle(x_coords[0], y_c0, 3.8, fillColor=colors.HexColor("#1E293B"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=1))
+
     # -------------------------------------------------------------------------
-    # Points et Étiquettes avec Anti-Collision Intelligente (Smart Staggering)
+    # Points et Étiquettes en Pilules Anti-Collision (Haute Lisibilité)
     # -------------------------------------------------------------------------
-    for i in range(4):
+    def dessiner_badge(bx: float, by: float, texte: str, bg_hex: str, bd_hex: str, tx_hex: str) -> None:
+        tw = stringWidth(texte, "Helvetica-Bold", 6.0)
+        pw = tw + 7
+        ph = 9.5
+        d.add(Rect(bx - pw / 2, by - 2.2, pw, ph,
+                   fillColor=colors.HexColor(bg_hex), strokeColor=colors.HexColor(bd_hex),
+                   strokeWidth=0.5, rx=2, ry=2))
+        d.add(String(bx, by, texte,
+                     fontName="Helvetica-Bold", fontSize=6.0, fillColor=colors.HexColor(tx_hex), textAnchor="middle"))
+
+    for i in range(1, 4):
         x = x_coords[i]
         y_r = to_y(val_pire[i])
         y_b = to_y(val_moyen[i])
         y_v = to_y(val_max[i])
 
-        if i == 0:
-            # Point de départ unique à T0
-            d.add(Circle(x, y_c0, 3.8, fillColor=colors.HexColor("#1E293B"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=1))
-            continue
-
-        # Cercles distinctifs
+        # Cercles distinctifs sur les courbes
         d.add(Circle(x, y_r, 3, fillColor=colors.HexColor("#DC2626"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.8))
         d.add(Circle(x, y_b, 3, fillColor=colors.HexColor("#2563EB"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.8))
         d.add(Circle(x, y_v, 3, fillColor=colors.HexColor("#16A34A"), strokeColor=colors.HexColor("#FFFFFF"), strokeWidth=0.8))
 
-        # --- Détection de collision verticale entre la courbe verte et bleue ---
-        delta_vb = y_v - y_b
-        if abs(delta_vb) < 16:
-            # Très proches : le plus haut monte, le plus bas descend
-            if y_v >= y_b:
-                y_lbl_v = y_v + 6.5
-                y_lbl_b = y_b - 9.5
-            else:
-                y_lbl_b = y_b + 6.5
-                y_lbl_v = y_v - 9.5
+        # Positionnement vertical intelligent sans collision
+        y_lbl_v = y_v + 6.5
+
+        # Positionnement de la valeur moyenne (Bleu)
+        if (y_v - y_b) >= 15:
+            y_lbl_b = y_b + 6.0
         else:
-            y_lbl_v = y_v + 5.5
-            y_lbl_b = y_b + 5.5
+            y_lbl_b = y_b - 8.5
 
-        d.add(String(x, y_lbl_v, f"{dollars(val_max[i])}",
-                     fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#15803D"), textAnchor="middle"))
-        d.add(String(x, y_lbl_b, f"{dollars(val_moyen[i])}",
-                     fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#1D4ED8"), textAnchor="middle"))
+        # Positionnement du pire cas (Rouge)
+        if y_lbl_b > y_b:
+            # Bleu est placé au-dessus de sa puce, l'espace entre rouge et bleu est libre
+            if (y_b - y_r) >= 16:
+                y_lbl_r = y_r + 6.0
+            else:
+                y_lbl_r = y_r - 8.5
+        else:
+            # Bleu est en dessous de sa puce
+            y_lbl_r = y_r - 8.5
+            if y_lbl_b - y_lbl_r < 11:
+                y_lbl_r = y_lbl_b - 11
 
-        # Étiquette rouge (Pire cas)
-        y_lbl_r = y_r - 9
-        if abs(y_lbl_r - y_seuil) < 5.5:
-            y_lbl_r = y_r + 5.5
-        d.add(String(x, y_lbl_r, f"{dollars(val_pire[i])}",
-                     fontName="Helvetica-Bold", fontSize=6.2, fillColor=colors.HexColor("#B91C1C"), textAnchor="middle"))
+        dessiner_badge(x, y_lbl_v, dollars(val_max[i]), "#F0FDF4", "#86EFAC", "#15803D")
+        dessiner_badge(x, y_lbl_b, dollars(val_moyen[i]), "#EFF6FF", "#93C5FD", "#1D4ED8")
+        dessiner_badge(x, y_lbl_r, dollars(val_pire[i]), "#FEF2F2", "#FCA5A5", "#B91C1C")
 
     # -------------------------------------------------------------------------
     # Axe X & Étiquettes enrichies
