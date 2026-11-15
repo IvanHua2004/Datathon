@@ -1,8 +1,11 @@
 <rdc-entete [etape]="2">
   @if (persona(); as p) {
-    <a class="dossier" routerLink="/personas" aria-label="Changer de persona">
-      <span class="pastille" aria-hidden="true">{{ p.nom[0] }}</span>
-      Dossier {{ p.nom }} <span class="changer">Changer</span>
+    <a class="dossier" routerLink="/personas" [attr.aria-label]="'Dossier de ' + p.nom + ', changer de persona'">
+      <img class="dossier-portrait" [src]="'assets/' + p.cle + '.png'" alt="" width="48" height="48">
+      <span class="dossier-texte">
+        <strong>Dossier {{ p.nom }}</strong>
+        <span class="changer">Changer <span aria-hidden="true">›</span></span>
+      </span>
     </a>
   }
 </rdc-entete>
