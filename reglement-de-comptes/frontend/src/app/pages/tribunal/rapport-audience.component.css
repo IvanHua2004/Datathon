@@ -116,22 +116,9 @@ h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
 .piece p { margin: 0.3rem 0 0; font-size: 0.8rem; color: #654455; overflow-wrap: anywhere; }
 
 /* F. Actions */
-.actions-rapport { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-.actions-rapport button {
-  min-height: 2.75rem;
-  padding: 0 1.1rem;
-  border-radius: 2px;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-.principal { border: 0; background: #ffc247; color: #200e0c; }
-.principal:hover { background: #fbde85; }
-.secondaire { border: 1px solid #773c6f; background: transparent; color: #773c6f; }
-.secondaire:hover { background: rgb(119 60 111 / 8%); }
 button:focus-visible, summary:focus-visible { outline: 3px solid #773c6f; outline-offset: 2px; }
 
 @media print {
-  .actions-rapport, .bandeau-encours { display: none; }
+  .bandeau-encours { display: none; }
   .synthese, .tuile, .camp, .piece { break-inside: avoid; }
 }

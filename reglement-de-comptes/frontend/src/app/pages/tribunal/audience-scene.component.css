@@ -125,7 +125,134 @@
 .contenu-verdict .rendre-verdict:enabled:hover { background: #871d29; }
 .contenu-verdict .rendre-verdict:disabled { opacity: 0.55; cursor: default; }
 
-.fenetre-rapport { border-top-color: #773c6f; }
+/* Le <dialog> devient un rail transparent : le papier à gauche, la barre d'outils flottante à droite.
+   Un clic sur la zone transparente du rail ferme aussi le rapport (cible = le dialog). */
+.fenetre-rapport {
+  width: min(46rem + 5.5rem, calc(100% - 1.25rem));
+  height: calc(100dvh - 1.25rem);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+.fenetre-rapport[open] {
+  display: grid;
+  grid-template-columns: minmax(0, 46rem) 4.75rem;
+  align-content: center;
+  column-gap: 0.75rem;
+}
+.fenetre-rapport .contenu-rapport {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  min-height: 0;
+  gap: 0;
+  padding: 0;
+  border: 1px solid #aa676a;
+  border-top: 4px solid #773c6f;
+  border-radius: 0.35rem;
+  background: #fff9f2;
+  box-shadow: 0 1.4rem 4rem rgb(24 9 19 / 62%);
+  overflow: hidden;
+}
+.fenetre-rapport[open] .contenu-rapport { animation: papier-entre 220ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+/* Barre d'outils : alignée sous l'en-tête du papier, hors de la zone qui défile. */
+.outils-rapport {
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 4.25rem;
+  padding: 0.4rem;
+  border: 1px solid rgb(255 249 242 / 22%);
+  border-radius: 0.6rem;
+  background: rgb(44 25 38 / 72%);
+  animation: outils-entrent 260ms 120ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.fenetre-rapport[open]:not(:has(.outils-rapport)) { grid-template-columns: minmax(0, 46rem); width: min(46rem, calc(100% - 1.25rem)); }
+.outil-rapport {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  width: 100%;
+  min-height: 3.4rem;
+  padding: 0.45rem 0.2rem 0.35rem;
+  border: 1px solid #deccd4;
+  border-radius: 0.4rem;
+  background: #fff9f2;
+  color: #58354d;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.1;
+  cursor: pointer;
+  transition: background-color 120ms, transform 120ms;
+}
+.outil-rapport svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.outil-rapport:hover { background: #f5eaf2; }
+.outil-rapport:active { transform: scale(0.96); }
+.outil-rapport:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
+.outil-principal { border-color: #e2a72f; background: #ffc247; color: #200e0c; }
+.outil-principal:hover { background: #fbde85; }
+
+@keyframes papier-entre {
+  from { opacity: 0; transform: translateY(0.6rem); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes outils-entrent {
+  from { opacity: 0; transform: translateX(-0.5rem); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fenetre-rapport[open] .contenu-rapport, .outils-rapport { animation: none; }
+}
+
+/* Écran étroit : la barre passe au-dessus du papier, en ligne, alignée à droite. */
+@media (max-width: 44rem) {
+  .fenetre-rapport { width: calc(100% - 1rem); }
+  .fenetre-rapport[open] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+    row-gap: 0.5rem;
+  }
+  .outils-rapport {
+    grid-row: 1;
+    justify-self: end;
+    flex-direction: row;
+    margin-top: 0;
+    padding: 0.3rem;
+  }
+  .outil-rapport { display: flex; align-items: center; min-height: 2.5rem; padding: 0 0.75rem; gap: 0.4rem; font-size: 0.8rem; }
+  .outil-rapport svg { width: 1.1rem; height: 1.1rem; }
+  .fenetre-rapport .contenu-rapport { grid-row: 2; align-self: start; }
+}
+.contenu-rapport > .entete-rapport {
+  flex: none;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 2.5rem;
+  align-items: center;
+  padding: 0.75rem clamp(0.85rem, 3vw, 1.6rem);
+  border-bottom: 1px solid #deccd4;
+}
+.entete-rapport h2 { grid-column: 2; margin: 0; text-align: center; }
+.entete-rapport .fermer-verdict { grid-column: 3; justify-self: end; }
+.corps-rapport {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem clamp(0.85rem, 3vw, 1.6rem) clamp(0.85rem, 3vw, 1.6rem);
+}
 .interventions-rapport { margin: 0; padding-inline-start: 1.5rem; }
 .interventions-rapport li { padding: 0.65rem 0; border-top: 1px solid #deccd4; }
 .interventions-rapport h3, .pieces-rapport h3 { font-size: 1rem; }

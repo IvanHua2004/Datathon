@@ -519,5 +519,9 @@ rdc-menu {
     box-shadow: none;
     overflow: visible;
   }
-  body.impression-rapport .fenetre-rapport .fermer-verdict { display: none; }
+  body.impression-rapport .fenetre-rapport .fermer-verdict,
+  body.impression-rapport .outils-rapport { display: none; }
+  body.impression-rapport .fenetre-rapport .contenu-rapport { max-height: none; overflow: visible; border: 0; box-shadow: none; animation: none; }
+  body.impression-rapport .fenetre-rapport[open] { display: block; overflow: visible; }
+  body.impression-rapport .corps-rapport { overflow: visible; }
 }

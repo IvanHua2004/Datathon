@@ -164,12 +164,14 @@ const PERSONNAGES = [
         </footer>
       </div>
     </dialog>
-    <dialog #fenetreRapport class="fenetre-rapport" aria-labelledby="titre-rapport" (close)="rapportOuvert.set(false)">
+    <dialog #fenetreRapport class="fenetre-rapport" aria-labelledby="titre-rapport" (close)="rapportOuvert.set(false)"
+      (click)="$event.target === fenetreRapport && fenetreRapport.close()">
       <div class="contenu-rapport">
-        <header>
+        <header class="entete-rapport">
           <h2 id="titre-rapport" tabindex="-1" autofocus>Rapport d’analyse</h2>
           <button class="fermer-verdict" type="button" aria-label="Fermer le rapport" (click)="fenetreRapport.close()">×</button>
         </header>
+        <div class="corps-rapport">
         @if (rapportOuvert()) {
           <rdc-rapport-audience
             [proces]="proces()"
@@ -177,10 +179,23 @@ const PERSONNAGES = [
             [pieces]="pieces()"
             [vote]="verdictRendu()"
             [audienceTerminee]="audienceTerminee() || !!verdictRendu()"
-            [portefeuille]="portefeuille()"
-            (telecharger)="telecharger.emit($event)" />
+            [portefeuille]="portefeuille()" />
         }
+        </div>
       </div>
+      @if (rapportOuvert() && proces()) {
+        <aside class="outils-rapport" aria-label="Emporter le rapport">
+          <button type="button" class="outil-rapport outil-principal" title="Télécharger le rapport en PDF"
+            (click)="telecharger.emit(verdictRendu())">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+            <span>PDF</span>
+          </button>
+          <button type="button" class="outil-rapport" title="Imprimer le rapport" (click)="imprimerRapport()">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>
+            <span>Imprimer</span>
+          </button>
+        </aside>
+      }
     </dialog>
   `,
 })
@@ -427,5 +442,17 @@ export class AudienceSceneComponent {
     void lecteur.play().catch((erreur: DOMException) => {
       if (erreur.name === 'NotAllowedError') this.sonBloque.set(true);
     });
+  }
+
+  /** Imprime uniquement le papier du rapport, sections repliées ouvertes. */
+  imprimerRapport(): void {
+    document.querySelectorAll<HTMLDetailsElement>('.fenetre-rapport details').forEach((d) => (d.open = true));
+    document.body.classList.add('impression-rapport');
+    const retirer = () => {
+      document.body.classList.remove('impression-rapport');
+      window.removeEventListener('afterprint', retirer);
+    };
+    window.addEventListener('afterprint', retirer);
+    window.print();
   }
 }

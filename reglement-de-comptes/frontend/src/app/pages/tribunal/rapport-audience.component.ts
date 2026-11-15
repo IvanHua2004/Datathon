@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
 import { Piece, PointCourbe, Position, Proces, TourDiscussion } from '../../models/proces.model';
@@ -167,7 +167,7 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
             }
           </div>
           <details class="transcription">
-            <summary>Transcription complète de l’audience ({{ interventions().length }} interventions)</summary>
+            <summary>Transcription complète de l’audience ({{ interventions().length }} intervention{{ interventions().length > 1 ? 's' : '' }})</summary>
             <ol>
               @for (entree of interventions(); track entree.tour.ordre) {
                 <li>
@@ -206,12 +206,6 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
             </details>
           }
         </section>
-
-        <!-- F. Emporter le rapport -->
-        <div class="actions-rapport">
-          <button type="button" class="principal" (click)="telecharger.emit(vote())">Télécharger le PDF</button>
-          <button type="button" class="secondaire" (click)="imprimer()">Imprimer</button>
-        </div>
       </div>
     } @else {
       <p>Le rapport sera disponible dès que le tribunal aura statué.</p>
@@ -225,8 +219,6 @@ export class RapportAudienceComponent {
   readonly vote = input<Camp | null>(null);
   readonly audienceTerminee = input(false);
   readonly portefeuille = input<readonly Position[]>([]);
-  /** Le camp retenu par l'investisseur, pour le PDF (OUI = pour la demande). */
-  readonly telecharger = output<Camp | null>();
 
   readonly pct = pct;
   readonly dollars = dollars;
@@ -287,15 +279,4 @@ export class RapportAudienceComponent {
     }));
   });
 
-  imprimer(): void {
-    // Les sections repliées s'impriment ouvertes.
-    document.querySelectorAll<HTMLDetailsElement>('.rapport-imprimable details').forEach((d) => (d.open = true));
-    document.body.classList.add('impression-rapport');
-    const retirer = () => {
-      document.body.classList.remove('impression-rapport');
-      window.removeEventListener('afterprint', retirer);
-    };
-    window.addEventListener('afterprint', retirer);
-    window.print();
-  }
 }
