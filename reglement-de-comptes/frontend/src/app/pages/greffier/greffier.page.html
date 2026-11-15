@@ -47,12 +47,19 @@
                       </button>
                     </li>
                   }
+                  @if (peutDueler(a)) {
+                    <li class="choix-duel">
+                      <button type="button" class="dossier-choix dossier-choix--duel" (click)="ouvrirDuel(a)">
+                        <span class="choix-tete">
+                          <strong><span aria-hidden="true">⚔</span> Débat entre les deux</strong>
+                          <span class="choix-symbole">{{ a.choix[0].ticker }} contre {{ a.choix[1].ticker }} · {{ pct(partDuel(a), 0) }} chacun</span>
+                        </span>
+                        <span class="choix-raison">Deux avocats s'affrontent, le juge dit lequel convient le mieux à votre profil</span>
+                        <span class="choix-action" aria-hidden="true">Ouvrir le débat →</span>
+                      </button>
+                    </li>
+                  }
                 </ul>
-                @if (peutDueler(a)) {
-                  <button type="button" class="principal duel" (click)="ouvrirDuel(a)">
-                    <span aria-hidden="true">⚔</span> Juger les deux en duel
-                  </button>
-                }
               }
               @if (a.statut === 'refus' && a.reformulations.length) {
                 <div class="reformulations">

@@ -238,7 +238,7 @@ export class GreffierPage {
       this.ajouter({
         de: 'greffier',
         ton: 'question',
-        texte: 'Lequel convient à votre profil ? C\'est au tribunal d\'en juger. Choisissez le titre à lui soumettre.',
+        texte: 'Lequel convient le mieux à votre profil ? C\'est au tribunal d\'en juger : soumettez un titre, ou opposez les deux dans un débat.',
         analyse: { ...a, statut: 'choix', motif: 'comparaison', agent: 'greffier', fiches: [] },
       });
     }
@@ -293,12 +293,19 @@ export class GreffierPage {
     return (a.motif === 'comparaison' || a.motif === 'plusieurs_titres') && a.choix.length === 2 && tickers.size === 2;
   }
 
+  /** Même part des deux côtés pour un duel équitable : celle de la question, sinon 10 %. */
+  partDuel(a: AnalyseQuestion): number {
+    const [x, y] = a.choix;
+    return x && y && x.taille === y.taille ? x.taille : 0.1;
+  }
+
   ouvrirDuel(a: AnalyseQuestion): void {
     const p = this.persona();
     if (!p || !this.peutDueler(a)) return;
     const [x, y] = a.choix;
+    const part = this.partDuel(a);
     this.router.navigate(['/duel'], {
-      queryParams: { profil: p.cle, a: `${x.ticker}:${x.taille}`, b: `${y.ticker}:${y.taille}` },
+      queryParams: { profil: p.cle, a: `${x.ticker}:${part}`, b: `${y.ticker}:${part}` },
     });
   }
 
