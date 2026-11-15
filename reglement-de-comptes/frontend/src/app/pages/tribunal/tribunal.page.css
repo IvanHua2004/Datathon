@@ -552,3 +552,261 @@ code {
   color: #554035;
   line-height: 1.4;
 }
+
+/* Groupe Intention libre */
+.groupe-intention {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.groupe-intention .champ-texte {
+  flex: 1;
+}
+
+.btn-analyser {
+  padding: 0 0.8rem;
+  border: 1px solid #773c6f;
+  border-radius: 6px;
+  background: #773c6f;
+  color: #fff8ec;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-analyser:hover:not(:disabled) {
+  background: #5c2d56;
+}
+
+.btn-analyser:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.explication-badge {
+  background: #fdf3d8;
+  border-left: 3px solid #d69e2e;
+  padding: 0.4rem 0.6rem;
+  margin: 0.2rem 0 0.4rem;
+  font-size: 0.82rem;
+  color: #553c0a;
+  line-height: 1.35;
+  border-radius: 0 4px 4px 0;
+}
+
+/* Barre d'état de l'audience */
+.barre-audience {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: #3a1d33;
+  color: #ffe5bf;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+  border: 1px solid #5a3250;
+}
+
+.statut-audience {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.point-activite {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #38a169;
+}
+
+.point-activite.actif {
+  background: #e53e3e;
+  box-shadow: 0 0 8px #e53e3e;
+  animation: pulsation 1.2s infinite;
+}
+
+@keyframes pulsation {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.compteur {
+  font-size: 0.85rem;
+  color: #dfc3a2;
+}
+
+.btn-controle {
+  padding: 0.45rem 0.85rem;
+  background: #ffc247;
+  color: #200e0c;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-controle:hover {
+  background: #fbde85;
+}
+
+.btn-controle--secondaire {
+  background: #4a2a40;
+  color: #ffe5bf;
+  border: 1px solid #773c6f;
+}
+
+.btn-controle--secondaire:hover {
+  background: #5c2d56;
+}
+
+/* Fil de discussion chronologique */
+.fil-discussion {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.bulle-tour {
+  background: #fff8ec;
+  color: #200e0c;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 12%);
+  border-left: 5px solid #b9a690;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: apparition 0.25s ease-out;
+}
+
+@keyframes apparition {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stylisation selon le rôle */
+.bulle--huissier {
+  border-left-color: #773c6f;
+  background: #faf3eb;
+}
+
+.bulle--greffier {
+  border-left-color: #3182ce;
+  background: #f4f8fb;
+}
+
+.bulle--avocat_defense {
+  border-left-color: #2b6cb0;
+  background: #f0f6fc;
+}
+
+.bulle--procureur {
+  border-left-color: #c53030;
+  background: #fff5f5;
+}
+
+.bulle--temoin {
+  border-left-color: #d69e2e;
+  background: #fffdf5;
+}
+
+.bulle--juge {
+  border-left-color: #2f855a;
+  background: #f0fff4;
+  border-width: 2px 2px 2px 6px;
+}
+
+.bulle--alerte {
+  border-left-color: #e53e3e !important;
+  background: #fff5f5 !important;
+}
+
+.bulle-entete {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.bulle-avatar {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.bulle-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.bulle-acteur {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #200e0c;
+}
+
+.bulle-titre {
+  font-size: 0.8rem;
+  color: #6a5749;
+}
+
+.badge-piece {
+  margin-left: auto;
+  background: #edf2f7;
+  color: #2d3748;
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+.badge-verdict {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+}
+
+.badge-verdict[data-ton='contraire'] {
+  background: #fed7d7;
+  color: #9b2c2c;
+}
+
+.badge-verdict[data-ton='tension'] {
+  background: #feebc8;
+  color: #9c4221;
+}
+
+.badge-verdict[data-ton='compatible'] {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.bulle-texte {
+  margin: 0;
+  font-size: 0.93rem;
+  line-height: 1.55;
+  color: #25130d;
+}
+
+.greffier-alerte {
+  margin: 0.4rem 0 0;
+  padding: 0.45rem 0.75rem;
+  background: #fed7d7;
+  color: #9b2c2c;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.carte-arbitrage {
+  background: #fff8ec;
+  border-left: 6px solid #ffc247;
+}
