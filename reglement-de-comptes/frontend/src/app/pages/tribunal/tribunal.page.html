@@ -17,8 +17,20 @@
     <h1 class="question-audience">{{ question }}</h1>
   }
   <div class="dossier-colonne">
+    @if (versionScene) {
+      <div class="onglets-cartable">
+        <h2 class="onglet-dossier">Le dossier</h2>
+        <button class="ouvrir-rapport" type="button" aria-haspopup="dialog" [disabled]="!toursScene().length"
+          (click)="sceneAudience()?.ouvrirRapport()">
+          <span class="icone-rapport"><img src="assets/tribunal-2/rapport-analyse.png" alt="" /></span>
+          <span>Rapport d’analyse</span>
+        </button>
+      </div>
+    }
     <aside class="dossier" aria-label="Le dossier">
-      <h2>Le dossier</h2>
+      @if (!versionScene) {
+        <h2>Le dossier</h2>
+      }
 
       @if (tribunal.chargement()) {
         <p class="note">Chargement des profils…</p>
@@ -88,8 +100,9 @@
       }
     </aside>
     @if (versionScene) {
-      <button class="ouvrir-rapport" type="button" aria-haspopup="dialog" [disabled]="!toursScene().length"
-        (click)="sceneAudience()?.ouvrirRapport()">Rapport d’analyse</button>
+      <div class="actions-dossier">
+        <ng-container [ngTemplateOutlet]="sceneAudience()?.boutonVerdict()" />
+      </div>
     }
   </div>
 

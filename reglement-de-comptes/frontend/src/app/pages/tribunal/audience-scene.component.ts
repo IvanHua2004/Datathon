@@ -1,12 +1,17 @@
-import { Component, DestroyRef, ElementRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
 import { Piece, Position, Proces, TourDiscussion } from '../../models/proces.model';
 import { RapportAudienceComponent } from './rapport-audience.component';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { choisirVoixAudience } from './voix-audience';
 
 const MS_PAR_MOT = 230;
+const DUREE_ANNONCE_MS = 1400;
 const FIN_DE_PHRASE = /[.!?…][»”"]?\s*$/u;
 const PAUSE_COURTE = /[,;:][»”"]?\s*$/u;
+const EXPRESSIONS_A_SOULIGNER = [
+  'silence dans la salle', 'silence', 'attention tout le monde', 'attention',
+  'objection', 'levez-vous', 'sous serment', 'pièces à conviction', 'la parole vous revient',
+].map((expression) => expression.split(' '));
 const PHRASES = new Intl.Segmenter('fr', { granularity: 'sentence' });
 type Camp = 'avocat_defense' | 'procureur';
 
@@ -20,25 +25,41 @@ const PERSONNAGES = [
   { role: 'procureur', image: 'assets/tribunal-2/procureur', emplacement: 'droite', nom: 'Me Austère', cote: 'Le Procureur' },
 ] as const;
 
+const BLOBS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+function clePortrait(tour: TourDiscussion): string {
+  return tour.role === 'temoin' ? tour.temoin || tour.acteur : tour.role + ':' + tour.acteur;
+}
+
 @Component({
   selector: 'rdc-audience-scene',
   imports: [RapportAudienceComponent],
   styleUrl: './audience-scene.component.css',
   template: `
+    <ng-template #boutonVerdict>
+      @if (tour() && !verdictRendu()) {
+        <button class="bouton-verdict" type="button" aria-haspopup="dialog"
+          [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
+          [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
+          Verdict
+          @if (impactVerdict()) {
+            <span class="eclats-verdict" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><i></i><i></i>
+            </span>
+          }
+        </button>
+      }
+    </ng-template>
     <section class="scene" aria-label="Audience du Tribunal 2">
       <div #ancrageSon hidden></div>
       <div class="plateau">
-        @if (tour() && !verdictRendu()) {
-          <button class="bouton-verdict" type="button" aria-haspopup="dialog"
-            [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
-            [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
-            Verdict
-            @if (impactVerdict()) {
-              <span class="eclats-verdict" aria-hidden="true">
-                <i></i><i></i><i></i><i></i><i></i><i></i>
-              </span>
-            }
-          </button>
+        @for (annonce of annoncesScene(); track annonce.tour) {
+          <div class="annonce-scene" [style.--duree-annonce]="dureeAnnonceMs + 'ms'" aria-hidden="true">
+            <div class="cartouche-annonce">
+              <strong>{{ annonce.titre }}</strong>
+              <span>{{ annonce.tour.acteur }}</span>
+            </div>
+          </div>
         }
         @for (personnage of personnages; track personnage.role) {
           <div class="personnage" aria-hidden="true" [attr.data-emplacement]="personnage.emplacement"
@@ -57,7 +78,9 @@ const PERSONNAGES = [
         <article class="dialogue" [class.verdict-final]="verdictRendu()">
           <div class="portrait" aria-hidden="true">
             @if (portrait(); as image) {
-              <img [src]="image" [class.miroir]="tour.role === 'procureur'" alt="">
+              <img [src]="image" [class.miroir]="tour.role === 'procureur'"
+                [class.portrait-blob]="blobActif() !== undefined"
+                [class.portrait-blob-recadrer]="blobActif() === 7 || blobActif() === 8" alt="">
             } @else {
               <span>{{ tour.avatar }}</span>
             }
@@ -68,15 +91,18 @@ const PERSONNAGES = [
               @if (tour.piece) { <span class="piece">Pièce {{ tour.piece }}</span> }
             </div>
             <p class="titre-replique">{{ tour.titre }}</p>
-            <p class="texte-accessible">{{ tour.texte }}</p>
-            <p class="texte-replique" aria-hidden="true">
-              @for (mot of mots(); track $index) {
-                <span [class.mot-masque]="!texteIntegral() && $index > motActif()"
-                  [class.mot-actif]="lectureActive() && $index === motActif()">{{ mot }}</span>
+            @if (!annonceActive()) {
+              <p class="texte-accessible">{{ tour.texte }}</p>
+              <p class="texte-replique" aria-hidden="true">
+                @for (mot of mots(); track $index) {
+                  <span [class.mot-masque]="!texteIntegral() && $index > motActif()"
+                    [class.mot-emphase]="motsEnGras().has($index)"
+                    [class.mot-actif]="lectureActive() && $index === motActif()">{{ mot }}</span>
+                }
+              </p>
+              @if (tour.non_verifies?.length) {
+                <p class="alerte"><strong>Audit du greffier.</strong> Chiffres absents des pièces scellées : {{ tour.non_verifies.join(', ') }}</p>
               }
-            </p>
-            @if (tour.non_verifies?.length) {
-              <p class="alerte"><strong>Audit du greffier.</strong> Chiffres absents des pièces scellées : {{ tour.non_verifies.join(', ') }}</p>
             }
           </div>
           <nav class="commandes" aria-label="Parcourir les interventions">
@@ -119,7 +145,7 @@ const PERSONNAGES = [
               } @else {
                 <button type="button" (click)="afficherTour(index() - 1)" [disabled]="index() === 0">← Précédent</button>
                 @if (index() < tours().length - 1) {
-                  <button type="button" class="suivant"
+                  <button type="button" class="suivant" [disabled]="annonceActive()"
                     [title]="repliqueDevoilee() ? 'Passer à la réplique suivante' : 'Afficher toute la réplique'"
                     (click)="suivant()">Suivant →</button>
                 } @else if (!audienceTerminee()) {
@@ -211,13 +237,44 @@ export class AudienceSceneComponent {
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
+  readonly annoncesScene = computed(() => {
+    const tour = this.tour();
+    if (!tour) return [];
+    if (tour.role === 'greffier' && (tour.statut === 'alerte' || tour.non_verifies?.length)) {
+      return [{ tour, titre: 'Objection !' }];
+    }
+    return tour.role === 'temoin' ? [{ tour, titre: 'Témoin à la barre !' }] : [];
+  });
+  readonly dureeAnnonceMs = DUREE_ANNONCE_MS;
+  private readonly annonceTermineePour = linkedSignal({
+    source: this.tour,
+    computation: (): TourDiscussion | undefined => undefined,
+  });
+  readonly annonceActive = computed(() => {
+    const annonce = this.annoncesScene()[0];
+    return !!annonce && this.annonceTermineePour() !== annonce.tour;
+  });
   readonly mots = computed(() => motsDe(this.tour()?.texte ?? ''));
+  readonly motsEnGras = computed(() => {
+    const mots = this.mots().map((mot) => mot.toLocaleLowerCase('fr').normalize('NFC')
+      .replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '').replace(/‑/gu, '-'));
+    const emphase = new Set<number>();
+    for (const index of mots.keys()) {
+      for (const expression of EXPRESSIONS_A_SOULIGNER) {
+        if (expression.every((mot, offset) => mot === mots[index + offset])) {
+          for (const offset of expression.keys()) emphase.add(index + offset);
+        }
+      }
+    }
+    return emphase;
+  });
   readonly motActif = linkedSignal({ source: this.tour, computation: () => 0 });
   readonly texteIntegral = linkedSignal({ source: this.tour, computation: () => false });
   readonly repliqueDevoilee = computed(() => this.texteIntegral() || this.motActif() >= this.mots().length);
   readonly lectureAuto = signal(true);
   readonly sonActive = signal(true);
   readonly sonBloque = signal(false);
+  readonly boutonVerdict = viewChild<TemplateRef<unknown>>('boutonVerdict');
   readonly verdictOuvert = signal(false);
   readonly rapportOuvert = signal(false);
   readonly impactVerdict = signal(false);
@@ -226,7 +283,8 @@ export class AudienceSceneComponent {
     source: this.tours, computation: () => null,
   });
   readonly lectureActive = computed(() =>
-    !this.verdictOuvert() && !this.rapportOuvert() && this.lectureAuto() && this.motActif() < this.mots().length);
+    !this.annonceActive() && !this.verdictOuvert() && !this.rapportOuvert() && this.lectureAuto()
+    && this.motActif() < this.mots().length);
   readonly audienceTerminee = computed(() =>
     !this.verdictRendu() && this.index() === this.tours().length - 1 && this.motActif() >= this.mots().length);
   readonly annonceTerminee = computed(() => !!this.verdictRendu() && this.motActif() >= this.mots().length);
@@ -279,11 +337,29 @@ export class AudienceSceneComponent {
     }
     return this.pieces().filter((piece) => numeros.has(piece.numero));
   });
+  private readonly blobsParPersonnage = computed(() => {
+    const disponibles: number[] = [];
+    const portraits = new Map<string, number>();
+    for (const tour of this.tours()) {
+      if (PERSONNAGES.some((personnage) => personnage.role === tour.role)) continue;
+      const cle = clePortrait(tour);
+      if (portraits.has(cle)) continue;
+      if (!disponibles.length) disponibles.push(...BLOBS);
+      const index = Math.floor(Math.random() * disponibles.length);
+      const [blob] = disponibles.splice(index, 1);
+      portraits.set(cle, blob);
+    }
+    return portraits;
+  });
+  readonly blobActif = computed(() => {
+    const tour = this.tour();
+    return tour ? this.blobsParPersonnage().get(clePortrait(tour)) : undefined;
+  });
   readonly portrait = computed(() => {
-    const role = this.tour()?.role;
-    const personnage = PERSONNAGES.find((p) => p.role === role);
+    const personnage = PERSONNAGES.find((p) => p.role === this.tour()?.role);
     if (personnage) return personnage.image + '.png';
-    return role === 'greffier' ? 'assets/greffier-transparent.png' : null;
+    const blob = this.blobActif();
+    return blob ? `assets/tribunal-2/blob-${blob}.png` : null;
   });
   private readonly replique = viewChild<ElementRef<HTMLElement>>('replique');
   private readonly voixAudience = linkedSignal({ source: this.tours, computation: choisirVoixAudience });
@@ -294,6 +370,7 @@ export class AudienceSceneComponent {
   private readonly fenetreRapport = viewChild<ElementRef<HTMLDialogElement>>('fenetreRapport');
 
   constructor() {
+    const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
     inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     afterRenderEffect(() => {
@@ -301,7 +378,7 @@ export class AudienceSceneComponent {
     });
     effect(() => {
       const tour = this.tour();
-      if (!tour) return;
+      if (!tour || this.annonceActive()) return;
       const lus = this.texteIntegral() ? this.mots().length : Math.min(this.motActif() + 1, this.mots().length);
       this.motsLus.update((progression) => {
         if (lus <= (progression.get(tour.ordre) ?? 0)) return progression;
@@ -328,9 +405,35 @@ export class AudienceSceneComponent {
     });
 
     effect((nettoyer) => {
-      if (!this.lectureActive() || !this.sonActive() || this.sonBloque()) return;
-      this.jouerVoix();
+      if (!this.sonActive() || this.sonBloque()) return;
+      if (this.annonceActive()) {
+        if (this.verdictOuvert() || this.rapportOuvert()) return;
+        this.jouerImpactAnnonce();
+      } else {
+        if (!this.lectureActive()) return;
+        this.jouerVoix();
+      }
       nettoyer(() => this.lecteur.pause());
+    });
+
+    afterRenderEffect((nettoyer) => {
+      const annonce = this.annoncesScene()[0];
+      if (!annonce) return;
+      const secousse = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? undefined
+        : page?.animate([
+          { translate: '0 0' },
+          { translate: '-6px 2px' },
+          { translate: '5px -2px' },
+          { translate: '-3px 1px' },
+          { translate: '2px -1px' },
+          { translate: '0 0' },
+        ], { duration: 320 });
+      const minuterie = setTimeout(() => this.annonceTermineePour.set(annonce.tour), DUREE_ANNONCE_MS);
+      nettoyer(() => {
+        clearTimeout(minuterie);
+        secousse?.cancel();
+      });
     });
 
     afterRenderEffect(() => {
@@ -346,6 +449,7 @@ export class AudienceSceneComponent {
   }
 
   suivant(): void {
+    if (this.annonceActive()) return;
     if (!this.repliqueDevoilee()) {
       this.motActif.set(this.mots().length);
       return;
@@ -424,6 +528,15 @@ export class AudienceSceneComponent {
     if (this.lectureActive()) this.jouerVoix();
   }
 
+  private jouerImpactAnnonce(): void {
+    const lecteur = this.lecteur;
+    lecteur.src = 'assets/tribunal-2/voix/impact-annonce.wav';
+    lecteur.loop = false;
+    lecteur.volume = 0.75;
+    lecteur.playbackRate = 1;
+    this.lancerSon();
+  }
+
   private jouerVoix(): void {
     const tour = this.tour();
     if (!tour) return;
@@ -439,7 +552,11 @@ export class AudienceSceneComponent {
     lecteur.volume = 0.38;
     lecteur.preservesPitch = false;
     lecteur.playbackRate = voix.vitesse;
-    void lecteur.play().catch((erreur: DOMException) => {
+    this.lancerSon();
+  }
+
+  private lancerSon(): void {
+    void this.lecteur.play().catch((erreur: DOMException) => {
       if (erreur.name === 'NotAllowedError') this.sonBloque.set(true);
     });
   }

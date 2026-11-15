@@ -13,35 +13,86 @@
   background: url('/assets/courtroom.png') center / cover;
 }
 
-.bouton-verdict {
+.annonce-scene {
   position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  overflow: hidden;
+  pointer-events: none;
+  background: rgb(32 13 25 / 48%);
+  animation: voile-annonce var(--duree-annonce) ease both;
+}
+
+.cartouche-annonce {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  padding: 0.45rem clamp(0.8rem, 3vw, 2.4rem);
+  border-block: 2px solid #ffb1a3;
+  background: #a8172d;
+  color: #fff4e6;
+  box-shadow: 0.4rem 0.45rem 0 #350c1d;
+  text-align: center;
+  animation: impact-annonce var(--duree-annonce) both;
+}
+
+.cartouche-annonce strong {
+  font: 900 clamp(1rem, 4vw, 3.1rem) / 1.08 Aptos, sans-serif;
+  text-transform: uppercase;
+}
+
+.cartouche-annonce span { font-size: clamp(0.7rem, 1.6vw, 1rem); }
+
+@keyframes voile-annonce {
+  0%, 100% { opacity: 0; }
+  10%, 75% { opacity: 1; }
+}
+
+@keyframes impact-annonce {
+  0% { transform: translateX(-105%) rotate(-12deg); }
+  13% { transform: translateX(4%) rotate(-4deg) scale(1.06); }
+  23%, 78% { transform: translateX(0) rotate(-4deg); }
+  100% { transform: translateX(10%) rotate(-4deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cartouche-annonce { animation: none; }
+}
+
+.bouton-verdict {
+  position: relative;
   z-index: 1;
-  top: clamp(0.45rem, 1.5vw, 1rem);
-  right: clamp(0.45rem, 1.5vw, 1rem);
   display: grid;
   place-content: center;
   justify-items: center;
-  width: clamp(3.6rem, 7vw, 5.3rem);
-  aspect-ratio: 1;
+  flex: 0 0 auto;
+  width: 4.5rem;
+  height: 4.5rem;
   padding: 0;
-  border: 3px solid #200d19;
+  border: 1px solid #6fa98b;
   border-radius: 50%;
-  background: #fc4547;
-  box-shadow: 0 4px 0 #200d19;
-  color: #200d19;
-  font: 800 clamp(0.7rem, 1.3vw, 0.95rem) / 1.1 Aptos, sans-serif;
+  background: var(--confirm-background);
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.15;
   cursor: pointer;
 }
 
-.bouton-verdict:hover { background: #ff6264; }
-.bouton-verdict:is(:active, .verdict-enfonce) { transform: translateY(3px) scale(0.93); box-shadow: 0 1px 0 #200d19; }
+.bouton-verdict:hover { background: var(--confirm-background-hover); }
+.bouton-verdict:is(:active, .verdict-enfonce) { transform: scale(0.95); }
 .bouton-verdict:focus-visible { outline-color: #fff6eb; }
 
 .bouton-verdict.verdict-attendu::after {
   position: absolute;
   inset: -6px;
   border: 3px solid #ffd578;
-  border-radius: 50%;
+  border-radius: inherit;
   pointer-events: none;
   content: '';
   animation: appel-verdict 1.05s ease-in-out 4;
@@ -326,6 +377,18 @@
 }
 
 .portrait img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.portrait:has(.portrait-blob) {
+  position: relative;
+  overflow: hidden;
+  background: #352631;
+}
+.portrait .portrait-blob {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  padding: 0.125rem;
+}
+.portrait .portrait-blob-recadrer { object-view-box: inset(4% 0 0); }
 .replique { max-height: min(35dvh, 16rem); overflow-y: auto; overscroll-behavior-y: contain; }
 .etiquettes { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.65rem; }
 
@@ -335,6 +398,7 @@ p { margin: 0; }
 .titre-replique { margin-top: 0.2rem; color: #654455; font-weight: 600; }
 .texte-replique, .attente p { margin-top: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
 .mot-masque { visibility: hidden; }
+.mot-emphase { font-weight: 750; }
 .texte-accessible {
   position: absolute;
   width: 1px;
