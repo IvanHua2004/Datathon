@@ -98,7 +98,7 @@ def charger() -> Donnees:
     fx["date"] = pd.to_datetime(fx["date"])
 
     large = prix.pivot(index="date", columns="ticker", values="adj_close").sort_index()
-    large = large[large.index.dayofweek < 5]           # lundi à vendredi
+    large = large[large.index.day_of_week < 5]         # lundi à vendredi
     large = large.ffill(limit=5)
 
     usdcad = fx.set_index("date")["usdcad"].sort_index().reindex(large.index).ffill().bfill()
