@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 
-const MURMURE_SALLE = 'assets/tribunal-2/voix/murmure-salle.wav';
+const MURMURE_SALLE = 'assets/tribunal-2/voix/weldert-crowd-talking-138493.mp3';
 
 @Injectable({ providedIn: 'root' })
 export class SonAudienceService {

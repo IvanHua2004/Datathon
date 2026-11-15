@@ -8,6 +8,7 @@ intention, comparaison, scenarios, rapport_pdf) et renvoie le résultat au forma
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 import os
@@ -16,7 +17,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated, Literal
 
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints, model_validator
@@ -32,7 +33,7 @@ if env_path.exists():
             if k not in os.environ:
                 os.environ[k] = v.strip().strip('"').strip("'")
 
-from rdc import audience, donnees, greffier, questions, temoins
+from rdc import audience, dictee, donnees, greffier, questions, temoins
 from rdc.profils import PROFILS, Profil
 from rdc.agents import generer_analogie
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
@@ -635,6 +636,70 @@ def telecharger_pdf(demande: DemandePDF, request: Request) -> Response:
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{nom_fichier}"'},
     )
+
+
+@app.websocket("/api/dictee")
+async def dictee_vocale(ws: WebSocket) -> None:
+    """Dictée de l'investisseur : micro (PCM 16 kHz) -> Amazon Transcribe (fr-CA) -> texte en direct.
+
+    Messages envoyés au navigateur : {"type": "pret"}, {"type": "partiel"|"final", "texte": …},
+    {"type": "indisponible", "detail": …} (le navigateur bascule alors sur sa propre dictée), {"type": "termine"}.
+    Le navigateur envoie l'audio en binaire, puis le texte « fin ».
+    """
+    await ws.accept()
+    if not dictee.identifiants_presents():
+        await ws.send_json({"type": "indisponible", "detail": "Aucun identifiant AWS chargé."})
+        await ws.close()
+        return
+    try:
+        from amazon_transcribe.client import TranscribeStreamingClient
+        from amazon_transcribe.model import TranscriptEvent
+
+        vocabulaire = await asyncio.to_thread(dictee.vocabulaire_pret)
+        options = {"vocabulary_name": vocabulaire} if vocabulaire else {}
+        flux = await TranscribeStreamingClient(region=dictee.REGION).start_stream_transcription(
+            language_code=dictee.LANGUE, media_sample_rate_hz=dictee.FREQUENCE_HZ, media_encoding="pcm", **options)
+    except Exception as erreur:  # SDK absent, AccessDenied, identifiants expirés…
+        await ws.send_json({"type": "indisponible", "detail": type(erreur).__name__})
+        await ws.close()
+        return
+    await ws.send_json({"type": "pret", "moteur": "Amazon Transcribe", "vocabulaire": bool(vocabulaire)})
+
+    async def relayer_audio() -> None:
+        try:
+            while True:
+                message = await ws.receive()
+                if message["type"] == "websocket.disconnect" or message.get("text") == "fin":
+                    break
+                if message.get("bytes"):
+                    await flux.input_stream.send_audio_event(audio_chunk=message["bytes"])
+        except WebSocketDisconnect:
+            pass
+        finally:
+            await flux.input_stream.end_stream()
+
+    async def relayer_texte() -> None:
+        async for evenement in flux.output_stream:
+            if not isinstance(evenement, TranscriptEvent):
+                continue
+            for resultat in evenement.transcript.results:
+                if resultat.alternatives:
+                    await ws.send_json({"type": "partiel" if resultat.is_partial else "final",
+                                        "texte": dictee.nettoyer(resultat.alternatives[0].transcript)})
+
+    try:
+        await asyncio.gather(relayer_audio(), relayer_texte())
+        await ws.send_json({"type": "termine"})
+    except Exception as erreur:  # coupure de Transcribe en cours de route
+        try:
+            await ws.send_json({"type": "indisponible", "detail": type(erreur).__name__})
+        except Exception:
+            pass
+    finally:
+        try:
+            await ws.close()
+        except Exception:
+            pass
 
 
 @app.post("/api/analogie", response_model=ReponseAnalogie)

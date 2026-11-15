@@ -341,7 +341,8 @@
           type="text"
           autocomplete="off"
           maxlength="500"
-          placeholder="Posez votre question…"
+          [placeholder]="dictee.etat() === 'ecoute' ? 'Je vous écoute…' : dictee.etat() === 'connexion' ? 'Ouverture du micro…' : 'Posez votre question…'"
+          [class.provisoire]="dicteeProvisoire()"
           role="combobox"
           aria-autocomplete="list"
           aria-controls="suggestions"
@@ -354,8 +355,32 @@
           (click)="ouverte.set(true)"
           (blur)="ouverte.set(false)"
         >
+        @if (dictee.disponible) {
+          <button type="button" class="micro" (click)="basculerDictee()"
+            [class.ecoute]="dictee.etat() === 'ecoute'" [class.connexion]="dictee.etat() === 'connexion'"
+            [attr.aria-pressed]="dictee.actif()"
+            [attr.aria-label]="dictee.actif() ? 'Arrêter la dictée' : 'Dicter la question'"
+            [title]="dictee.actif() ? 'Arrêter la dictée' : 'Dicter la question (micro)'">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              @if (dictee.actif()) {
+                <rect x="7" y="7" width="10" height="10" rx="1.5" />
+              } @else {
+                <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3M9 21h6" />
+              }
+            </svg>
+          </button>
+        }
         <button type="submit" class="principal" [disabled]="enCours() || !saisie().trim()">Envoyer</button>
       </div>
+      @if (dictee.etat() === 'ecoute') {
+        <p class="etat-dictee" role="status">
+          <span class="point-dictee" aria-hidden="true"></span>
+          Je vous écoute · {{ dictee.moteur() === 'transcribe' ? 'Amazon Transcribe (fr-CA)' : 'dictée du navigateur' }}
+          · relisez avant d’envoyer
+        </p>
+      } @else if (dictee.erreur()) {
+        <p class="etat-dictee etat-dictee--erreur" role="alert">{{ dictee.erreur() }}</p>
+      }
       <div class="outils" role="group" aria-label="Raccourcis">
         <button type="button" class="outil" (click)="voirTousLesTitres()" [disabled]="enCours()">
           <span aria-hidden="true">☰</span> Voir tous les titres

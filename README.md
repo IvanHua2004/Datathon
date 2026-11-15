@@ -1,34 +1,232 @@
-### 1. Le Pitch : Pourquoi c'est EXACTEMENT ce qu'ils demandent
+# 🐳 Guide Complet Docker — Règlement de Comptes
 
-L'énoncé de la page 9 propose explicitement deux pistes : un **« Agent d'explicabilité »** et un **« Agent de gouvernance »**. De plus, l'énoncé insiste sur la capacité de la solution à « remettre en question une demande incohérente » (le cas de Robert) et à vérifier que les contraintes sont respectées.
+Ce guide détaille pas à pas comment installer **Docker**, configurer l'environnement et lancer le projet **Règlement de Comptes** en conteneur sur votre machine (Windows, macOS ou Linux).
 
-**Votre pitch au jury :**
+---
 
-> « Le problème avec les LLMs financiers classiques, c'est la complaisance (sycophancy) : l'IA a tendance à toujours donner raison à l'investisseur. Si Robert, 59 ans, demande 100 % de Bitcoin, un agent classique va souvent justifier cette erreur.
-> Pour résoudre cela et répondre au critère d'auto-explicabilité, nous avons conçu **AlphaForge Council**. C'est une architecture agentique contradictoire. Au lieu d'avoir une boîte noire qui donne une réponse unique, nous séparons les cerveaux :
-> 1. Un agent propose (le Promoteur).
-> 2. Un agent critique en s'appuyant strictement sur les CSV de risque et le profil (la Gouvernance).
-> 3. Un agent tranche et source la décision (l'Auditeur/Juge).
-> 
-> 
-> En rendant ce débat visible dans l'interface Angular, l'utilisateur comprend *exactement* pourquoi une décision est prise, quelles données ont été utilisées, et quelles sont les limites. Nous répondons ainsi parfaitement à l'exigence d'encadrement responsable et de traçabilité du défi. »
+## 📑 Sommaire
+1. [Prérequis & Installation de Docker](#1-prérequis--installation-de-docker)
+2. [Lancement Rapide (En 1 commande)](#2-lancement-rapide-en-1-commande)
+3. [Configuration des Environnements (.env & AWS Bedrock)](#3-configuration-des-environnements-env--aws-bedrock)
+4. [Architecture des Conteneurs Locaux](#4-architecture-des-conteneurs-locaux)
+5. [Commandes Utiles au Quotidien](#5-commandes-utiles-au-quotidien)
+6. [Image Unifiée de Production (Dockerfile.aws)](#6-image-unifiée-de-production-dockerfileaws)
+7. [Dépannage & FAQ](#7-dépannage--faq)
 
-### 2. Comment ça se connecte bien (L'Architecture Technique)
+---
 
-Puisque l'équipe gère Angular et que tu gères FastAPI/AWS, la connexion se fait par un flux continu (Streaming). Voici le cycle de vie exact d'une requête :
+## 1. Prérequis & Installation de Docker
 
-* **Étape 1 (Le Front-end) :** Sur l'interface Angular, l'utilisateur sélectionne son Persona (ex. Mateo) et tape sa requête : *« Je veux investir dans Exxon (XOM) et du Bitcoin (BTC-USD). »*
-* **Étape 2 (L'Orchestrateur FastAPI) :** Le backend Python reçoit la requête. Il ne fait pas un simple appel LLM, il lance un workflow (ex. via LangGraph ou du code séquentiel Python).
-* **Étape 3 (L'Agent Promoteur - AWS Bedrock) :** FastAPI envoie un prompt à Claude 3.5 via AWS : *« Donne des arguments pour cette requête »*. Claude répond (ex: potentiel de croissance). FastAPI commence à streamer cette réponse vers Angular.
-* **Étape 4 (L'Agent Gouvernance - Python + Pandas + S3) :** En parallèle, FastAPI lit les données dans AWS S3. Un script Python pur voit que Mateo a un profil ESG strict et que `XOM` est bloqué, et calcule le risque du Bitcoin avec `prices_daily.csv`. Il génère le refus. FastAPI envoie cette alerte à Angular.
-* **Étape 5 (L'Auditeur - AWS Bedrock) :** FastAPI prend la requête initiale, l'avis du Promoteur et le blocage quantitatif de la Gouvernance, et demande à l'Agent final de synthétiser. La réponse finale s'affiche sur Angular avec les citations des fichiers exacts.
+### 🪟 Sur Windows 10 / 11 (Recommandé avec WSL2)
+1. **Téléchargez Docker Desktop pour Windows :**  
+   👉 [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/)
+2. Lors de l'installation, assurez-vous de cocher l'option **« Use WSL 2 instead of Hyper-V »**.
+3. Redémarrez votre ordinateur si demandé.
+4. Lancez **Docker Desktop** depuis le menu Démarrer et attendez que l'icône de la baleine dans la barre des tâches indique que le moteur est en cours d'exécution (*Docker Desktop is running*).
+5. Vérifiez l'installation dans un terminal PowerShell :
+   ```powershell
+   docker --version
+   docker compose version
+   ```
 
-La magie réside dans les **Server-Sent Events (SSE)** : Angular n'attend pas 15 secondes pour avoir un bloc de texte. Il voit les agents « réfléchir » et se répondre en direct.
+### 🍏 Sur macOS (Apple Silicon M1/M2/M3/M4 ou Intel)
+1. Téléchargez et installez **Docker Desktop pour Mac** depuis le site officiel.
+2. Déplacez Docker dans votre dossier Applications et lancez-le.
+3. Vérifiez dans votre Terminal :
+   ```bash
+   docker --version
+   docker compose version
+   ```
 
-### 3. Vos Livrables avec ce concept
+### 🐧 Sur Linux (Ubuntu / Debian / Fedora)
+```bash
+# Installation via le script officiel Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+# Permettre d'utiliser Docker sans sudo
+sudo usermod -aG docker $USER
+newgrp docker
+```
 
-L'énoncé exige 4 livrables précis. Voici comment votre concept les remplit de manière éclatante :
+---
 
-* **Prototype et code source**
-* Un repo GitHub contenant votre backend (FastAPI orchestrant Bedrock et lisant les CSV) et le frontend (Angular affichant le chat contradictoire).
-* Un fichier `README.md` expliquant comment lancer les agents localement ou sur le cloud.
+## 2. Lancement Rapide (En 1 commande)
+
+Placez-vous dans le dossier racine du projet `reglement-de-comptes` :
+
+```bash
+docker compose up --build
+```
+
+> 💡 **Ce qui se passe :**
+> - Docker compile l'image de l'API Python FastAPI (`reglement-de-comptes-api`).
+> - Docker compile l'interface Angular 19+ avec Node.js 22 et la sert via Nginx (`reglement-de-comptes-interface`).
+> - Nginx relaie automatiquement les requêtes `/api/` vers FastAPI.
+> - **Aucune installation de Node.js, Python ou Nginx n'est requise sur votre ordinateur.**
+
+### 🌐 Accéder à l'application
+Une fois les conteneurs démarrés :
+- 🏠 **Page d'accueil & Menu :** [http://localhost:4200](http://localhost:4200)
+- ⚖️ **Accès direct au Tribunal :** [http://localhost:4200/tribunal](http://localhost:4200/tribunal)
+- 🤺 **Mode Duel d'actifs :** [http://localhost:4200/duel](http://localhost:4200/duel)
+- 📚 **Documentation Swagger de l'API :** [http://localhost:4200/api/docs](http://localhost:4200/api/docs)
+
+*Note de sécurité : Seul le port 4200 est ouvert sur votre boucle locale (`127.0.0.1`), l'application n'est pas exposée sur votre réseau Wi-Fi public.*
+
+Pour arrêter l'application, appuyez sur `Ctrl + C` dans le terminal, ou lancez :
+```bash
+docker compose down
+```
+
+---
+
+## 3. Configuration des Environnements (.env & AWS Bedrock)
+
+Le projet dispose de deux modes de fonctionnement :
+
+### Mode A : Mode Déterministe / Hors-Ligne (Sans clé AWS)
+Par défaut, si aucun identifiant AWS n'est fourni, l'application fonctionne immédiatement en **Mode Gabarit**. Les calculs financiers réels (1 304 séances quotidiennes en CAD), les pièces à conviction scellées `[P-01]` à `[P-06]`, l'audit anti-hallucination du Greffier et le verdict du Juge fonctionnent **à 100 % hors-ligne**.
+
+### Mode B : Mode Connecté Amazon Bedrock (Claude Sonnet 5)
+Pour activer les agents cognitifs en langage naturel (Me Vigor, Me Austère) sur **Amazon Bedrock**, créez un fichier `.env` à la racine de `reglement-de-comptes` (à côté de `docker-compose.yml`) :
+
+```env
+# Configuration AWS Bedrock
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=VOTRE_ACCESS_KEY
+AWS_SECRET_ACCESS_KEY=VOTRE_SECRET_KEY
+AWS_SESSION_TOKEN=VOTRE_SESSION_TOKEN_TEMPORAIRE
+BEDROCK_MODEL_ID=global.anthropic.claude-sonnet-5
+
+# Données & Datalake S3 (optionnel)
+RDC_S3_BUCKET=reglement-de-comptes-alphaforge
+RDC_S3_PREFIX=alphaforge/
+```
+
+Relancez ensuite les conteneurs :
+```bash
+docker compose up --build
+```
+
+> ⚠️ **Sécurité :** Le fichier `.env` est déjà inscrit dans le fichier `.gitignore`. **Ne le committez jamais dans Git.**
+
+---
+
+## 4. Architecture des Conteneurs Locaux
+
+Le fichier `docker-compose.yml` orchestre deux services isolés au sein d'un réseau interne Docker :
+
+```
+                        NAVIGATEUR WEB
+                              │
+                    http://localhost:4200
+                              │
+                    ┌─────────▼─────────┐
+                    │  Service Interface│  Port 4200 -> 80 (Nginx)
+                    │  (Angular 19 Dist)│  Sert la SPA
+                    └─────────┬─────────┘
+                              │
+                    Relais proxy interne
+                    location /api/ -> http://api:8000
+                              │
+                    ┌─────────▼─────────┐
+                    │    Service API    │  Port 8000 interne (Expose)
+                    │ (FastAPI/Python)  │  Calculs financiers
+                    └─────────┬─────────┘  Agents Bedrock & Greffier
+                              │
+                     Volume de données /data
+                     (1 304 séances quotidiennes)
+```
+
+1. **`interface` (Nginx + Angular) :**
+   - Sert l'application compilée avec un routage HTML5 propre (`try_files $uri /index.html`).
+   - Relaie les appels `/api/*` directement vers le conteneur `api:8000` avec un `proxy_read_timeout` de 600s pour permettre aux agents Bedrock de débattre sereinement.
+2. **`api` (FastAPI + Python 3.12) :**
+   - Exécute le moteur financier `rdc`, les 44 tests, le simulateur de stress et l'orchestration multi-agents.
+   - Embarque un healthcheck natif validant l'intégrité du service toutes les 30 secondes.
+
+---
+
+## 5. Commandes Utiles au Quotidien
+
+### 🧪 Exécuter les tests Pytest dans le conteneur
+Vous pouvez lancer la suite de tests automatisés directement dans l'environnement conteneurisé sans rien installer sur votre machine :
+
+```bash
+docker compose run --rm api pytest -q backend/tests
+```
+
+### 📜 Consulter les logs en direct
+```bash
+# Tous les logs
+docker compose logs -f
+
+# Uniquement les logs de l'API Python
+docker compose logs -f api
+
+# Uniquement les logs Nginx de l'interface
+docker compose logs -f interface
+```
+
+### 🔄 Reconstruire complètement sans cache
+En cas de modification majeure des dépendances (`package.json` ou `requirements.txt`) :
+```bash
+docker compose build --no-cache
+docker compose up
+```
+
+### 🧹 Nettoyer les conteneurs et volumes résiduels
+```bash
+docker compose down --volumes --remove-orphans
+```
+
+---
+
+## 6. Image Unifiée de Production (Dockerfile.aws)
+
+En plus de l'environnement de développement multi-conteneurs, le projet dispose d'un **`Dockerfile.aws` unifié**.  
+Cette image multi-stage regroupe à la fois l'application Angular compilée et le backend FastAPI dans un conteneur unique allégé sous utilisateur non-root, optimisé pour **AWS ECS Fargate**.
+
+### Pour tester l'image de production AWS localement :
+```bash
+# 1. Construction de l'image de production
+docker build -f Dockerfile.aws -t reglement-prod-aws .
+
+# 2. Exécution locale sur le port 8501 (conforme AWS ECS)
+docker run --rm -p 8501:8501 --env-file .env reglement-prod-aws
+```
+Ouvrez ensuite [http://localhost:8501](http://localhost:8501) dans votre navigateur.
+
+---
+
+## 7. Dépannage & FAQ
+
+### ❌ Erreur : `port 4200 is already allocated`
+Un autre processus (ex: un ancien `ng serve` local) occupe déjà le port 4200.
+- **Solution sous Windows (PowerShell) :**
+  ```powershell
+  Get-Process -Id (Get-NetTCPConnection -LocalPort 4200).OwningProcess | Stop-Process -Force
+  ```
+- **Ou modifiez le port dans `docker-compose.yml` :**
+  ```yaml
+  ports:
+    - "127.0.0.1:4201:80"  # Accédez ensuite à http://localhost:4201
+  ```
+
+### ❌ Erreur : `Cannot connect to the Docker daemon`
+Docker Desktop n'est pas démarré.  
+- Lancez **Docker Desktop** et patientez jusqu'à ce que l'indicateur d'état soit vert.
+
+### ❌ Erreur : `ExpiredToken` ou `AccessDeniedException` avec Bedrock
+Les jetons temporaires fournis par AWS Workshop Studio expirent régulièrement.  
+1. Rendez-vous sur Workshop Studio et copiez de nouveaux identifiants (*Get AWS CLI credentials*).
+2. Mettez à jour votre fichier `.env`.
+3. Relancez `docker compose up`.  
+*(Si vous n'avez pas de nouveaux jetons immédiatement, supprimez les variables AWS du `.env` : l'application basculera automatiquement en mode Gabarit sans planter).*
+
+### ❌ Erreur de montage du volume `/data`
+Vérifiez que le dossier `data` ou `../Datathon2026/alphaforge_starter` existe bien. Si votre dossier de données est ailleurs, ajustez le volume dans `docker-compose.yml` :
+```yaml
+volumes:
+  - ./votre_chemin_de_donnees:/data:ro
+```
