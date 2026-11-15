@@ -17,13 +17,7 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Annotated, Literal
 
-<<<<<<< HEAD
 from fastapi import FastAPI, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
-from pydantic import BaseModel, Field, StringConstraints, model_validator
-
-from rdc import audience, dictee, donnees, greffier, questions, temoins
-=======
-from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints, model_validator
@@ -39,8 +33,7 @@ if env_path.exists():
             if k not in os.environ:
                 os.environ[k] = v.strip().strip('"').strip("'")
 
-from rdc import audience, donnees, greffier, questions, temoins
->>>>>>> 2ce566af8fcbf129e797e366fdca325ca19927ae
+from rdc import audience, dictee, donnees, greffier, questions, temoins
 from rdc.profils import PROFILS, Profil
 from rdc.agents import generer_analogie
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
@@ -638,7 +631,6 @@ def telecharger_pdf(demande: DemandePDF, request: Request) -> Response:
     )
 
 
-<<<<<<< HEAD
 @app.websocket("/api/dictee")
 async def dictee_vocale(ws: WebSocket) -> None:
     """Dictée de l'investisseur : micro (PCM 16 kHz) -> Amazon Transcribe (fr-CA) -> texte en direct.
@@ -701,7 +693,8 @@ async def dictee_vocale(ws: WebSocket) -> None:
             await ws.close()
         except Exception:
             pass
-=======
+
+
 @app.post("/api/analogie", response_model=ReponseAnalogie)
 def obtenir_analogie(demande: DemandeAnalogie) -> ReponseAnalogie:
     resultat = generer_analogie(
@@ -749,4 +742,3 @@ def serve_frontend_spa(full_path: str):
 
     raise HTTPException(status_code=404, detail="Interface introuvable")
 
->>>>>>> 2ce566af8fcbf129e797e366fdca325ca19927ae
