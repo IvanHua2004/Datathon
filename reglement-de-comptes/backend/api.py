@@ -386,6 +386,18 @@ def analyser_question(q: Question, request: Request) -> dict:
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
                                  historique=[h[:500] for h in q.historique],
                                  profil_info=_dossier_investisseur(profil, _donnees().univers))
+    if (q.audience and analyse.statut == "recevable" and analyse.ticker == q.audience.get("ticker")
+            and analyse.taille is not None and abs(analyse.taille - float(q.audience.get("taille") or 0)) < 1e-9):
+        # « ok » juste après l'audience : ce procès vient d'être plaidé, on ne le relance pas en double.
+        analyse = questions.Analyse(
+            "refus", "deja_plaide",
+            f"Ce débat vient d'être plaidé : {round(analyse.taille * 100):g} % du portefeuille dans "
+            f"{analyse.nom_titre} ({analyse.ticker}). Revenez voter avec « Revenir voter » sur la carte "
+            "de l'audience, ou choisissez une autre part ou un autre titre.",
+            ticker=analyse.ticker, nom_titre=analyse.nom_titre,
+            reformulations=[questions.formuler(analyse.ticker, t, univers)
+                            for t in (0.05, 0.20) if abs(t - analyse.taille) > 1e-9],
+        )
     if not profil.portefeuille_declare:
         # Persona trop peu détaillé : le greffier ne parle pas d'un portefeuille qu'il ne connaît pas.
         questions.adapter_au_portefeuille_de_reference(analyse)

@@ -632,6 +632,21 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
     return analyse
 
 
+_REPONSE_COURTE = re.compile(r"^(?:oui|non|ok|okay|d'accord|vas-y|go|parfait|exactement|celui-ci|celui-la)\b")
+
+
+def _suite_plausible(norm: str, part: float | None) -> bool:
+    """La phrase peut-elle continuer la discussion sur le titre retenu ?
+
+    Oui si elle donne une part ou un nombre, parle de placement, ou relance (« et pour 20 % ? »,
+    « ok », « ses chiffres ? »). Non pour une phrase sans rapport : « blablabla », « la météo ? ».
+    """
+    return (part is not None or re.search(r"\d", norm) is not None
+            or any(m in norm for m in MOTS_FINANCE)
+            or any(re.search(m, norm) for m in RELANCE)
+            or _REPONSE_COURTE.search(norm) is not None)
+
+
 def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univers: dict[str, str],
               ticker_en_attente: str | None, taille_en_attente: float | None, titre_exemple: str,
               resume_profil: str, portefeuille: set[str], classes_exclues: set[str]) -> Analyse:
@@ -679,8 +694,18 @@ def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univ
             nom, candidats = theme
             choix = _proposer(candidats, part_valide, univers)
             return Analyse("choix", "theme", _message_choix(nom, choix), choix=choix, theme=nom)
-        if ticker_en_attente:
+        if ticker_en_attente and _suite_plausible(norm, part):
             titres = [ticker_en_attente]
+        elif ticker_en_attente:
+            # Un titre est retenu, mais la phrase n'a rien à voir (« blablabla », « la météo ? ») :
+            # on ne l'y rattache pas, on dit clairement ce que le greffier peut faire.
+            return Analyse(
+                "refus", "hors_sujet",
+                "Je ne peux pas répondre à cette question : le tribunal débat seulement de décisions de "
+                f"portefeuille. Toujours sur {_libelle(ticker_en_attente, univers)}, choisissez une part, "
+                "ou posez une question sur un titre.",
+                reformulations=[formuler(ticker_en_attente, t, univers) for t in (0.05, 0.20)],
+            )
         elif part is not None or any(m in norm for m in MOTS_FINANCE):
             return Analyse(
                 "incomplet", "titre_manquant",

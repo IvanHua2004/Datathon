@@ -45,7 +45,7 @@ def test_second_calcul_independant_de_la_pire_baisse():
 def test_donnees_sans_trou_et_en_cad():
     d = donnees.charger()
     assert d.prix_cad.shape[1] == 31 and not d.prix_cad.isna().any().any()
-    assert (d.prix_cad.index.dayofweek < 5).all()
+    assert (d.prix_cad.index.day_of_week < 5).all()
 
 
 def test_verdicts_des_trois_demandes_types():
