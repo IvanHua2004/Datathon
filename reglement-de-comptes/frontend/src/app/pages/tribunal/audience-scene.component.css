@@ -1,0 +1,282 @@
+:host { display: block; }
+
+.scene {
+  border: 1px solid #936a4f;
+  border-radius: 0.25rem;
+  overflow: clip;
+  box-shadow: 0 1rem 2rem rgb(0 0 0 / 32%);
+}
+
+.plateau {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: url('/assets/courtroom.png') center / cover;
+}
+
+.bouton-verdict {
+  position: absolute;
+  z-index: 1;
+  top: clamp(0.45rem, 1.5vw, 1rem);
+  right: clamp(0.45rem, 1.5vw, 1rem);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  width: clamp(3.6rem, 7vw, 5.3rem);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 3px solid #200d19;
+  border-radius: 50%;
+  background: #fc4547;
+  box-shadow: 0 4px 0 #200d19;
+  color: #200d19;
+  font: 800 clamp(0.7rem, 1.3vw, 0.95rem) / 1.1 Aptos, sans-serif;
+  cursor: pointer;
+}
+
+.bouton-verdict:hover { background: #ff6264; }
+.bouton-verdict:is(:active, .verdict-enfonce) { transform: translateY(3px) scale(0.93); box-shadow: 0 1px 0 #200d19; }
+.bouton-verdict:focus-visible { outline-color: #fff6eb; }
+
+.bouton-verdict.verdict-attendu::after {
+  position: absolute;
+  inset: -6px;
+  border: 3px solid #ffd578;
+  border-radius: 50%;
+  pointer-events: none;
+  content: '';
+  animation: appel-verdict 1.05s ease-in-out 4;
+}
+
+@keyframes appel-verdict {
+  0%, 100% { opacity: 0.65; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.13); }
+}
+
+.eclats-verdict { position: absolute; inset: 0; pointer-events: none; }
+.eclats-verdict i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1.5px solid #200d19;
+  border-radius: 50%;
+  background: #ffd578;
+  animation: eclat-verdict 230ms ease-out both;
+}
+
+.eclats-verdict i:nth-child(1) { --x: -4.1rem; --y: -1.2rem; }
+.eclats-verdict i:nth-child(2) { --x: -4.4rem; --y: 0.8rem; background: #fc4547; }
+.eclats-verdict i:nth-child(3) { --x: -3.4rem; --y: 2.5rem; border-radius: 0.12rem; }
+.eclats-verdict i:nth-child(4) { --x: -1.6rem; --y: 3.7rem; background: #fff4e6; }
+.eclats-verdict i:nth-child(5) { --x: 0.7rem; --y: 4rem; border-radius: 0.12rem; }
+.eclats-verdict i:nth-child(6) { --x: 2.35rem; --y: 3rem; background: #fc4547; }
+
+@keyframes eclat-verdict {
+  from { opacity: 0; transform: translate(calc(var(--x) * 0.48), calc(var(--y) * 0.48)) scale(0.45); }
+  35% { opacity: 1; }
+  to { opacity: 1; transform: translate(var(--x), var(--y)) rotate(45deg); }
+}
+
+.fenetre-verdict, .fenetre-rapport {
+  width: min(46rem, calc(100% - 1.25rem));
+  max-height: calc(100dvh - 1.25rem);
+  padding: 0;
+  border: 1px solid #aa676a;
+  border-top: 4px solid #a62432;
+  border-radius: 0.35rem;
+  background: #fff9f2;
+  color: #2c1926;
+  box-shadow: 0 1.4rem 4rem rgb(24 9 19 / 62%);
+}
+
+.fenetre-verdict::backdrop, .fenetre-rapport::backdrop { background: rgb(28 13 23 / 75%); }
+.fenetre-verdict[open] { animation: impact-verdict 260ms cubic-bezier(0.18, 0.8, 0.35, 1.2) both; }
+
+@keyframes impact-verdict {
+  from { opacity: 0; transform: translateY(0.85rem) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.contenu-verdict, .contenu-rapport { display: grid; gap: 1rem; padding: clamp(0.85rem, 3vw, 1.6rem); }
+.contenu-verdict :is(header, footer), .contenu-rapport header { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
+.contenu-verdict footer { flex-wrap: wrap; }
+.contenu-verdict footer p { color: #654455; font-size: 0.875rem; }
+.contenu-verdict button { min-height: 2.5rem; padding: 0.4rem 0.7rem; border-radius: 0.25rem; font: inherit; font-weight: 700; cursor: pointer; }
+.fermer-verdict, .contenu-verdict .fermer-verdict {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #58354d;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+.plaidoiries-verdict { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.camp-verdict { display: flex; flex-direction: column; gap: 0.55rem; padding: 0.85rem; border: 1px solid #deccd4; border-radius: 0.25rem; background: #fff; }
+.nom-camp { color: #654455; font-weight: 700; }
+.extrait-camp { line-height: 1.45; overflow-wrap: anywhere; }
+.contenu-verdict .bouton-vote { margin-top: auto; border: 1px solid #a47b9b; background: #f5eaf2; color: #58354d; }
+.contenu-verdict .bouton-vote:enabled:hover { background: #ecd9e7; }
+.contenu-verdict .bouton-vote[aria-pressed="true"] { background: #58354d; color: #fff; }
+.contenu-verdict .bouton-vote:disabled { opacity: 0.55; cursor: default; }
+.contenu-verdict .rendre-verdict { margin-inline-start: auto; border: 1px solid #a62432; background: #a62432; color: #fff; }
+.contenu-verdict .rendre-verdict:enabled:hover { background: #871d29; }
+.contenu-verdict .rendre-verdict:disabled { opacity: 0.55; cursor: default; }
+
+.fenetre-rapport { border-top-color: #773c6f; }
+.interventions-rapport { margin: 0; padding-inline-start: 1.5rem; }
+.interventions-rapport li { padding: 0.65rem 0; border-top: 1px solid #deccd4; }
+.interventions-rapport h3, .pieces-rapport h3 { font-size: 1rem; }
+.interventions-rapport p { margin-top: 0.35rem; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.pieces-rapport details { margin-top: 0.45rem; padding: 0.6rem; border: 1px solid #deccd4; border-radius: 0.25rem; }
+.pieces-rapport summary { cursor: pointer; font-weight: 700; }
+.pieces-rapport dl { display: grid; grid-template-columns: 1fr auto; gap: 0.25rem 0.75rem; }
+.pieces-rapport dd { margin: 0; }
+.pieces-rapport p { font-size: 0.85rem; color: #654455; overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fenetre-verdict[open], .bouton-verdict.verdict-attendu::after { animation: none; }
+  .bouton-verdict:is(:active, .verdict-enfonce) { transform: none; }
+}
+
+.personnage {
+  position: absolute;
+  left: var(--position-x);
+  bottom: var(--position-bas, 0%);
+  width: var(--largeur, 22%);
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0.25rem 0.25rem rgb(33 16 25 / 45%));
+}
+
+.personnage[data-emplacement="gauche"] { --position-x: 18%; }
+.personnage[data-emplacement="centre"] { --position-x: 50%; --position-bas: 48%; --largeur: 20%; }
+.personnage[data-emplacement="droite"] { --position-x: 82%; }
+.personnage img { display: block; width: 100%; height: auto; }
+.nom-avocat {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.25rem);
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 0.25rem;
+  transform: translateX(-50%);
+  background: #35232e;
+  color: #fff8e9;
+  font-size: clamp(0.65rem, 1.1vw, 0.95rem);
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+.nom-avocat span { color: #ffdb98; font-size: 0.85em; }
+.personnage[data-emplacement="droite"] img, .portrait img.miroir { transform: scaleX(-1); }
+.personnage.parle {
+  filter: drop-shadow(0 0 0.4rem rgb(255 226 155 / 90%))
+    drop-shadow(0 0.25rem 0.25rem rgb(33 16 25 / 45%));
+}
+
+.dialogue {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem 1rem;
+  padding: clamp(0.75rem, 2vw, 1.25rem);
+  border-top: 1px solid #b78b65;
+  background: #fff;
+  color: #2c1926;
+}
+
+.portrait {
+  display: grid;
+  place-items: center;
+  width: clamp(2.75rem, 8vw, 5.75rem);
+  aspect-ratio: 1;
+  border: 1px solid #936a4f;
+  border-radius: 0.375rem;
+  background: #f7eee8;
+  font-size: clamp(1.35rem, 4vw, 2.6rem);
+}
+
+.portrait img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.replique { max-height: min(35dvh, 16rem); overflow-y: auto; overscroll-behavior-y: contain; }
+.etiquettes { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.65rem; }
+
+h2, h3 { margin: 0; color: #58354d; font-family: "Bookman Old Style", Georgia, serif; }
+h3 { font-size: clamp(1rem, 2.3vw, 1.35rem); }
+p { margin: 0; }
+.titre-replique { margin-top: 0.2rem; color: #654455; font-weight: 600; }
+.texte-replique, .attente p { margin-top: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
+.mot-masque { visibility: hidden; }
+.texte-accessible {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.piece { padding: 0.2em 0.5em; border-radius: 0.2rem; background: #583848; color: #fff; font-size: 0.8rem; }
+.alerte { margin-top: 0.65rem; color: #883d29; font-size: 0.9rem; }
+
+.commandes {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.4rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid #eadde3;
+}
+
+.commandes button {
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #b78b65;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.commandes button:disabled { opacity: 0.45; cursor: default; }
+.options-lecture { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.options-lecture button {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0;
+  border-color: #a47b9b;
+  background: #f5eaf2;
+  color: #58354d;
+}
+.options-lecture button:hover { background: #ecd9e7; }
+.options-lecture svg { width: 1.25rem; height: 1.25rem; }
+.progression { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.25rem; }
+.commandes .suivant { border-color: #ffd578; background: #ffd578; color: #2c1926; }
+.commandes .suivant:hover { background: #ffe5aa; }
+.compteur { color: #654455; font-size: 0.875rem; white-space: nowrap; }
+:is(button, .replique):focus-visible { outline: 2px solid #773c6f; outline-offset: 2px; }
+.attente { display: block; }
+.verdict-final { border-top: 3px solid #a62432; }
+.verdict-final .progression { grid-column: -2 / -1; }
+
+@media (width > 58rem) and (min-height: 38rem) {
+  .scene { display: grid; grid-template-rows: minmax(0, 1fr) auto; height: 100%; }
+  .plateau { aspect-ratio: auto; container-type: size; }
+  .personnage { width: min(var(--largeur, 22%), 42cqh); }
+  .personnage[data-emplacement="centre"] { width: min(var(--largeur), 32cqh); }
+  .replique { max-height: min(25dvh, 13rem); }
+}
+
+@media (max-width: 36rem) {
+  .dialogue { column-gap: 0.5rem; }
+  .commandes { grid-template-columns: minmax(0, 1fr) auto; }
+  .progression { grid-column: 1 / -1; }
+  .commandes button { padding-inline: 0.4rem; font-size: 0.8rem; }
+  .plaidoiries-verdict { grid-template-columns: minmax(0, 1fr); }
+}

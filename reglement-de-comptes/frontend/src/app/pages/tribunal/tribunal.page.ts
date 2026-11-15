@@ -1,33 +1,41 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, DestroyRef, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CourbeTailleComponent } from '../../components/courbe-taille/courbe-taille.component';
+import { EnteteComponent } from '../../components/entete/entete.component';
 import { PlaidoirieComponent } from '../../components/plaidoirie/plaidoirie.component';
 import { Mode, TourDiscussion } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
+import { SonAudienceService } from '../../services/son-audience.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
 import { laisserUnRetour } from '../../shared/memoire';
+import { AudienceSceneComponent } from './audience-scene.component';
 
 /** Le tribunal : choix du dossier, procès, verdict, salle et pièces du greffier. */
 @Component({
   selector: 'rdc-tribunal',
-  imports: [RouterLink, PlaidoirieComponent, CourbeTailleComponent],
+  imports: [RouterLink, PlaidoirieComponent, CourbeTailleComponent, AudienceSceneComponent, EnteteComponent],
   templateUrl: './tribunal.page.html',
   styleUrl: './tribunal.page.css',
+  host: { '[class.tribunal-scene]': 'versionScene' },
 })
 export class TribunalPage {
   readonly tribunal = inject(ProcesService);
+  readonly sonAudience = inject(SonAudienceService);
   private readonly api = inject(ApiService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  readonly versionScene = this.route.snapshot.data['versionScene'] === true;
+  readonly sceneAudience = viewChild(AudienceSceneComponent);
 
   readonly profilCle = signal('');
   readonly ticker = signal('');
   readonly taille = signal(0.2);
-  /** Paramètres d'URL envoyés par la page du greffier : /tribunal?profil=…&ticker=…&taille=…&question=… */
+  /** Paramètres d'URL envoyés par la page du greffier : /tribunal-2?profil=…&ticker=…&taille=…&question=… */
   readonly profilDemande = input<string>('', { alias: 'profil' });
   readonly tickerDemande = input<string>('', { alias: 'ticker' });
   readonly tailleDemande = input<string>('', { alias: 'taille' });
-  readonly question = input<string>('');
+  readonly question = input<string>();
   private demandeLancee = false;
   /** Bedrock seulement (« Sans modèle » retiré de l'interface). */
   readonly mode = signal<Mode>('bedrock');
@@ -48,6 +56,22 @@ export class TribunalPage {
   );
 
   readonly proces = this.tribunal.resultat;
+  readonly toursScene = computed(() => (this.proces()?.discussion ?? []).map((tour) => {
+    if (tour.etape !== 'VERDICT_JUGE') return tour;
+    return {
+      ...tour,
+      titre: 'La parole vous revient',
+      texte: 'La défense et l’accusation ont été entendues. Vous pouvez relire leurs arguments, puis rendre votre verdict.',
+      verdict: undefined,
+    };
+  }));
+  readonly questionDossier = computed(() => {
+    const question = this.question()?.trim();
+    if (question) return question;
+    const ticker = this.tickerDemande();
+    const taille = Number(this.tailleDemande());
+    return ticker && taille > 0 ? `Faut-il placer ${pct(taille, 0)} du portefeuille dans ${ticker} ?` : '';
+  });
 
   readonly motifs = computed(() => {
     const p = this.proces();
@@ -64,7 +88,9 @@ export class TribunalPage {
   });
 
   constructor() {
-    const persona = inject(ActivatedRoute).snapshot.queryParamMap.get('persona');
+    const persona = this.route.snapshot.queryParamMap.get('persona');
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.timerDiscussion));
+    if (this.versionScene) this.tribunal.effacer();
     this.tribunal.chargerReferentiels();
     // Résumé du verdict pour le greffier, affiché quand on revient à la conversation.
     effect(() => {
@@ -86,6 +112,8 @@ export class TribunalPage {
         this.ticker.set(this.tickerDemande());
         this.taille.set(taille);
         this.ouvrir();
+      } else if (this.versionScene) {
+        if (demande) this.profilCle.set(demande.cle);
       } else {
         // Arrivée depuis la page des personas : /tribunal?persona=robert
         const profil = profils.find((p) => p.cle === persona) ?? profils[0];
@@ -93,8 +121,8 @@ export class TribunalPage {
       }
     });
 
-    // Déclenche l'animation progressive dès qu'un procès avec discussion arrive
-    effect(() => {
+    // Le tribunal classique déroule les répliques à son propre rythme.
+    if (!this.versionScene) effect(() => {
       const pr = this.proces();
       if (pr?.discussion && pr.discussion.length > 0) {
         this.demarrerAnimationDiscussion(pr.discussion);
@@ -186,6 +214,7 @@ export class TribunalPage {
 
   ouvrir(): void {
     if (!this.profilCle() || !this.ticker()) return;
+    if (this.versionScene) this.tribunal.effacer();
     this.tribunal.ouvrir({
       profil: this.profilCle(),
       ticker: this.ticker(),

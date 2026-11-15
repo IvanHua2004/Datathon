@@ -1,9 +1,14 @@
 :host {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   grid-template-columns: minmax(0, 1fr);
-  height: 100svh;
+  height: 100dvh;
   color: #ffe5bf;
+  background-image:
+    linear-gradient(180deg, rgb(0 0 0 / 76%), rgb(0 0 0 / 92%) 72%),
+    url('/assets/courtroom.png');
+  background-size: cover;
+  background-position: center top;
 }
 
 .dossier {
@@ -16,6 +21,8 @@
   background: #3b2836;
   color: #feedd3;
   text-decoration: none;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .dossier:hover { border-color: #fec946; }
@@ -35,33 +42,37 @@
   font-size: 1.1rem;
 }
 
+.dossier-texte strong { overflow-wrap: anywhere; }
+
 .changer { color: #fec946; font-size: 0.925rem; font-weight: 700; }
 
 .scene {
   min-height: 0;
+  width: min(54rem, calc(100% - 2rem));
+  margin: clamp(0.5rem, 2vh, 1.25rem) auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto 1fr auto;
-  background-image:
-    linear-gradient(180deg, rgb(40 21 35 / 74%), rgb(40 21 35 / 95%) 72%),
-    url('/assets/courtroom.png');
-  background-size: cover;
-  background-position: center top;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  border: 1px solid #ded3c6;
+  border-radius: 4px;
+  background-color: var(--paper-background);
+  background-image: var(--paper-ruling);
+  box-shadow: 3px 4px 0 -1px #e7ddd0, 0 14px 32px rgb(0 0 0 / 35%);
+  color: #200e0c;
 }
 
 .titre-audience {
-  margin: 0;
-  padding: 1.25rem 1rem 0.25rem;
-  text-align: center;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgb(255 229 191 / 80%);
+  margin: 0 clamp(1rem, 3vw, 1.5rem);
+  padding: 0.85rem 0 0.6rem;
+  border-bottom: 3px double #cbb5bd;
+  color: #523047;
+  font: 700 clamp(1.2rem, 3vw, 1.5rem) "Bookman Old Style", Georgia, serif;
 }
 
 .fil {
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   width: 100%;
   max-width: 54rem;
   margin: 0 auto;
@@ -75,21 +86,16 @@
 .ligne { display: flex; gap: 0.75rem; align-items: flex-end; }
 .ligne--moi { justify-content: flex-end; }
 
-.avatar {
+.avatar--greffier {
   flex: none;
   width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: #ffc247;
-  color: #200e0c;
-  font-weight: 800;
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform: scale(1.5);
 }
 
 .bulle.bulle--archiviste { max-width: min(46rem, calc(100% - 3.5rem)); }
 
-.avatar--archiviste { background: #fff8ec; color: #773c6f; border: 2px solid #773c6f; }
 
 .fiche {
   margin-top: 0.25rem;
@@ -184,13 +190,14 @@
 .bulle p { margin: 0; }
 
 .bulle--greffier {
-  background: #fff8ec;
+  background: #fffaf1;
   color: #200e0c;
   border-radius: 6px 6px 6px 0;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  border-left: 5px solid transparent;
+  border: 1px solid #e6dbce;
+  border-left: 5px solid #d8c4ce;
 }
 
 .bulle--greffier[data-ton='ok'] { border-left-color: #2e8b57; }
@@ -230,6 +237,9 @@ button:disabled { cursor: not-allowed; opacity: 0.55; }
 }
 
 .principal:hover:not(:disabled) { background: #fbde85; }
+
+.barre .principal { background: var(--confirm-background); }
+.barre .principal:hover:enabled { background: var(--confirm-background-hover); }
 
 .secondaire {
   min-height: 2.75rem;
@@ -302,7 +312,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 .points i:nth-child(3) { animation-delay: 300ms; }
 
 .compositeur {
-  position: relative;
   width: 100%;
   max-width: 54rem;
   margin: 0 auto;
@@ -310,14 +319,19 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
   padding: 0.5rem clamp(1rem, 3vw, 1.5rem) 1.5rem;
 }
 
+.zone-saisie {
+  position: relative;
+  border-radius: 6px;
+  border: 1px solid #d8c4ce;
+  background: #fff;
+  box-shadow: 0 3px 0 rgb(82 48 71 / 12%);
+}
+
 .barre {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0.5rem 0.5rem 1rem;
-  border-radius: 6px;
-  background: #fff8ec;
-  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
 }
 
 .barre input {
@@ -335,16 +349,17 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 
 .suggestions {
   position: absolute;
-  left: clamp(1rem, 3vw, 1.5rem);
-  right: clamp(1rem, 3vw, 1.5rem);
-  bottom: calc(100% - 0.25rem);
+  inset-inline: 0;
+  bottom: calc(100% + 0.35rem);
+  z-index: 1;
   margin: 0;
   padding: 0;
   list-style: none;
   background: #fff8ec;
   color: #200e0c;
   border-radius: 6px;
-  overflow: hidden;
+  max-height: min(16rem, 35dvh);
+  overflow-y: auto;
   box-shadow: 0 -2px 0 rgb(0 0 0 / 10%), 0 8px 24px rgb(0 0 0 / 40%);
 }
 
@@ -390,27 +405,49 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
   .dossier-choix { transition: none; }
 }
 
-@media (max-width: 40rem) {
-  .avatar { width: 2.25rem; height: 2.25rem; }
+@media (max-width: 650px) {
+  .dossier { max-width: calc(100% - 5.5rem); padding-right: 0.4rem; gap: 0.35rem; }
+  .dossier-portrait { width: 2rem; height: 2rem; }
+  .dossier-texte, .changer { font-size: 0.8rem; }
+  .scene { width: calc(100% - 1rem); }
+  .avatar--greffier { width: 2.25rem; }
   .ligne { gap: 0.5rem; }
 }
 
-.outils { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.5rem; }
+@media (max-width: 650px), (max-height: 640px) {
+  .scene { margin-block: 0.35rem; }
+  .titre-audience { padding-block: 0.45rem 0.35rem; }
+  .fil { padding-block: 0.5rem; gap: 0.5rem; }
+  .compositeur { padding-block: 0.25rem 0.5rem; }
+  .barre { padding-block: 0.25rem; }
+  .barre .principal { padding-inline: 0.65rem; }
+}
+
+.outils {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-top: 1px solid #ebdfe6;
+  border-radius: 0 0 5px 5px;
+  background: #fbf5f8;
+}
 
 .outil {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  min-height: 2.5rem;
-  padding: 0 0.9rem;
-  border: 1px solid rgb(255 229 191 / 45%);
-  border-radius: 999px;
-  background: rgb(40 21 35 / 70%);
-  color: #ffe5bf;
+  min-height: 2.25rem;
+  padding: 0.2rem 0.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #523047;
+  text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
 }
-.outil:hover:not(:disabled) { border-color: #ffc247; color: #ffc247; }
+.outil:hover:enabled { background: #efe2eb; }
 
 .choix-duel { grid-column: 1 / -1; }
 .dossier-choix--duel { border: 2px solid #ffc247; background: rgb(255 194 71 / 18%); }

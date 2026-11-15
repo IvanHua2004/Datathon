@@ -8,6 +8,7 @@ import { EnteteComponent } from '../../components/entete/entete.component';
 import { AnalyseQuestion, ChoixDossier } from '../../models/question.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
+import { SonAudienceService } from '../../services/son-audience.service';
 import { Attente, completer } from '../../shared/autocompletion';
 import { dollars, pct } from '../../shared/format';
 import { cleConversation, cleRetour, ecrire, effacer, lire } from '../../shared/memoire';
@@ -39,6 +40,7 @@ interface Sauvegarde {
 })
 export class GreffierPage {
   private readonly api = inject(ApiService);
+  private readonly sonAudience = inject(SonAudienceService);
   private readonly router = inject(Router);
   readonly tribunal = inject(ProcesService);
   readonly pct = pct;
@@ -87,12 +89,6 @@ export class GreffierPage {
   readonly suggestions = computed(() => {
     const p = this.persona();
     if (!p || this.enCours()) return [];
-    // Champ vide : on propose des débuts de phrase seulement au premier échange ou quand
-    // le greffier attend une réponse précise (la part, le titre).
-    const dejaParle = this.messages().some((m) => m.de === 'moi');
-    const derniere = this.messages().at(-1);
-    const choixAffiches = !!derniere?.analyse?.choix?.length;
-    if (!this.saisie().trim() && dejaParle && (!this.enAttente().attente || choixAffiches)) return [];
     return completer(this.saisie(), {
       actifs: this.tribunal.actifs(),
       attente: this.enAttente().attente,
@@ -258,6 +254,7 @@ export class GreffierPage {
     const champ = this.champ()?.nativeElement;
     if (champ) champ.value = '';
     this.ouverte.set(false);
+    this.active.set(-1);
     this.enCours.set(true);
 
     const contexte = this.enAttente();
@@ -272,8 +269,8 @@ export class GreffierPage {
         }
         if (a.agent === 'archiviste') {
           this.repondreArchiviste(a);
-          this.ouverte.set(false);
           champ?.focus();
+          this.ouverte.set(false);
           return;
         }
         this.ajouter({
@@ -294,9 +291,9 @@ export class GreffierPage {
         } else {
           this.enAttente.set({ ticker: null, taille: null, attente: null });
         }
-        // Les suggestions réapparaissent dès qu'on tape, sans cacher la réponse du greffier.
-        this.ouverte.set(false);
+        // Rendre le focus au champ sans recouvrir la réponse qui vient d'apparaître.
         champ?.focus();
+        this.ouverte.set(false);
       },
       error: (e: unknown) => {
         this.enCours.set(false);
@@ -428,7 +425,8 @@ export class GreffierPage {
   ouvrirDebat(a: AnalyseQuestion | ChoixDossier): void {
     const p = this.persona();
     if (!p || !a.ticker || a.taille == null) return;
-    this.router.navigate(['/tribunal'], {
+    this.sonAudience.amorcer();
+    this.router.navigate(['/tribunal-2'], {
       queryParams: { profil: p.cle, ticker: a.ticker, taille: a.taille, question: a.question },
     });
   }

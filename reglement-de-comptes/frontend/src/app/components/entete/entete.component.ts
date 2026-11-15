@@ -87,16 +87,29 @@ import { RouterLink } from '@angular/router';
     .etapes li.faite { border-color: rgb(255 229 191 / 60%); color: #ffe5bf; }
     .etapes li.courante { background: #ffc247; border-color: #ffc247; color: #200e0c; font-weight: 700; }
 
-    @media (max-width: 520px) {
+    @media (max-width: 650px) {
+      .entete { justify-content: space-between; gap: 0.35rem 0.5rem; padding: 0.4rem 0.65rem; }
+      .marque { width: 5rem; height: 3rem; }
       .etapes {
+        order: 1;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         flex-basis: 100%;
         gap: 0.75rem;
         font-size: 0.75rem;
       }
-      .etapes li { flex-direction: column; gap: 0.125rem; padding-inline: 0; }
+      .etapes li { gap: 0.25rem; padding: 0.25rem 0; }
       .etapes li:not(:last-child)::after { left: 100%; width: 0.95rem; }
+    }
+
+    @media (max-width: 360px) {
+      .etapes { gap: 0.4rem; }
+      .etapes li:not(:last-child)::after { width: 0.55rem; }
+    }
+
+    @media (min-width: 651px) and (max-height: 520px) {
+      .entete { padding-block: 0.3rem; }
+      .marque { width: 5rem; height: 3rem; }
     }
   `,
 })

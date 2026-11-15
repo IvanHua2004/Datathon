@@ -8,6 +8,7 @@ from __future__ import annotations
 import io
 from pathlib import Path
 from datetime import datetime, timezone
+from xml.sax.saxutils import escape
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
@@ -106,7 +107,7 @@ def generer_pdf_rapport(proces,
     # 2. Informations du dossier et profil
     info_profil = [
         [
-            Paragraph(f"<b>Investisseur :</b> {p.nom} ({p.resume})", style_body),
+            Paragraph(f"<b>Investisseur :</b> {escape(p.nom)} ({p.resume})", style_body),
             Paragraph(f"<b>Capital engagé :</b> {dollars(p.capital)}", style_body),
         ],
         [
@@ -176,9 +177,9 @@ def generer_pdf_rapport(proces,
     juge_txt = proces.motivation.texte if proces.motivation else "Motifs délibérés."
 
     debat_data = [
-        [Paragraph("<b>La Défense (Me Vigor) :</b>", style_bold), Paragraph(defense_txt, style_body)],
-        [Paragraph("<b>Le Procureur (Me Austère) :</b>", style_bold), Paragraph(procureur_txt, style_body)],
-        [Paragraph("<b>Le Juge (Motifs) :</b>", style_bold), Paragraph(juge_txt, style_body)],
+        [Paragraph("<b>La Défense (Me Vigor) :</b>", style_bold), Paragraph(escape(defense_txt), style_body)],
+        [Paragraph("<b>Le Procureur (Me Austère) :</b>", style_bold), Paragraph(escape(procureur_txt), style_body)],
+        [Paragraph("<b>Le Juge (Motifs) :</b>", style_bold), Paragraph(escape(juge_txt), style_body)],
     ]
     t_debat = Table(debat_data, colWidths=[130, 410])
     t_debat.setStyle(TableStyle([

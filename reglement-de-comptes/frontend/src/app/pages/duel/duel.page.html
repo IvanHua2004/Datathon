@@ -98,7 +98,7 @@
             <p><strong>Le Juge.</strong> {{ c.juge }}</p>
           </details>
 
-          <a class="secondaire" routerLink="/tribunal"
+          <a class="secondaire" routerLink="/tribunal-2" (click)="sonAudience.amorcer()"
              [queryParams]="{ profil: d.profil, ticker: c.ticker, taille: c.taille }">Voir le procès complet →</a>
         </article>
       }
