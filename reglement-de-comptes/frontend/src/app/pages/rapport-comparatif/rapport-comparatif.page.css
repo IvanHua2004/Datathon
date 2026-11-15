@@ -375,6 +375,8 @@ summary {
   background: #5a2c54;
 }
 
+.choix-rapport { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
 footer {
   display: flex;
   justify-content: center;

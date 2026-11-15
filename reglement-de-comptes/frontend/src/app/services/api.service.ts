@@ -61,7 +61,7 @@ export class ApiService {
     ticker: string,
     taille: number,
     choix_investisseur: 'OUI' | 'NON',
-    profit_initial: number,
+    profit_initial: number | null,
   ): Observable<AnalyseComparative> {
     return this.http.post<AnalyseComparative>(`${this.base}/comparaison`, {
       profil, ticker, taille, choix_investisseur, profit_initial,

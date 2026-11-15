@@ -59,16 +59,12 @@ export class RapportComparatifPage {
       !!this.profilCle() &&
       !!this.ticker() &&
       this.tailleValeur() > 0 &&
-      this.tailleValeur() <= 0.5 &&
-      this.profitInitialValeur() !== null &&
-      !!this.choixValide(),
+      this.tailleValeur() <= 0.5,
   );
   readonly profitInitialIncoherent = computed(() => {
     const resultat = this.tribunal.comparaison();
     const profitInitial = this.profitInitialValeur();
-    return !!resultat && (
-      profitInitial === null || Math.abs(resultat.profit_initial - profitInitial) > 0.01
-    );
+    return !!resultat && profitInitial !== null && Math.abs(resultat.profit_initial - profitInitial) > 0.01;
   });
   readonly differenceProfit = computed(() => {
     const resultat = this.tribunal.comparaison();
@@ -88,11 +84,12 @@ export class RapportComparatifPage {
       if (!this.demandeValide()) return;
       const choix = this.choixValide();
       const profitInitial = this.profitInitialValeur();
-      if (!choix || profitInitial === null) return;
+      if (!choix) return;
 
       const dossier = `${this.profilCle()}|${this.ticker()}|${this.tailleValeur()}|${choix}|${profitInitial}`;
       if (dossier === this.dernierDossier) return;
       this.dernierDossier = dossier;
+      this.tribunal.choixInvestisseur.set(choix);
       this.tribunal.choisirArbitrage(
         choix,
         this.profilCle(),

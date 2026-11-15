@@ -129,8 +129,7 @@
         [delibere]="reprise()"
         (voteRendu)="tribunal.voteAudience.set($event)"
         [reprendreVote]="retourVote()" [voteReprise]="tribunal.voteAudience()"
-        [choixReprise]="tribunal.choixInvestisseur()"
-        (continuerComparaison)="choisirArbitrage($event)" />
+        (continuerComparaison)="ouvrirRapportComparatif()" />
     } @else if (proces(); as pr) {
       @if (pr.avertissement) {
         <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>

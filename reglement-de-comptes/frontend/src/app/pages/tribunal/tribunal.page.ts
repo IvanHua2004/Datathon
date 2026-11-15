@@ -289,15 +289,13 @@ export class TribunalPage {
   }
 
   choisirArbitrage(choix: 'OUI' | 'NON'): void {
+    this.ouvrirRapportComparatif(choix);
+  }
+
+  ouvrirRapportComparatif(choix = this.tribunal.choixInvestisseur()): void {
     const proces = this.proces();
-    const profitInitial = proces?.profit_initial;
-    if (!proces || typeof profitInitial !== 'number' || !Number.isFinite(profitInitial)) return;
-    if (this.versionScene) {
-      const vote = this.sceneAudience()?.vote();
-      if (!vote) return;
-      this.tribunal.voteAudience.set(vote);
-      this.tribunal.choixInvestisseur.set(choix);
-    }
+    if (!proces) return;
+    const profitInitial = Number.isFinite(proces.profit_initial) ? proces.profit_initial : null;
     this.router.navigate(['/rapport-comparatif'], {
       queryParams: {
         profil: proces.demande.profil,

@@ -16,8 +16,21 @@
   @if (!demandeValide()) {
     <section class="carte" role="alert">
       <h2>Dossier incomplet</h2>
-      <p>Le profil, le titre, la pondération, la décision OUI/NON et le profit initial du dossier sont nécessaires pour produire la comparaison.</p>
+      <p>Le profil, le titre et la pondération du dossier sont nécessaires pour produire la comparaison.</p>
       <a class="action-retour" routerLink="/personas">Choisir un profil</a>
+    </section>
+  } @else if (!choixValide()) {
+    <section class="carte">
+      @if (tribunal.resultat(); as proces) {
+        <p class="sur-titre">Verdict du juge</p>
+        <p class="verdict">{{ proces.decision.verdict }}</p>
+      }
+      <h2>Votre décision d’investissement</h2>
+      <p>{{ profil()?.nom ?? profilCle() }} · {{ ticker() }} · {{ pct(tailleValeur(), 0) }} du portefeuille</p>
+      <div class="choix-rapport">
+        <a class="action-retour" routerLink="." queryParamsHandling="merge" [queryParams]="{ choix: 'OUI' }">OUI — investir</a>
+        <a class="action-retour" routerLink="." queryParamsHandling="merge" [queryParams]="{ choix: 'NON' }">NON — renoncer</a>
+      </div>
     </section>
   } @else {
     <section class="dossier">

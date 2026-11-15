@@ -91,7 +91,7 @@ export class ProcesService {
     profil: string,
     ticker: string,
     taille: number,
-    profitInitial: number,
+    profitInitial: number | null,
   ): void {
     this.chargementComparaison.set(true);
     this.comparaison.set(null);
