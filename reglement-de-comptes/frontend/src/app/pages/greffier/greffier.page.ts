@@ -8,6 +8,7 @@ import { EnteteComponent } from '../../components/entete/entete.component';
 import { AnalyseQuestion, ChoixDossier } from '../../models/question.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
+import { SonAudienceService } from '../../services/son-audience.service';
 import { Attente, completer } from '../../shared/autocompletion';
 import { pct } from '../../shared/format';
 
@@ -29,6 +30,7 @@ interface Message {
 })
 export class GreffierPage {
   private readonly api = inject(ApiService);
+  private readonly sonAudience = inject(SonAudienceService);
   private readonly router = inject(Router);
   readonly tribunal = inject(ProcesService);
   readonly pct = pct;
@@ -327,7 +329,8 @@ export class GreffierPage {
   ouvrirDebat(a: AnalyseQuestion | ChoixDossier): void {
     const p = this.persona();
     if (!p || !a.ticker || a.taille == null) return;
-    this.router.navigate(['/tribunal'], {
+    this.sonAudience.amorcer();
+    this.router.navigate(['/tribunal-2'], {
       queryParams: { profil: p.cle, ticker: a.ticker, taille: a.taille, question: a.question },
     });
   }

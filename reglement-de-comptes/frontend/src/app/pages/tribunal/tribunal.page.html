@@ -1,85 +1,114 @@
-<header class="barre">
-  <a class="retour" routerLink="/question" [queryParams]="{ profil: profilCle() }">← Le greffier</a>
-  <div class="titres">
-    <h1>Règlement de comptes</h1>
-    <p>Avant d'investir, faites passer votre idée en procès. Simulation pédagogique sur des profils fictifs : ce n'est pas un conseil financier.</p>
-  </div>
-</header>
+@if (versionScene) {
+  <rdc-entete [etape]="3" />
+} @else {
+  <header class="barre">
+    <a class="retour" routerLink="/question" [queryParams]="{ profil: profilCle() }">← Le greffier</a>
+    <div class="titres">
+      <h1>Règlement de comptes</h1>
+      <p>Avant d'investir, faites passer votre idée en procès. Simulation pédagogique sur des profils fictifs : ce n'est pas un conseil financier.</p>
+    </div>
+    <a class="version-tribunal" routerLink="/tribunal-2" queryParamsHandling="preserve"
+      (click)="sonAudience.amorcer()">Tribunal 2</a>
+  </header>
+}
 
 <div class="disposition">
-  <aside class="dossier" aria-label="Le dossier">
-    <h2>Le dossier</h2>
+  @if (versionScene && questionDossier(); as question) {
+    <h1 class="question-audience">{{ question }}</h1>
+  }
+  <div class="dossier-colonne">
+    <aside class="dossier" aria-label="Le dossier">
+      <h2>Le dossier</h2>
 
-    @if (tribunal.chargement()) {
-      <p class="note">Chargement des profils…</p>
-    }
-
-    @if (profil(); as p) {
-      <label for="profil">Investisseur (fictif)</label>
-      <select id="profil" (change)="choisirProfil(valeur($event))">
-        @for (x of tribunal.profils(); track x.cle) {
-          <option [value]="x.cle" [selected]="x.cle === profilCle()">{{ x.nom }}</option>
-        }
-      </select>
-
-      <p class="profil">{{ p.resume }}</p>
-      <dl class="profil-details">
-        <dt>Objectif</dt><dd>{{ p.objectif }}</dd>
-        <dt>Préférences</dt><dd>{{ p.preferences }}</dd>
-        <dt>Capital (hypothèse)</dt><dd>{{ dollars(p.capital) }}</dd>
-        <dt>Budget de perte (hypothèse)</dt><dd>{{ pct(p.budgetPerte, 0) }}</dd>
-      </dl>
-
-      <h2>La demande</h2>
-      <label for="intention">Volonté libre (ex: devrais acheter +30% dans des etf ?)</label>
-      <div class="groupe-intention">
-        <input id="intention" type="text" [value]="intentionTexte()" (input)="mettreAJourIntention($event)"
-               (keydown.enter)="analyserIntention()"
-               placeholder="Ex: devrais acheter +30% dans des etf ?" class="champ-texte" />
-        <button type="button" class="btn-analyser" (click)="analyserIntention()" [disabled]="intentionEnCours() || !intentionTexte()">
-          {{ intentionEnCours() ? '…' : 'Analyser' }}
-        </button>
-      </div>
-      @if (explicationIntention()) {
-        <p class="explication-badge">💡 {{ explicationIntention() }}</p>
+      @if (tribunal.chargement()) {
+        <p class="note">Chargement des profils…</p>
       }
 
-      <label for="titre">Titre à ajouter</label>
-      <select id="titre" (change)="choisirTicker(valeur($event))">
-        @for (a of tribunal.actifs(); track a.ticker) {
-          <option [value]="a.ticker" [selected]="a.ticker === ticker()">{{ a.ticker }} — {{ a.nom }}</option>
+      @if (profil(); as p) {
+        @if (versionScene) {
+          <h2 class="investisseur-dossier">Investisseur fictif · {{ p.nom }}</h2>
+        } @else {
+          <label for="profil">Investisseur (fictif)</label>
+          <select id="profil" (change)="choisirProfil(valeur($event))">
+            @for (x of tribunal.profils(); track x.cle) {
+              <option [value]="x.cle" [selected]="x.cle === profilCle()">{{ x.nom }}</option>
+            }
+          </select>
         }
-      </select>
 
-      <label for="taille">Part du portefeuille à y placer</label>
-      <select id="taille" (change)="choisirTaille(valeur($event))">
-        @for (t of tribunal.tailles(); track t) {
-          <option [value]="t" [selected]="t === taille()">{{ pct(t, 0) }}</option>
+        <p class="profil">{{ p.resume }}</p>
+        <dl class="profil-details">
+          <dt>Objectif</dt><dd>{{ p.objectif }}</dd>
+          <dt>Préférences</dt><dd>{{ p.preferences }}</dd>
+          <dt>Capital (hypothèse)</dt><dd>{{ dollars(p.capital) }}</dd>
+          <dt>Budget de perte (hypothèse)</dt><dd>{{ pct(p.budgetPerte, 0) }}</dd>
+          @if (versionScene && ticker()) {
+            <dt>Titre débattu</dt><dd>{{ ticker() }}</dd>
+            <dt>Part du portefeuille</dt><dd>{{ pct(taille(), 0) }}</dd>
+          }
+        </dl>
+
+        @if (!versionScene) {
+          <h2>La demande</h2>
+          <label for="intention">Volonté libre (ex: devrais acheter +30% dans des etf ?)</label>
+          <div class="groupe-intention">
+            <input id="intention" type="text" [value]="intentionTexte()" (input)="mettreAJourIntention($event)"
+                   (keydown.enter)="analyserIntention()"
+                   placeholder="Ex: devrais acheter +30% dans des etf ?" class="champ-texte" />
+            <button type="button" class="btn-analyser" (click)="analyserIntention()" [disabled]="intentionEnCours() || !intentionTexte()">
+              {{ intentionEnCours() ? '…' : 'Analyser' }}
+            </button>
+          </div>
+          @if (explicationIntention()) {
+            <p class="explication-badge">💡 {{ explicationIntention() }}</p>
+          }
+
+          <label for="titre">Titre à ajouter</label>
+          <select id="titre" (change)="choisirTicker(valeur($event))">
+            @for (a of tribunal.actifs(); track a.ticker) {
+              <option [value]="a.ticker" [selected]="a.ticker === ticker()">{{ a.ticker }} — {{ a.nom }}</option>
+            }
+          </select>
+
+          <label for="taille">Part du portefeuille à y placer</label>
+          <select id="taille" (change)="choisirTaille(valeur($event))">
+            @for (t of tribunal.tailles(); track t) {
+              <option [value]="t" [selected]="t === taille()">{{ pct(t, 0) }}</option>
+            }
+          </select>
+
+          <p class="note">Agents : Amazon Bedrock (Strands).</p>
+
+
+          <button type="button" class="ouvrir" (click)="versGreffier()" [disabled]="tribunal.enCours()">
+            {{ tribunal.enCours() ? 'Le tribunal siège…' : 'Ouvrir le procès' }}
+          </button>
+          <p class="note">{{ sourceTexte() }}</p>
         }
-      </select>
-
-      <p class="note">Agents : Amazon Bedrock (Strands).</p>
-
-
-      <button type="button" class="ouvrir" (click)="versGreffier()" [disabled]="tribunal.enCours()">
-        {{ tribunal.enCours() ? 'Le tribunal siège…' : 'Ouvrir le procès' }}
-      </button>
-      <p class="note">{{ sourceTexte() }}</p>
+      }
+    </aside>
+    @if (versionScene) {
+      <button class="ouvrir-rapport" type="button" aria-haspopup="dialog" [disabled]="!toursScene().length"
+        (click)="sceneAudience()?.ouvrirRapport()">Rapport d’analyse</button>
     }
-  </aside>
+  </div>
 
-  <main class="audience">
+  <main class="audience" [class.audience-ouverte]="versionScene && !!proces()">
     @if (tribunal.erreur(); as erreur) {
-      <p class="bandeau bandeau--erreur" role="alert">{{ erreur }}</p>
+      <p class="bandeau bandeau--erreur" role="alert">
+        {{ versionScene ? 'L’audience n’a pas pu démarrer.' : erreur }}
+      </p>
     }
 
-    @if (tribunal.enCours()) {
+    @if (!versionScene && tribunal.enCours()) {
       <p class="bandeau" role="status">
         Le tribunal siège… Avec Bedrock, un procès prend environ 30 secondes.
       </p>
     }
 
-    @if (proces(); as pr) {
+    @if (versionScene) {
+      <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []" [enCours]="tribunal.enCours()" />
+    } @else if (proces(); as pr) {
       @if (pr.avertissement) {
         <p class="bandeau bandeau--avertissement" role="status">{{ pr.avertissement }}</p>
       }

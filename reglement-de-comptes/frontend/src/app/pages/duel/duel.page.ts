@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { EnteteComponent } from '../../components/entete/entete.component';
 import { Duel } from '../../models/duel.model';
 import { ApiService } from '../../services/api.service';
+import { SonAudienceService } from '../../services/son-audience.service';
 import { pct, tonVerdict } from '../../shared/format';
 
 /** Lit « NVDA:0.1 » dans l'URL. */
@@ -23,6 +24,7 @@ function lireCote(texte: string): { ticker: string; taille: number } | null {
 })
 export class DuelPage {
   private readonly api = inject(ApiService);
+  readonly sonAudience = inject(SonAudienceService);
 
   /** /duel?profil=robert&a=NVDA:0.1&b=XBB.TO:0.1 */
   readonly profil = input<string>('');

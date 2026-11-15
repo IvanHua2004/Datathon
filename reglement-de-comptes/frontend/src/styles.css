@@ -3,6 +3,10 @@
 }
 
 :root {
+  --paper-background: #fffdf8;
+  --paper-ruling:
+    linear-gradient(90deg, transparent 10px, rgb(179 38 30 / 36%) 10px 11px, transparent 11px),
+    repeating-linear-gradient(180deg, transparent 0 29px, rgb(119 60 111 / 19%) 29px 30px);
   --confirm-background: rgb(55, 150, 94);
   --confirm-background-hover: rgb(76, 195, 125);
 }

@@ -13,5 +13,6 @@ export const routes: Routes = [
   { path: 'question', component: GreffierPage, title: 'Le greffier · Règlement de comptes' },
   { path: 'duel', component: DuelPage, title: 'Le duel · Règlement de comptes' },
   { path: 'tribunal', component: TribunalPage, title: 'Le tribunal · Règlement de comptes' },
+  { path: 'tribunal-2', component: TribunalPage, data: { versionScene: true }, title: 'Tribunal 2 · Règlement de comptes' },
   { path: '**', redirectTo: '' },
 ];

@@ -102,7 +102,8 @@ import { ProcesService } from '../../services/proces.service';
       font-size: 0.875rem;
     }
     :is(.custom-button, .custom-edit):disabled { opacity: 0.65; cursor: wait; }
-    :is(.custom-button, .custom-edit, .custom-form :is(input, select, textarea)):focus-visible {
+    .custom-edit:focus,
+    :is(.custom-button, .custom-form :is(input, select, textarea)):focus-visible {
       outline: 2px solid #fec946;
       outline-offset: 2px;
     }
@@ -142,7 +143,7 @@ import { ProcesService } from '../../services/proces.service';
           [style.--selection-duration]="selectionDuration + 'ms'">
           <div class="custom-portrait">
             <img class="persona-portrait" src="assets/personnalise.png" alt="" width="1254" height="1254">
-            <button class="custom-edit" type="button" aria-label="Modifier le persona personnalisé"
+            <button #editPersona class="custom-edit" type="button" aria-label="Modifier le persona personnalisé"
               title="Modifier le persona" (click)="openPersonaForm(details, customForm)">
               <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -160,6 +161,9 @@ import { ProcesService } from '../../services/proces.service';
               </p>
               @if (config.note) { <p class="custom-note">{{ config.note }}</p> }
             </div>
+          } @else {
+            <button class="card-select" type="button" aria-label="Repérer le bouton de configuration du persona personnalisé"
+              (click)="highlightEditButton(editPersona)"></button>
           }
         </article>
       </div>
@@ -216,6 +220,7 @@ export class PersonasPage {
   private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(ApiService);
   private readonly tribunal = inject(ProcesService);
+  private editHintAnimation?: Animation;
 
   readonly selectedPersona = signal('');
   readonly confirming = signal(false);
@@ -271,6 +276,17 @@ export class PersonasPage {
       summary: 'Il privilégie la stabilité et la préservation de son capital, mais une occasion très médiatisée peut le tenter.',
     },
   ];
+
+  highlightEditButton(button: HTMLButtonElement): void {
+    button.focus({ preventScroll: true });
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    this.editHintAnimation?.cancel();
+    this.editHintAnimation = button.animate(
+      ['0', '-4px', '4px', '-2px', '2px', '0'].map((x) => ({ transform: `translateX(${x})` })),
+      { duration: 360, easing: 'ease-out' },
+    );
+  }
 
   openPersonaForm(dialog: HTMLDialogElement, form: HTMLFormElement): void {
     if (this.saving() || this.confirming()) return;
