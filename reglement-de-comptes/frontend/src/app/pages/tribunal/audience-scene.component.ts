@@ -208,6 +208,26 @@ function clePortrait(tour: TourDiscussion): string {
         </div>
       </div>
     </dialog>
+    @if (annonceTerminee()) {
+      <section class="decision-finale" aria-labelledby="titre-decision-finale">
+        <h2 id="titre-decision-finale">Votre décision d’investissement</h2>
+        <p>Après le verdict, choisissez OUI ou NON. Ce choix est distinct de votre vote pour la défense ou l’accusation.</p>
+        <div class="choix-investissement">
+          <button type="button" [attr.aria-pressed]="choixInvestisseur() === 'OUI'"
+            (click)="choixInvestisseur.set('OUI')">OUI — investir quand même</button>
+          <button type="button" [attr.aria-pressed]="choixInvestisseur() === 'NON'"
+            (click)="choixInvestisseur.set('NON')">NON — suivre la recommandation</button>
+        </div>
+        @if (choixInvestisseur(); as choix) {
+          @if (profitInitialDisponible()) {
+            <button type="button" class="voir-comparaison"
+              (click)="continuerComparaison.emit(choix)">Voir la comparaison →</button>
+          } @else {
+            <p class="erreur-profit" role="alert">Le profit initial du dossier est manquant; la comparaison ne peut pas être ouverte.</p>
+          }
+        }
+      </section>
+    }
     <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
       <div class="contenu-verdict">
         <header class="entete-verdict">
@@ -307,8 +327,8 @@ function clePortrait(tour: TourDiscussion): string {
             [interventions]="interventionsLues()"
             [pieces]="pieces()"
             [vote]="verdictRendu()"
-            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert()"
             [pendantLeVote]="verdictOuvert()"
+            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert() || annonceTerminee()"
             [portefeuille]="portefeuille()"
             [masquerDecision]="!verdictRendu()" />
         }
@@ -338,6 +358,9 @@ export class AudienceSceneComponent {
   readonly proces = input<Proces | null>(null);
   /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
   readonly portefeuille = input<readonly Position[]>([]);
+  readonly reprendreVote = input(false);
+  readonly voteReprise = input<Camp | null>(null);
+  readonly choixReprise = input<'OUI' | 'NON' | null>(null);
   /** Demande de PDF depuis le rapport, avec le camp retenu par l'investisseur. */
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
   /** « Poser plus de questions » : retour au greffier. */
@@ -347,6 +370,7 @@ export class AudienceSceneComponent {
   /** « Revenir voter » depuis le greffier : l'audience est déjà entendue, on ouvre le délibéré. */
   readonly delibere = input(false);
   private delibereOuvert = false;
+  readonly continuerComparaison = output<'OUI' | 'NON'>();
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly preparation = computed(() => this.enCours() && !this.tour());
@@ -400,6 +424,14 @@ export class AudienceSceneComponent {
   readonly vote = linkedSignal<readonly TourDiscussion[], Camp | null>({ source: this.tours, computation: () => null });
   readonly verdictRendu = linkedSignal<readonly TourDiscussion[], Camp | null>({
     source: this.tours, computation: () => null,
+  });
+  readonly choixInvestisseur = linkedSignal<readonly TourDiscussion[], 'OUI' | 'NON' | null>({
+    source: this.tours, computation: () => null,
+  });
+  private readonly repriseAppliquee = signal(false);
+  readonly profitInitialDisponible = computed(() => {
+    const profit = this.proces()?.profit_initial;
+    return typeof profit === 'number' && Number.isFinite(profit);
   });
   readonly lectureActive = computed(() =>
     !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert() && this.lectureAuto()
@@ -514,6 +546,18 @@ export class AudienceSceneComponent {
       this.motActif.set(this.mots().length);
       this.verdictOuvert.set(true);
       fenetre.showModal();
+    });
+    effect(() => {
+      if (!this.reprendreVote() || this.repriseAppliquee()) return;
+      const camp = this.voteReprise();
+      if (!camp || !this.tours().length) return;
+      this.vote.set(camp);
+      this.verdictRendu.set(camp);
+      this.choixInvestisseur.set(this.choixReprise());
+      this.lectureAuto.set(false);
+      this.texteIntegral.set(true);
+      this.motActif.set(this.mots().length);
+      this.repriseAppliquee.set(true);
     });
     afterRenderEffect(() => {
       if (this.verdictRendu()) this.replique()?.nativeElement.focus({ preventScroll: true });

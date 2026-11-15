@@ -74,6 +74,10 @@ export interface AnalyseComparative {
   titre_decision: string;
   statut_conformite: string;
   impact_capital: string;
+  profit_initial: number;
+  profit_final: number;
+  periode_debut: string;
+  periode_fin: string;
   delta_perte_dollars: number;
   perte_max_dollars: number;
   budget_depasse: boolean;
@@ -163,6 +167,7 @@ export interface Proces {
     capital: number;
   };
   periode: { debut: string; fin: string };
+  profit_initial: number;
   mode: Mode;
   avertissement: string | null;
   decision: {

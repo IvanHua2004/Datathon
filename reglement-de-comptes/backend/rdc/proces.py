@@ -34,6 +34,7 @@ class Dossier:
     debut: str
     fin: str
     avant: dict
+    profit_initial: float
     apres: dict
     crise: dict
     titre_seul: dict
@@ -48,11 +49,17 @@ def construire_dossier(profil: Profil, ticker: str, taille: float,
     if ticker not in d.univers.index:
         raise KeyError(f"{ticker} n'est pas dans l'univers de 31 actifs.")
     rend = d.rendements if rend is None else rend
+    debut = str(rend.index[0].date())
+    fin = str(rend.index[-1].date())
+    profit_initial = moteur.profit_portefeuille(
+        rend, profil.portefeuille, profil.capital, debut, fin
+    )
     poids_apres = moteur.ajouter_position(profil.portefeuille, ticker, taille)
     return Dossier(
         profil=profil, ticker=ticker, taille=taille, donnees=d,
-        debut=str(rend.index[0].date()), fin=str(rend.index[-1].date()),
+        debut=debut, fin=fin,
         avant=moteur.resume(rend, d.univers, profil.portefeuille),
+        profit_initial=profit_initial,
         apres=moteur.resume(rend, d.univers, poids_apres),
         crise=moteur.comportement_en_crise(rend, profil.portefeuille, ticker),
         titre_seul=moteur.pire_baisse(rend[ticker]),

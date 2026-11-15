@@ -27,6 +27,7 @@ export class TribunalPage {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   readonly versionScene = this.route.snapshot.data['versionScene'] === true;
+  readonly retourVote = signal(false);
   readonly sceneAudience = viewChild(AudienceSceneComponent);
 
   readonly profilCle = signal('');
@@ -92,10 +93,17 @@ export class TribunalPage {
 
   constructor() {
     const persona = this.route.snapshot.queryParamMap.get('persona');
+    const retourDemande = this.route.snapshot.queryParamMap.get('retour') === 'vote';
+    const procesExistant = this.tribunal.resultat();
+    const reprendreVote = this.versionScene && retourDemande && !!procesExistant
+      && procesExistant.demande.profil === this.route.snapshot.queryParamMap.get('profil')
+      && procesExistant.demande.ticker === this.route.snapshot.queryParamMap.get('ticker')
+      && procesExistant.demande.taille === Number(this.route.snapshot.queryParamMap.get('taille'));
+    this.retourVote.set(reprendreVote);
     inject(DestroyRef).onDestroy(() => clearTimeout(this.timerDiscussion));
     // « Revenir voter » depuis le greffier : le procès gardé en mémoire est repris, pas relancé.
     const reprendre = this.route.snapshot.queryParamMap.get('reprendre') === '1';
-    if (this.versionScene && !reprendre) this.tribunal.effacer();
+    if (this.versionScene && !reprendre && !reprendreVote) this.tribunal.effacer();
     this.tribunal.chargerReferentiels();
     // Résumé pour le greffier, affiché quand on revient à la conversation. Dans la scène, la décision
     // du tribunal reste scellée tant que l'investisseur n'a pas voté : le résumé ne la dévoile pas.
@@ -125,6 +133,15 @@ export class TribunalPage {
     effect(() => {
       const profils = this.tribunal.profils();
       if (!profils.length || this.profilCle()) return;
+      if (this.versionScene && this.retourVote()) {
+        const proces = this.tribunal.resultat();
+        if (!proces) return;
+        this.demandeLancee = true;
+        this.profilCle.set(proces.demande.profil);
+        this.ticker.set(proces.demande.ticker);
+        this.taille.set(proces.demande.taille);
+        return;
+      }
       const demande = profils.find((p) => p.cle === this.profilDemande());
       const taille = Number(this.tailleDemande());
       if (demande && this.tickerDemande() && taille > 0 && !this.demandeLancee) {
@@ -272,8 +289,24 @@ export class TribunalPage {
   }
 
   choisirArbitrage(choix: 'OUI' | 'NON'): void {
-    if (!this.profilCle() || !this.ticker()) return;
-    this.tribunal.choisirArbitrage(choix, this.profilCle(), this.ticker(), this.taille());
+    const proces = this.proces();
+    const profitInitial = proces?.profit_initial;
+    if (!proces || typeof profitInitial !== 'number' || !Number.isFinite(profitInitial)) return;
+    if (this.versionScene) {
+      const vote = this.sceneAudience()?.vote();
+      if (!vote) return;
+      this.tribunal.voteAudience.set(vote);
+      this.tribunal.choixInvestisseur.set(choix);
+    }
+    this.router.navigate(['/rapport-comparatif'], {
+      queryParams: {
+        profil: proces.demande.profil,
+        ticker: proces.demande.ticker,
+        taille: proces.demande.taille,
+        choix,
+        profitInitial,
+      },
+    });
   }
 
   demanderScenarios(): void {

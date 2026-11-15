@@ -56,8 +56,16 @@ export class ApiService {
     return this.http.post<IntentionResultat>(`${this.base}/intention`, { profil, texte });
   }
 
-  comparerDecision(profil: string, ticker: string, taille: number, choix_investisseur: 'OUI' | 'NON'): Observable<AnalyseComparative> {
-    return this.http.post<AnalyseComparative>(`${this.base}/comparaison`, { profil, ticker, taille, choix_investisseur });
+  comparerDecision(
+    profil: string,
+    ticker: string,
+    taille: number,
+    choix_investisseur: 'OUI' | 'NON',
+    profit_initial: number,
+  ): Observable<AnalyseComparative> {
+    return this.http.post<AnalyseComparative>(`${this.base}/comparaison`, {
+      profil, ticker, taille, choix_investisseur, profit_initial,
+    });
   }
 
   demanderScenarios(profil: string, ticker: string, taille: number, intention_texte?: string): Observable<ScenarioAlternatif[]> {

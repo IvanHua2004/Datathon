@@ -37,6 +37,13 @@ def rendements_portefeuille(rend: pd.DataFrame, poids: dict[str, float]) -> pd.S
     return (rend[list(p)] * pd.Series(p)).sum(axis=1)
 
 
+def profit_portefeuille(rend: pd.DataFrame, poids: dict[str, float], capital: float,
+                        debut: str, fin: str) -> float:
+    """Profit historique en CAD : capital initial multiplié par le rendement composé."""
+    serie = rendements_portefeuille(rend, poids)
+    return float(capital * rendement_periode(serie, debut, fin))
+
+
 def pire_baisse(r: pd.Series) -> dict:
     """Plus forte baisse du sommet au creux, et temps pour revenir au sommet."""
     valeur = (1 + r).cumprod()
