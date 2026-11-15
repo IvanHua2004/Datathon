@@ -22,7 +22,18 @@ export interface CoteDuel {
   chiffres: ChiffreDuel[];
 }
 
+export interface TourDuel {
+  ordre: number;
+  role: 'avocat_a' | 'avocat_b' | 'juge';
+  acteur: string;
+  ticker: string | null;
+  texte: string;
+  non_verifies: string[];
+}
+
 export interface Duel {
+  debat: TourDuel[];
+  avertissementDebat: string | null;
   profil: string;
   nom: string;
   cotes: [CoteDuel, CoteDuel];

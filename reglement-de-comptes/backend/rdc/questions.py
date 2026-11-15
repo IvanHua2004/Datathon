@@ -600,7 +600,10 @@ def _analyser(texte: str, norm: str, titres: list[str], part: float | None, univ
         choix = _proposer([(t, "Nommé dans votre question") for t in titres[:4]], part_valide, univers)
         return Analyse(
             "choix", "plusieurs_titres",
-            "Un procès à la fois : le tribunal juge un seul titre par audience. Lequel voulez-vous soumettre ?",
+            ("Vous pouvez soumettre un seul de ces titres au tribunal, ou les opposer dans un débat "
+             "pour savoir lequel convient le mieux à votre profil."
+             if len(choix) == 2 else
+             "Un procès à la fois : le tribunal juge un seul titre par audience. Lequel voulez-vous soumettre ?"),
             choix=choix,
         )
 

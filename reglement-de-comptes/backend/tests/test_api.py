@@ -138,7 +138,9 @@ def test_duel_deux_titres():
     duel = r.json()
     assert [c["ticker"] for c in duel["cotes"]] == ["NVDA", "XBB.TO"]
     assert duel["decision"]["gagnant"] in ("NVDA", "XBB.TO", None) and duel["decision"]["texte"]
-    assert all(len(c["chiffres"]) == 5 for c in duel["cotes"])
+    assert all(len(c["chiffres"]) == 6 for c in duel["cotes"])
+    assert [t["role"] for t in duel["debat"]] == ["avocat_a", "avocat_b", "juge"]
+    assert all(t["non_verifies"] == [] for t in duel["debat"])
     assert client.post("/api/duel", json={"profil": "robert", "a": {"ticker": "NVDA", "taille": 0.1},
                                           "b": {"ticker": "NVDA", "taille": 0.2}}).status_code == 422
 

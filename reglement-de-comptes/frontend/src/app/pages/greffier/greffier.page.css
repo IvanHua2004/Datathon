@@ -409,4 +409,6 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 }
 .outil:hover:not(:disabled) { border-color: #ffc247; color: #ffc247; }
 
-.duel { align-self: flex-start; margin-top: 0.25rem; }
+.choix-duel { grid-column: 1 / -1; }
+.dossier-choix--duel { border: 2px solid #ffc247; background: rgb(255 194 71 / 18%); }
+.dossier-choix--duel:hover { background: rgb(255 194 71 / 35%); }
