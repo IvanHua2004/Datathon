@@ -507,23 +507,62 @@ export class GreffierPage {
   }
 
   interrogerArchiviste(au: AudienceSuspendue): void {
-    const pr = this.tribunal.resultat();
-    const fait = (motif: RegExp) => pr?.pieces.flatMap((x) => x.faits).find((f) => motif.test(f.libelle))?.valeur;
-    const partRisque = fait(/part du risque/i);
-    const pireBaisse = fait(/pire baisse observée, avec/i);
-    this.ajouter({
-      de: 'archiviste',
-      texte: `Posez-moi une question sur le débat ${au.nomTitre} (${au.ticker}) : je réponds à partir des pièces `
-        + 'scellées, sans trancher à votre place.',
-      suggestions: [
-        ...(partRisque ? [`D'où vient le ${partRisque} du Procureur ?`] : []),
-        ...(pireBaisse ? [`D'où vient le ${pireBaisse} de pire baisse ?`] : []),
-        'Sur quoi s\'appuie la Défense ?',
-        'Que contient la pièce P-02 ?',
-        'C\'est quoi la part du risque ?',
-      ].slice(0, 4),
-    });
+    // Ce qui a déjà été demandé ou proposé ne revient pas : chaque clic ouvre de nouvelles pistes.
+    const dejaVus = new Set(this.messages().flatMap((m) =>
+      m.de === 'moi' ? [normaliserQuestion(m.texte)] : (m.suggestions ?? []).map(normaliserQuestion)));
+    const nouvelles = this.suggestionsDebat(au).filter((q) => !dejaVus.has(normaliserQuestion(q))).slice(0, 4);
+    const premiereFois = !this.messages().some((m) => m.de === 'archiviste' && m.suggestions?.length);
+    const texte = !nouvelles.length
+      ? 'Vous avez fait le tour de mes suggestions sur ce débat. Posez votre propre question : un chiffre, '
+        + 'une pièce (« que contient P-03 ? ») ou un camp.'
+      : premiereFois
+        ? `Posez-moi une question sur le débat ${au.nomTitre} (${au.ticker}) : je réponds à partir des pièces `
+          + 'scellées, sans trancher à votre place.'
+        : 'D’autres questions possibles sur ce débat :';
+    this.ajouter({ de: 'archiviste', texte, suggestions: nouvelles });
     this.champ()?.nativeElement.focus();
+  }
+
+  /**
+   * Questions tirées du vrai procès, mélangées par type : chiffres cités par chaque camp (vérifiables
+   * dans une pièce), contenu des pièces, appuis de chaque camp, termes du glossaire.
+   */
+  private suggestionsDebat(au: AudienceSuspendue): string[] {
+    const pr = this.tribunal.resultat();
+    const p = this.persona();
+    const procesDuDebat = pr && p && this.tribunal.correspond(p.cle, au.ticker, au.taille) ? pr : null;
+    const valeursPieces = (procesDuDebat?.pieces ?? []).flatMap((x) => x.faits.map((f) => f.valeur)).join(' ');
+    const chiffresDe = (texte: string) => [...new Set(texte.match(/-?\d{1,3}(?:[ \u202f\u00a0]\d{3})*(?:,\d+)?\s?(?:%|\$)/g) ?? [])]
+      .map((c) => c.replace(/\s+(?=[%$])/, ' ').trim())
+      .filter((c) => valeursPieces.includes(c));
+    // Qui cite quel chiffre ; un chiffre repris par les deux camps n'est proposé qu'une fois.
+    const cites = new Map<string, string[]>();
+    for (const [nom, texte] of [['la Défense', procesDuDebat?.plaidoiries[0]?.texte ?? ''],
+      ['le Procureur', procesDuDebat?.plaidoiries[1]?.texte ?? '']] as const) {
+      for (const c of chiffresDe(texte)) cites.set(c, [...(cites.get(c) ?? []), nom]);
+    }
+    // Les pourcentages d'abord (plus parlants), en alternant les camps.
+    const parCamp = (nom: string) => [...cites].filter(([, qui]) => qui.length === 1 && qui[0] === nom)
+      .sort(([a], [b]) => Number(b.includes('%')) - Number(a.includes('%'))).map(([c]) => c);
+    const defense = parCamp('la Défense');
+    const procureur = parCamp('le Procureur');
+    const communs = [...cites].filter(([, qui]) => qui.length > 1).map(([c]) => c);
+    const chiffres: string[] = communs.map((c) => `D'où vient le ${c} cité par les deux camps ?`);
+    for (let i = 0; i < Math.max(defense.length, procureur.length); i++) {
+      if (procureur[i]) chiffres.push(`D'où vient le ${procureur[i]} cité par le Procureur ?`);
+      if (defense[i]) chiffres.push(`D'où vient le ${defense[i]} cité par la Défense ?`);
+    }
+    const pieces = (procesDuDebat?.pieces ?? []).map((x) => `Que contient la pièce ${x.numero} (${x.temoin}) ?`);
+    const appuis = ['Sur quoi s\'appuie la Défense ?', 'Sur quoi s\'appuie le Procureur ?'];
+    const termes = ['C\'est quoi la part du risque ?', 'C\'est quoi la pire baisse ?',
+      'C\'est quoi le budget de perte ?', 'C\'est quoi la diversification ?'];
+    // On alterne les familles pour que chaque série de 4 reste variée.
+    const familles = [chiffres, pieces, appuis, termes];
+    const melange: string[] = [];
+    for (let rang = 0; familles.some((f) => rang < f.length); rang++) {
+      for (const f of familles) if (rang < f.length) melange.push(f[rang]);
+    }
+    return [...melange, 'Qui a gagné le débat ?'];
   }
 
   /** Même titre, autre part : le chemin le plus court pour voir si le verdict bouge. */
@@ -550,4 +589,10 @@ export class GreffierPage {
       fil?.scrollTo({ top: fil.scrollHeight, behavior: 'smooth' });
     });
   }
+}
+
+/** Pour reconnaître une question déjà posée, sans tenir compte des guillemets, accents ou majuscules. */
+function normaliserQuestion(texte: string): string {
+  return texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[«»"’']/g, "'")
+    .replace(/\s+/g, ' ').trim().toLowerCase();
 }
