@@ -1,10 +1,13 @@
 import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
-import { Piece, Position, Proces, TourDiscussion } from '../../models/proces.model';
-import { RapportAudienceComponent } from './rapport-audience.component';
+import { Piece, Position, Proces, ReponseAnalogie, TourDiscussion } from '../../models/proces.model';
+import { RapportAudienceComponent, argumentsDe, chiffresCles } from './rapport-audience.component';
+import { dollars, pct } from '../../shared/format';
+import { ApiService } from '../../services/api.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { choisirVoixAudience } from './voix-audience';
 
 const MS_PAR_MOT = 230;
+const MS_PAR_MOT_ANALOGIE = 185;
 const DUREE_ANNONCE_MS = 1400;
 const FIN_DE_PHRASE = /[.!?…][»”"]?\s*$/u;
 const PAUSE_COURTE = /[,;:][»”"]?\s*$/u;
@@ -40,8 +43,8 @@ function clePortrait(tour: TourDiscussion): string {
     <ng-template #boutonVerdict>
       @if (tour() && !verdictRendu()) {
         <button class="bouton-verdict" type="button" aria-haspopup="dialog"
-          [class.verdict-attendu]="audienceTerminee() && !verdictOuvert()"
-          [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirVerdict(fenetreVerdict)">
+          [class.verdict-attendu]="audienceTerminee() && !finOuverte() && !verdictOuvert()"
+          [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirFin(fenetreFin)">
           <img class="icone-verdict" src="assets/tribunal-2/marteau.png" alt="" />
           <span>Terminer</span>
           @if (impactVerdict()) {
@@ -101,6 +104,16 @@ function clePortrait(tour: TourDiscussion): string {
             <div class="etiquettes">
               <h3>{{ tour.acteur }}</h3>
               @if (tour.piece) { <span class="piece">Pièce {{ tour.piece }}</span> }
+              @if (!annonceActive() && tour.role !== 'huissier') {
+                <button type="button" class="bouton-analogie"
+                  [class.actif]="analogieAffichee() && !!analogieCourante()"
+                  [class.chargement]="analogieEnCours()"
+                  (click)="basculerAnalogie()"
+                  [title]="analogieAffichee() && !!analogieCourante() ? 'Masquer l’analogie' : 'Obtenir une analogie vulgarisée pour cette intervention'">
+                  <span class="icone-ampoule" aria-hidden="true">💡</span>
+                  <span>{{ analogieEnCours() ? 'Vulgarisation…' : (analogieAffichee() && !!analogieCourante() ? 'Masquer' : 'Une analogie ?') }}</span>
+                </button>
+              }
             </div>
             <p class="titre-replique">{{ tour.titre }}</p>
             @if (!annonceActive()) {
@@ -114,6 +127,46 @@ function clePortrait(tour: TourDiscussion): string {
               </p>
               @if (tour.non_verifies?.length) {
                 <p class="alerte"><strong>Audit du greffier.</strong> Chiffres absents des pièces scellées : {{ tour.non_verifies.join(', ') }}</p>
+              }
+              @if (analogieAffichee()) {
+                @if (analogieEnCours()) {
+                  <aside class="encart-analogie en-chargement" aria-live="polite">
+                    <div class="entete-analogie">
+                      <span class="icone-analogie" aria-hidden="true">💡</span>
+                      <strong>L’Interprète du Juré cherche une analogie…</strong>
+                    </div>
+                    <p class="texte-chargement">Traduction du jargon en métaphore concrète de la vie courante…</p>
+                  </aside>
+                } @else if (analogieCourante(); as rep) {
+                  <aside class="encart-analogie" aria-live="polite"
+                    (click)="devoilerAnalogieComplete()"
+                    [title]="!analogieFinieDeLire() ? 'Cliquer pour dévoiler toute l’analogie immédiatement' : ''">
+                    <div class="entete-analogie">
+                      <div class="titre-juré">
+                        <span class="icone-analogie" aria-hidden="true">💡</span>
+                        <strong>{{ rep.titre || "L'analogie du juré" }}</strong>
+                        @if (!analogieFinieDeLire()) {
+                          <span class="badge-lecture">Lecture en cours…</span>
+                        } @else {
+                          <span class="badge-lecture badge-termine">Terminée</span>
+                        }
+                      </div>
+                      <button type="button" class="fermer-analogie" (click)="fermerAnalogie(); $event.stopPropagation()" aria-label="Fermer l'analogie">×</button>
+                    </div>
+                    <p class="texte-analogie">
+                      @for (mot of motsAnalogie(); track $index) {
+                        <span [class.mot-masque]="$index > motAnalogieActif()">{{ mot }}</span>
+                      }
+                    </p>
+                    @if (analogieFinieDeLire()) {
+                      <div class="pied-analogie">
+                        <button type="button" class="bouton-continuer" (click)="continuerApresAnalogie(); $event.stopPropagation()">
+                          Reprendre l’audience →
+                        </button>
+                      </div>
+                    }
+                  </aside>
+                }
               }
             }
           </div>
@@ -176,29 +229,123 @@ function clePortrait(tour: TourDiscussion): string {
         </div>
       }
     </section>
+    <dialog #fenetreFin class="fenetre-fin" aria-labelledby="titre-fin"
+      (close)="finOuverte.set(false)" (click)="$event.target === fenetreFin && fenetreFin.close()">
+      <div class="contenu-fin">
+        <header class="entete-fin">
+          <div>
+            <p class="sur-titre">Fin de l’audience</p>
+            <h2 id="titre-fin" tabindex="-1" autofocus>Les deux camps ont plaidé. Et maintenant ?</h2>
+          </div>
+          <ol class="etapes-verdict" aria-label="Progression">
+            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
+            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
+            <li><span aria-hidden="true">3</span> Verdict</li>
+          </ol>
+          <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreFin.close()">×</button>
+        </header>
+        <div class="portes-fin">
+          <span class="ou-fin" aria-hidden="true">ou</span>
+          <button type="button" class="porte-fin porte-fin--verdict" (click)="passerAuVerdict(fenetreFin, fenetreVerdict)">
+            <span class="pastille-fin">Étape suivante</span>
+            <span class="illustration-fin" aria-hidden="true"><img src="assets/tribunal-2/juge.png" alt=""></span>
+            <span class="titre-porte">Passer au verdict</span>
+            <span class="texte-porte">Départagez la Défense et le Procureur, chiffres clés à l’appui.</span>
+            <span class="action-porte">Passer au verdict
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+          </button>
+          <button type="button" class="porte-fin" (click)="poserQuestions(fenetreFin)">
+            <span class="illustration-fin" aria-hidden="true"><img src="assets/greffier-transparent.png" alt=""></span>
+            <span class="titre-porte">Poser plus de questions</span>
+            <span class="texte-porte">Retournez au greffier : il garde le fil et le résumé de l’audience.</span>
+            <span class="action-porte">Retour au greffier
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
+          </button>
+        </div>
+      </div>
+    </dialog>
     <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
       <div class="contenu-verdict">
-        <header>
-          <h2 id="titre-verdict" tabindex="-1" autofocus>À vous de rendre le verdict</h2>
-          <button class="fermer-verdict" type="button" aria-label="Fermer le résumé" (click)="fenetreVerdict.close()">×</button>
+        <header class="entete-verdict">
+          <div>
+            <p class="sur-titre">Délibéré · étape finale</p>
+            <h2 id="titre-verdict" tabindex="-1" autofocus>Qui a gagné le débat ? Votez.</h2>
+          </div>
+          <ol class="etapes-verdict" aria-label="Progression">
+            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
+            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
+            <li><span aria-hidden="true">3</span> Verdict</li>
+          </ol>
+          <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreVerdict.close()">×</button>
         </header>
-        <div class="plaidoiries-verdict">
-          @for (camp of plaidoiries(); track camp.role) {
-            <section class="camp-verdict">
-              <h3>{{ camp.cote }}</h3>
-              <p class="nom-camp">{{ camp.nom }}</p>
-              <p class="extrait-camp">{{ camp.extrait || 'Plaidoirie indisponible.' }}</p>
-              <button type="button" class="bouton-vote" [disabled]="!camp.extrait"
-                [attr.aria-pressed]="vote() === camp.role" (click)="vote.set(camp.role)">
-                {{ camp.role === 'avocat_defense' ? 'Voter pour la défense' : 'Voter pour l’accusation' }}
-              </button>
-            </section>
-          }
+        <div class="corps-verdict">
+          <div class="duel" role="radiogroup" aria-labelledby="titre-verdict">
+            @for (camp of plaidoiries(); track camp.role; let i = $index) {
+              <article class="camp" [attr.data-camp]="camp.role" [class.choisie]="vote() === camp.role"
+                (click)="choisirCamp(camp.role, $any($event.currentTarget))">
+                <input type="radio" name="vote-audience" [id]="'vote-' + camp.role" [value]="camp.role"
+                  [checked]="vote() === camp.role" [disabled]="!camp.arguments.length"
+                  [attr.aria-describedby]="'arguments-' + camp.role" (change)="vote.set(camp.role)">
+                @if (vote() === camp.role) {
+                  <span class="coche-camp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+                }
+                <div class="bande-camp">
+                  <img [src]="camp.image + '.png'" alt="">
+                  <div class="identite-camp">
+                    <span class="lettre-camp" aria-hidden="true">{{ i === 0 ? 'A' : 'B' }}</span>
+                    <h3>{{ camp.cote }}</h3>
+                    <span class="avocat-camp">{{ camp.nom }}</span>
+                    <span class="position-camp">{{ camp.role === 'avocat_defense' ? 'Pour la demande' : 'Contre la demande' }}</span>
+                  </div>
+                </div>
+                @if (camp.chiffre; as c) {
+                  <p class="chiffre-camp"><strong>{{ c.valeur }}</strong><span>{{ c.texte }}</span></p>
+                }
+                @if (camp.arguments.length) {
+                  <ul class="arguments-camp" [id]="'arguments-' + camp.role">
+                    @for (argument of camp.arguments; track $index) { <li>{{ argument }}</li> }
+                  </ul>
+                } @else {
+                  <p class="arguments-camp" [id]="'arguments-' + camp.role">Plaidoirie indisponible.</p>
+                }
+                <label class="voter-camp" [for]="'vote-' + camp.role">
+                  @if (vote() === camp.role) {
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
+                    Vous votez pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                  } @else {
+                    Voter pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                  }
+                </label>
+              </article>
+            }
+          </div>
+          <aside class="rail-rapport" aria-labelledby="titre-rail">
+            <h3 id="titre-rail">Rapport d’analyse</h3>
+            @if (chiffres(); as c) {
+              <dl class="tuiles-rail">
+                <div [class.alerte]="c.depasse"><dt>Pire baisse</dt><dd><strong>{{ pct(c.apres.pireBaisse) }}</strong><small>avant : {{ pct(c.avant.pireBaisse) }}</small></dd></div>
+                <div><dt>Perte au pire</dt><dd><strong>{{ dollars(c.apres.pireBaisse * (proces()?.demande?.capital ?? 0)) }}</strong></dd></div>
+                <div [class.alerte]="c.apres.partDuRisque > 0.25"><dt>Part du risque</dt><dd><strong>{{ pct(c.apres.partDuRisque, 0) }}</strong></dd></div>
+                <div><dt>Mauvaise année</dt><dd><strong>{{ pct(c.apres.defavorable12Mois) }}</strong><small>avant : {{ pct(c.avant.defavorable12Mois) }}</small></dd></div>
+              </dl>
+            }
+            <p class="scelle-rail">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2"/></svg>
+              La décision du tribunal est révélée après votre vote, pour ne pas vous influencer.
+            </p>
+            <button type="button" class="rapport-complet" (click)="ouvrirRapport()">Ouvrir le rapport complet</button>
+          </aside>
         </div>
-        <footer>
-          <p role="status">{{ vote() ? 'Confirmez votre choix pour clore l’audience.' : 'Choisissez le camp que vous retenez.' }}</p>
+        <footer class="pied-vote">
+          <p role="status">
+            @if (vote(); as v) {
+              Votre choix : <strong>{{ v === 'avocat_defense' ? 'la Défense (A)' : 'le Procureur (B)' }}</strong>. Vous pouvez encore changer.
+            } @else {
+              Choisissez le camp qui vous a convaincu.
+            }
+          </p>
           <button type="button" class="rendre-verdict" [disabled]="!vote()"
-            (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict</button>
+            (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict →</button>
         </footer>
       </div>
     </dialog>
@@ -216,17 +363,32 @@ function clePortrait(tour: TourDiscussion): string {
             [interventions]="interventionsLues()"
             [pieces]="pieces()"
             [vote]="verdictRendu()"
-            [audienceTerminee]="audienceTerminee() || !!verdictRendu()"
-            [portefeuille]="portefeuille()" />
+            [audienceTerminee]="audienceTerminee() || !!verdictRendu() || verdictOuvert()"
+            [pendantLeVote]="verdictOuvert()"
+            [portefeuille]="portefeuille()"
+            [masquerDecision]="!verdictRendu()" />
         }
         </div>
       </div>
       @if (rapportOuvert() && proces()) {
         <aside class="outils-rapport" aria-label="Emporter le rapport">
-          <button type="button" class="outil-rapport outil-principal" title="Télécharger le rapport en PDF"
-            (click)="telecharger.emit(verdictRendu())">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
-            <span>PDF</span>
+          <button type="button" class="outil-rapport outil-principal"
+            [title]="chargementPdf() ? 'Génération du rapport en cours…' : 'Télécharger le rapport en PDF'"
+            (click)="telecharger.emit(verdictRendu())"
+            [disabled]="chargementPdf()"
+            [class.en-chargement]="chargementPdf()">
+            @if (chargementPdf()) {
+              <svg class="icone-spin" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-dasharray="28 28"/>
+              </svg>
+              <span>Génération…</span>
+            } @else if (succesPdf()) {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              <span>Prêt !</span>
+            } @else {
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/></svg>
+              <span>PDF</span>
+            }
           </button>
           <button type="button" class="outil-rapport" title="Imprimer le rapport" (click)="imprimerRapport()">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>
@@ -245,8 +407,19 @@ export class AudienceSceneComponent {
   readonly proces = input<Proces | null>(null);
   /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
   readonly portefeuille = input<readonly Position[]>([]);
+  /** Indicateur de génération du PDF en cours. */
+  readonly chargementPdf = input(false);
+  /** Indicateur de succès après téléchargement du PDF. */
+  readonly succesPdf = input(false);
   /** Demande de PDF depuis le rapport, avec le camp retenu par l'investisseur. */
   readonly telecharger = output<'avocat_defense' | 'procureur' | null>();
+  /** « Poser plus de questions » : retour au greffier. */
+  readonly autreQuestion = output<void>();
+  /** Le camp retenu, pour que le greffier puisse résumer l'audience au retour. */
+  readonly voteRendu = output<Camp>();
+  /** « Revenir voter » depuis le greffier : l'audience est déjà entendue, on ouvre le délibéré. */
+  readonly delibere = input(false);
+  private delibereOuvert = false;
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly preparation = computed(() => this.enCours() && !this.tour());
@@ -287,23 +460,52 @@ export class AudienceSceneComponent {
   });
   readonly motActif = linkedSignal({ source: this.tour, computation: () => 0 });
   readonly texteIntegral = linkedSignal({ source: this.tour, computation: () => false });
-  readonly repliqueDevoilee = computed(() => this.texteIntegral() || this.motActif() >= this.mots().length);
+  private readonly api = inject(ApiService);
+  readonly analogieEnCours = signal(false);
+  readonly analogieAffichee = signal(false);
+  readonly cacheAnalogies = signal<Map<number, ReponseAnalogie>>(new Map());
+  readonly analogieCourante = computed(() => {
+    const t = this.tour();
+    return t ? this.cacheAnalogies().get(t.ordre) : undefined;
+  });
+  readonly motsAnalogie = computed(() => motsDe(this.analogieCourante()?.analogie ?? ''));
+  readonly motAnalogieActif = linkedSignal({ source: this.analogieCourante, computation: () => 0 });
+  readonly analogieFinieDeLire = computed(() => {
+    if (!this.analogieAffichee()) return true;
+    if (this.analogieEnCours()) return false;
+    const rep = this.analogieCourante();
+    if (!rep) return false;
+    return this.motAnalogieActif() >= this.motsAnalogie().length;
+  });
+  readonly repliqueDevoilee = computed(() => {
+    const tourDevoile = this.texteIntegral() || this.motActif() >= this.mots().length;
+    if (!this.analogieAffichee()) return tourDevoile;
+    return tourDevoile && this.analogieFinieDeLire();
+  });
   readonly lectureAuto = signal(true);
   readonly sonActive = signal(true);
   readonly sonBloque = signal(false);
   readonly boutonVerdict = viewChild<TemplateRef<unknown>>('boutonVerdict');
   readonly verdictOuvert = signal(false);
   readonly rapportOuvert = signal(false);
+  readonly finOuverte = signal(false);
+  /** Le coup de marteau du bouton « Terminé », juste avant d'ouvrir le choix de fin d'audience. */
   readonly impactVerdict = signal(false);
+  private minuterieVerdict?: ReturnType<typeof setTimeout>;
+  readonly chiffres = computed(() => chiffresCles(this.proces()));
+  readonly pct = pct;
+  readonly dollars = dollars;
   readonly vote = linkedSignal<readonly TourDiscussion[], Camp | null>({ source: this.tours, computation: () => null });
   readonly verdictRendu = linkedSignal<readonly TourDiscussion[], Camp | null>({
     source: this.tours, computation: () => null,
   });
   readonly lectureActive = computed(() =>
-    !this.annonceActive() && !this.verdictOuvert() && !this.rapportOuvert() && this.lectureAuto()
+    !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert()
+    && !this.analogieAffichee()
+    && this.lectureAuto()
     && this.motActif() < this.mots().length);
   readonly audienceTerminee = computed(() =>
-    !this.verdictRendu() && this.index() === this.tours().length - 1 && this.motActif() >= this.mots().length);
+    !this.verdictRendu() && this.index() === this.tours().length - 1 && this.repliqueDevoilee());
   readonly annonceTerminee = computed(() => !!this.verdictRendu() && this.motActif() >= this.mots().length);
   readonly libelleLecture = computed(() => {
     if (this.annonceTerminee()) return 'Rejouer l’annonce';
@@ -313,8 +515,15 @@ export class AudienceSceneComponent {
   readonly personnages = PERSONNAGES;
   readonly plaidoiries = computed(() => PERSONNAGES.filter((p) => p.role !== 'juge').map((p) => {
     const texte = this.tours().find((tour) => tour.role === p.role)?.texte ?? '';
-    const extrait = Array.from(PHRASES.segment(texte)).slice(0, 2).map(({ segment }) => segment).join('').trim();
-    return { ...p, extrait };
+    const c = this.chiffres();
+    const t = this.proces()?.demande.ticker ?? 'le titre';
+    const budget = this.proces()?.budgetPerte ?? 0;
+    // Le chiffre qui sert le mieux chaque camp : la pire baisse face au budget pour la défense,
+    // la concentration du risque pour l'accusation.
+    const chiffre = !c ? null : p.role === 'avocat_defense'
+      ? { valeur: pct(c.apres.pireBaisse), texte: `pire baisse avec ${t}, pour un budget déclaré de ${pct(budget, 0)}` }
+      : { valeur: pct(c.apres.partDuRisque, 0), texte: `du risque porté par ${t}, pour ${pct(this.proces()?.demande.taille ?? 0, 0)} du portefeuille` };
+    return { ...p, arguments: texte ? argumentsDe(texte, 3) : [], chiffre };
   }));
   readonly campRetenu = computed(() => this.plaidoiries().find((camp) => camp.role === this.verdictRendu()));
   private readonly annonceVerdict = computed<TourDiscussion | undefined>(() => {
@@ -385,14 +594,26 @@ export class AudienceSceneComponent {
   private readonly sonAudience = inject(SonAudienceService);
   private readonly lecteur = this.sonAudience.lecteur;
   private dernierTourSon?: TourDiscussion;
-  private minuterieVerdict?: ReturnType<typeof setTimeout>;
   private readonly ancrageSon = viewChild<ElementRef<HTMLElement>>('ancrageSon');
   private readonly fenetreRapport = viewChild<ElementRef<HTMLDialogElement>>('fenetreRapport');
+  private readonly fenetreVerdict = viewChild<ElementRef<HTMLDialogElement>>('fenetreVerdict');
 
   constructor() {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
     inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
+    // Retour depuis le greffier pour voter : dernière réplique affichée en entier, délibéré ouvert.
+    afterRenderEffect(() => {
+      const fenetre = this.fenetreVerdict()?.nativeElement;
+      if (!this.delibere() || this.delibereOuvert || !this.tours().length || !fenetre) return;
+      this.delibereOuvert = true;
+      this.lectureAuto.set(false);
+      this.index.set(this.tours().length - 1);
+      this.texteIntegral.set(true);
+      this.motActif.set(this.mots().length);
+      this.verdictOuvert.set(true);
+      fenetre.showModal();
+    });
     effect((nettoyer) => {
       if (!this.tours().length) return;
       let minuterie: ReturnType<typeof setTimeout>;
@@ -440,11 +661,43 @@ export class AudienceSceneComponent {
       const minuterie = setTimeout(() => {
         if (!this.lectureActive() || this.tour() !== tour || this.motActif() !== indexMot) return;
         if (!this.verdictRendu() && indexMot + 1 === mots.length && this.index() < this.tours().length - 1) {
+          if (this.analogieAffichee() && !this.analogieFinieDeLire()) {
+            this.motActif.set(mots.length);
+            return;
+          }
           this.afficherTour(this.index() + 1);
         } else {
           this.motActif.set(indexMot + 1);
         }
       }, MS_PAR_MOT + pause);
+      nettoyer(() => clearTimeout(minuterie));
+    });
+
+    // Lecture progressive de l'analogie : elle défile mot par mot et empêche le discours de changer tant qu'elle n'est pas finie de lire
+    effect((nettoyer) => {
+      if (!this.analogieAffichee() || this.analogieEnCours()) return;
+      const rep = this.analogieCourante();
+      if (!rep) return;
+      const mots = this.motsAnalogie();
+      const indexMot = this.motAnalogieActif();
+      if (indexMot >= mots.length) {
+        if (this.lectureAuto() && !this.verdictRendu() && this.index() < this.tours().length - 1) {
+          const minuterieFin = setTimeout(() => {
+            if (this.analogieAffichee() && this.analogieFinieDeLire()) {
+              this.fermerAnalogie();
+              this.afficherTour(this.index() + 1);
+            }
+          }, 3500);
+          nettoyer(() => clearTimeout(minuterieFin));
+        }
+        return;
+      }
+      const mot = mots[indexMot];
+      const pause = FIN_DE_PHRASE.test(mot) ? 140 : PAUSE_COURTE.test(mot) ? 70 : 0;
+      const minuterie = setTimeout(() => {
+        if (!this.analogieAffichee() || this.analogieCourante() !== rep || this.motAnalogieActif() !== indexMot) return;
+        this.motAnalogieActif.set(indexMot + 1);
+      }, MS_PAR_MOT_ANALOGIE + pause);
       nettoyer(() => clearTimeout(minuterie));
     });
 
@@ -501,11 +754,31 @@ export class AudienceSceneComponent {
 
   suivant(): void {
     if (this.annonceActive()) return;
+    if (this.analogieAffichee() && !this.analogieFinieDeLire()) {
+      this.motAnalogieActif.set(this.motsAnalogie().length);
+      return;
+    }
     if (!this.repliqueDevoilee()) {
       this.motActif.set(this.mots().length);
       return;
     }
+    if (this.analogieAffichee()) {
+      this.fermerAnalogie();
+    }
     this.afficherTour(this.index() + 1);
+  }
+
+  devoilerAnalogieComplete(): void {
+    if (!this.analogieFinieDeLire()) {
+      this.motAnalogieActif.set(this.motsAnalogie().length);
+    }
+  }
+
+  continuerApresAnalogie(): void {
+    this.fermerAnalogie();
+    if (this.index() < this.tours().length - 1) {
+      this.afficherTour(this.index() + 1);
+    }
   }
 
   afficherTour(index: number): void {
@@ -516,11 +789,59 @@ export class AudienceSceneComponent {
     this.motActif.set(0);
     this.texteIntegral.set(!this.lectureAuto());
     this.dernierTourSon = undefined;
+    this.analogieAffichee.set(false);
+    this.motAnalogieActif.set(0);
   }
 
-  ouvrirVerdict(fenetre: HTMLDialogElement): void {
-    if (this.verdictOuvert()) return;
-    this.verdictOuvert.set(true);
+  basculerAnalogie(): void {
+    const tour = this.tour();
+    if (!tour) return;
+    if (this.analogieAffichee() && !!this.analogieCourante()) {
+      this.analogieAffichee.set(false);
+      return;
+    }
+    this.motActif.set(this.mots().length);
+    const existant = this.cacheAnalogies().get(tour.ordre);
+    if (existant) {
+      this.motAnalogieActif.set(0);
+      this.analogieAffichee.set(true);
+      return;
+    }
+    this.motAnalogieActif.set(0);
+    this.analogieEnCours.set(true);
+    this.analogieAffichee.set(true);
+    this.api.demanderAnalogie({
+      texte: tour.texte,
+      acteur: tour.acteur,
+      role: tour.role,
+      mode: 'bedrock',
+    }).subscribe({
+      next: (rep) => {
+        this.cacheAnalogies.update((map) => new Map(map).set(tour.ordre, rep));
+        this.motAnalogieActif.set(0);
+        this.analogieEnCours.set(false);
+      },
+      error: () => {
+        const fallback: ReponseAnalogie = {
+          analogie: "Voyez cela comme une traversée en mer : par vent fort, mieux vaut vérifier que les gilets et amarres sont solides avant d'accélérer.",
+          titre: "L'analogie du juré",
+          source: 'secours',
+        };
+        this.cacheAnalogies.update((map) => new Map(map).set(tour.ordre, fallback));
+        this.motAnalogieActif.set(0);
+        this.analogieEnCours.set(false);
+      },
+    });
+  }
+
+  fermerAnalogie(): void {
+    this.analogieAffichee.set(false);
+  }
+
+  /** « Terminé » : coup de marteau, puis le choix entre passer au verdict et poser plus de questions. */
+  ouvrirFin(fenetre: HTMLDialogElement): void {
+    if (fenetre.open || this.finOuverte()) return;
+    this.finOuverte.set(true);
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       fenetre.showModal();
       return;
@@ -530,6 +851,26 @@ export class AudienceSceneComponent {
       this.impactVerdict.set(false);
       fenetre.showModal();
     }, 230);
+  }
+
+
+  passerAuVerdict(fin: HTMLDialogElement, verdict: HTMLDialogElement): void {
+    fin.close();
+    this.verdictOuvert.set(true);
+    verdict.showModal();
+  }
+
+  /** Un clic n'importe où sur la carte choisit le camp et y met le focus (flèches ↑ ↓ ensuite). */
+  choisirCamp(camp: Camp, carte: HTMLElement): void {
+    const radio = carte.querySelector('input');
+    if (!radio || radio.disabled) return;
+    this.vote.set(camp);
+    radio.focus({ preventScroll: true });
+  }
+
+  poserQuestions(fin: HTMLDialogElement): void {
+    fin.close();
+    this.autreQuestion.emit();
   }
 
   ouvrirRapport(): void {
@@ -543,6 +884,7 @@ export class AudienceSceneComponent {
     const choix = this.vote();
     if (!choix) return;
     this.verdictRendu.set(choix);
+    this.voteRendu.emit(choix);
     this.lectureAuto.set(true);
     const panneau = this.replique()?.nativeElement;
     if (panneau) panneau.scrollTop = 0;

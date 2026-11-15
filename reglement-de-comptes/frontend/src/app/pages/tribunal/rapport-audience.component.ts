@@ -19,11 +19,20 @@ const PHRASES = new Intl.Segmenter('fr', { granularity: 'sentence' });
  * une pièce passent avant les formules d'audience (« Monsieur le Président… »).
  * Le texte n'est pas réécrit, seulement sélectionné, dans l'ordre d'origine.
  */
-function argumentsDe(texte: string, n: number): string[] {
+export function argumentsDe(texte: string, n: number): string[] {
   const phrases = Array.from(PHRASES.segment(texte)).map(({ segment }) => segment.trim()).filter((s) => s.length > 25);
   const fortes = phrases.filter((s) => /\d|\[P-\d+\]/.test(s));
   const choisies = new Set((fortes.length >= n ? fortes : [...fortes, ...phrases.filter((s) => !fortes.includes(s))]).slice(0, n));
   return phrases.filter((s) => choisies.has(s));
+}
+
+/** Pire baisse, part du risque… avant et après la demande, lus sur la courbe du procès. */
+export function chiffresCles(pr: Proces | null) {
+  if (!pr?.courbe.length) return null;
+  const avant = pointPour(pr.courbe, 0)!;
+  const apres = pointPour(pr.courbe, pr.demande.taille)!;
+  // budgetPerte arrive déjà en négatif depuis l'API (ex. -0,12).
+  return { avant, apres, depasse: apres.pireBaisse < pr.budgetPerte };
 }
 
 /** Le point de la courbe le plus proche d'une part donnée. */
@@ -50,7 +59,17 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
           </p>
         }
 
-        <!-- A. La synthèse -->
+        <!-- A. La synthèse (la décision du tribunal reste scellée tant que l'investisseur n'a pas voté) -->
+        @if (masquerDecision()) {
+          <section class="synthese synthese--scellee" aria-labelledby="r-verdict">
+            <p class="sur-titre">Verdict du tribunal · règle fixe</p>
+            <h3 id="r-verdict" class="verdict">Révélé après votre vote</h3>
+            <p class="question">{{ pr.demande.nom }} · {{ pct(pr.demande.taille, 0) }} du portefeuille dans
+              {{ pr.demande.nomTitre }} ({{ pr.demande.ticker }}), soit {{ dollars(pr.demande.capital * pr.demande.taille) }}</p>
+            <p class="motif-unique">Pour ne pas vous influencer, la décision du tribunal et ce qui la ferait changer
+              s’affichent dès que vous avez rendu votre verdict.</p>
+          </section>
+        } @else {
         <section class="synthese" [attr.data-ton]="ton()" aria-labelledby="r-verdict">
           <p class="sur-titre">Verdict du tribunal · règle fixe</p>
           <h3 id="r-verdict" class="verdict">{{ pr.decision.verdict }}</h3>
@@ -64,6 +83,7 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
             <p class="motif-unique">La demande respecte les contraintes déclarées et ne crée pas de tension notable avec le profil.</p>
           }
         </section>
+        }
 
         @if (vote(); as v) {
           <p class="vote" [class.accord]="accord()" [class.desaccord]="accord() === false">
@@ -72,8 +92,8 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
             @else if (accord() === false) { Le tribunal arrive à la conclusion inverse : relisez les motifs ci-dessus. }
             @else { Le tribunal ne tranche pas : une information manque. }
           </p>
-        } @else {
-          <p class="vote vote--attente">Vous n’avez pas encore rendu votre verdict : le bouton « Verdict » est sur la scène.</p>
+        } @else if (!pendantLeVote()) {
+          <p class="vote vote--attente">Vous n’avez pas encore rendu votre verdict : « Terminer », puis « Passer au verdict ».</p>
         }
 
         @if (chiffres(); as c) {
@@ -102,7 +122,7 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
         }
 
         <!-- C. Ce qui changerait le verdict -->
-        @if (pr.salle.length) {
+        @if (pr.salle.length && !masquerDecision()) {
           <section aria-labelledby="r-salle">
             <h3 id="r-salle">Qu’est-ce qui changerait le verdict ?</h3>
             <table class="salle">
@@ -218,6 +238,10 @@ export class RapportAudienceComponent {
   readonly pieces = input<readonly Piece[]>([]);
   readonly vote = input<Camp | null>(null);
   readonly audienceTerminee = input(false);
+  /** Affiché à côté du vote : inutile de rappeler comment voter. */
+  readonly pendantLeVote = input(false);
+  /** Avant le vote de l'investisseur : la décision du tribunal reste scellée. */
+  readonly masquerDecision = input(false);
   readonly portefeuille = input<readonly Position[]>([]);
 
   readonly pct = pct;
@@ -240,14 +264,7 @@ export class RapportAudienceComponent {
     return (v === 'avocat_defense') === tribunalPour;
   });
 
-  readonly chiffres = computed(() => {
-    const pr = this.proces();
-    if (!pr?.courbe.length) return null;
-    const avant = pointPour(pr.courbe, 0)!;
-    const apres = pointPour(pr.courbe, pr.demande.taille)!;
-    // budgetPerte arrive déjà en négatif depuis l'API (ex. -0,12).
-    return { avant, apres, depasse: apres.pireBaisse < pr.budgetPerte };
-  });
+  readonly chiffres = computed(() => chiffresCles(this.proces()));
 
   readonly portefeuilles = computed(() => {
     const pr = this.proces();

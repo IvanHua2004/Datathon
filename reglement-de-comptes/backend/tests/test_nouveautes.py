@@ -148,3 +148,41 @@ def test_timeline_discussion_chronologique(data_marche):
     juge = next(t for t in timeline if t["etape"] == "VERDICT_JUGE")
     assert juge["role"] == "juge" and juge["avatar"] == "👨‍⚖️"
     assert "verdict" in juge
+
+
+def test_export_svg_endpoints_et_proces(data_marche):
+    """Vérifie la génération SVG vectorielle via renderSVG et l'intégration."""
+    from api import exporter_graphique
+    from rdc import simulateur
+    from reportlab.graphics import renderSVG
+
+    # 1. Test endpoint exporter_graphique pour horizons
+    res_h = exporter_graphique("horizons", "robert", "NVDA", None, 0.20)
+    assert res_h.status_code == 200
+    assert "image/svg+xml" in res_h.headers["content-type"]
+    assert b"<svg" in res_h.body
+    assert b"PROJECTIONS DU CAPITAL" in res_h.body
+
+    # 2. Test endpoint exporter_graphique pour simulations
+    res_s = exporter_graphique("simulations", "robert", "NVDA", None, 0.20)
+    assert res_s.status_code == 200
+    assert "image/svg+xml" in res_s.headers["content-type"]
+    assert b"<svg" in res_s.body
+
+    # 3. Test du procès et des résultats de simulation enrichis
+    profil = PROFILS["robert"]
+    p = ouvrir_proces(profil, "NVDA", 0.20, mode="gabarit")
+    assert getattr(p, "simulation", None) is not None
+    simu_dict = p.simulation.en_dict()
+    assert simu_dict["score_securite"] is not None
+    assert simu_dict["zone_securite"] in ("securisee", "vigilance", "critique")
+    assert simu_dict["cout_opportunite_gain_annuel"] is not None
+    assert simu_dict["est_titre_usd"] is True
+    assert simu_dict["impact_change_5pct"] > 0
+
+    svg_h = renderSVG.drawToString(simulateur.creer_graphique_horizons(p.simulation))
+    svg_s = renderSVG.drawToString(simulateur.creer_graphique_simulations(p.simulation))
+    assert "<svg" in svg_h and "PROJECTIONS DU CAPITAL" in svg_h
+    assert "<svg" in svg_s
+
+

@@ -153,6 +153,7 @@ class Proces:
     mode: str = "gabarit"
     avertissement: str | None = None
     intention_texte: str = ""
+    simulation: object = None
 
 
 def ouvrir_proces(profil: Profil, ticker: str, taille: float, mode: str = "gabarit",
@@ -164,10 +165,13 @@ def ouvrir_proces(profil: Profil, ticker: str, taille: float, mode: str = "gabar
     greffier.admettre(profil.resume, f"{profil.capital:.0f}", pct(taille), pct(taille, 0),
                       pct(profil.budget_perte), pct(profil.plafond_position),
                       pct(profil.plafond_secteur), annees(profil.horizon_ans),
-                      pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10")
+                      pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10",
+                      "1", "2", "3", "1304", "1305", str(len(dossier.donnees.prix_cad)))
     decision = regle_verdict(dossier)
     proces = Proces(dossier=dossier, greffier=greffier, decision=decision, mode=mode,
                     intention_texte=intention_texte)
+    from . import simulateur
+    proces.simulation = simulateur.simuler_impact_decision(dossier)
     proces.salle = salle(dossier, decision["verdict"])
     agents.plaider(proces)
     return proces
@@ -186,10 +190,13 @@ def lancer_proces_stream(profil: Profil, ticker: str, taille: float, mode: str =
     greffier.admettre(profil.resume, f"{profil.capital:.0f}", pct(taille), pct(taille, 0),
                       pct(profil.budget_perte), pct(profil.plafond_position),
                       pct(profil.plafond_secteur), annees(profil.horizon_ans),
-                      pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10")
+                      pct(SEUIL_PART_RISQUE, 0), "2022", "12", "5", "10",
+                      "1", "2", "3", "1304", "1305", str(len(dossier.donnees.prix_cad)))
     decision = regle_verdict(dossier)
     proces = Proces(dossier=dossier, greffier=greffier, decision=decision, mode=mode,
                     intention_texte=intention_texte)
+    from . import simulateur
+    proces.simulation = simulateur.simuler_impact_decision(dossier)
     proces.salle = salle(dossier, decision["verdict"])
 
     # Étape 1 : Ouverture solennelle par l'Huissier
@@ -317,6 +324,8 @@ def construire_timeline_discussion(proces: Proces) -> list[dict]:
         "diversification": "🧭",
         "valeurs": "🌱",
         "macro": "🏦",
+        "action": "📈",
+        "simulation": "🔮",
     }
     for dep in depositions:
         timeline.append({
@@ -329,6 +338,7 @@ def construire_timeline_discussion(proces: Proces) -> list[dict]:
             "temoin": dep["temoin"],
             "piece": dep["piece"],
             "texte": dep["texte"],
+            "non_verifies": dep.get("non_verifies", []),
             "pause_ms": 3200,
         })
         ordre += 1

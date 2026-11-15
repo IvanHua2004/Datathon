@@ -38,6 +38,8 @@ export class TribunalPage {
   readonly tailleDemande = input<string>('', { alias: 'taille' });
   readonly question = input<string>();
   private demandeLancee = false;
+  /** Vrai quand on revient voter : la scène saute l'audience et ouvre le délibéré. */
+  readonly reprise = signal(false);
   /** Bedrock seulement (« Sans modèle » retiré de l'interface). */
   readonly mode = signal<Mode>('bedrock');
   readonly intentionTexte = signal('');
@@ -91,15 +93,34 @@ export class TribunalPage {
   constructor() {
     const persona = this.route.snapshot.queryParamMap.get('persona');
     inject(DestroyRef).onDestroy(() => clearTimeout(this.timerDiscussion));
-    if (this.versionScene) this.tribunal.effacer();
+    // « Revenir voter » depuis le greffier : le procès gardé en mémoire est repris, pas relancé.
+    const reprendre = this.route.snapshot.queryParamMap.get('reprendre') === '1';
+    if (this.versionScene && !reprendre) this.tribunal.effacer();
     this.tribunal.chargerReferentiels();
-    // Résumé du verdict pour le greffier, affiché quand on revient à la conversation.
+    // Résumé pour le greffier, affiché quand on revient à la conversation. Dans la scène, la décision
+    // du tribunal reste scellée tant que l'investisseur n'a pas voté : le résumé ne la dévoile pas.
     effect(() => {
       const pr = this.tribunal.resultat();
       if (!pr) return;
-      laisserUnRetour(pr.demande.profil,
-        `Retour d'audience : le tribunal a jugé ${pct(pr.demande.taille, 0)} dans ${pr.demande.nomTitre} `
-        + `(${pr.demande.ticker}) : « ${pr.decision.verdict} ».`);
+      const d = pr.demande;
+      if (!this.versionScene) {
+        laisserUnRetour(d.profil, `Retour d'audience : le tribunal a jugé ${pct(d.taille, 0)} dans ${d.nomTitre} `
+          + `(${d.ticker}) : « ${pr.decision.verdict} ».`);
+        return;
+      }
+      const vote = this.tribunal.voteAudience();
+      const ton = tonVerdict(pr.decision.verdict);
+      const accord = !vote || ton === 'indecidable' ? null : (vote === 'avocat_defense') === (ton === 'compatible');
+      const camp = vote === 'avocat_defense' ? 'la Défense (pour la demande)' : 'le Procureur (contre la demande)';
+      const texte = vote
+        ? `Retour d'audience : vous avez suivi ${camp}. Le tribunal conclut « ${pr.decision.verdict} »`
+          + (accord === true ? ' : même conclusion que vous.' : accord === false ? ' : la conclusion inverse.' : '.')
+        : `Audience suspendue : ${pct(d.taille, 0)} du portefeuille dans ${d.nomTitre} (${d.ticker}) a été plaidé. `
+          + 'Vous n’avez pas encore rendu votre verdict.';
+      laisserUnRetour(d.profil, texte, {
+        ticker: d.ticker, nomTitre: d.nomTitre, taille: d.taille, question: this.question() ?? '',
+        vote, verdictTribunal: vote ? pr.decision.verdict : null, accord,
+      });
     });
     effect(() => {
       const profils = this.tribunal.profils();
@@ -107,12 +128,16 @@ export class TribunalPage {
       const demande = profils.find((p) => p.cle === this.profilDemande());
       const taille = Number(this.tailleDemande());
       if (demande && this.tickerDemande() && taille > 0 && !this.demandeLancee) {
-        // Arrivée depuis le greffier : le procès s'ouvre tout seul.
+        // Arrivée depuis le greffier : le procès s'ouvre tout seul, ou reprend s'il est en mémoire.
         this.demandeLancee = true;
         this.profilCle.set(demande.cle);
         this.ticker.set(this.tickerDemande());
         this.taille.set(taille);
-        this.ouvrir();
+        if (reprendre && this.tribunal.correspond(demande.cle, this.tickerDemande(), taille)) {
+          this.reprise.set(true);
+        } else {
+          this.ouvrir();
+        }
       } else if (this.versionScene) {
         if (demande) this.profilCle.set(demande.cle);
       } else {
@@ -266,6 +291,26 @@ export class TribunalPage {
       this.intentionTexte(),
       choix
     );
+  }
+
+  exporterSvg(type: 'horizons' | 'simulations' = 'horizons'): void {
+    const pr = this.proces();
+    if (!pr) return;
+    const svgContent = type === 'horizons' ? pr.svg_horizons : pr.svg_simulations;
+    if (svgContent) {
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `alphaforge_${type}_${pr.demande.profil}_${pr.demande.ticker}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      const url = `/api/proces/export-graphique/${type}?profil=${pr.demande.profil}&ticker=${pr.demande.ticker}&taille=${pr.demande.taille}`;
+      window.open(url, '_blank');
+    }
   }
 
   valeur(event: Event): string {

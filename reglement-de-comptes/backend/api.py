@@ -9,16 +9,32 @@ intention, comparaison, scenarios, rapport_pdf) et renvoie le résultat au forma
 from __future__ import annotations
 
 import json
+import re
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from dataclasses import asdict
+from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints, model_validator
 
-from rdc import donnees, greffier, questions, temoins
+# Charger automatiquement le fichier .env si présent
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    for ligne in env_path.read_text(encoding="utf-8").splitlines():
+        ligne = ligne.strip()
+        if ligne and not ligne.startswith("#") and "=" in ligne:
+            k, v = ligne.split("=", 1)
+            k = k.strip()
+            if k not in os.environ:
+                os.environ[k] = v.strip().strip('"').strip("'")
+
+from rdc import audience, donnees, greffier, questions, temoins
 from rdc.profils import PROFILS, Profil
+from rdc.agents import generer_analogie
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
                         construire_timeline_discussion)
 from rdc.intention import interpreter_intention
@@ -53,6 +69,9 @@ class Question(BaseModel):
                                   description="Questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
     action: Literal["catalogue", "choisir_deux"] | None = Field(
         default=None, description="Bouton de l'écran : voir tous les titres, ou en choisir deux à comparer")
+    audience: dict | None = Field(
+        default=None, description="L'audience déjà plaidée (titre, pièces scellées, plaidoiries), pour que "
+                                  "l'archiviste réponde sur le débat")
 
 
 class CoteDuel(BaseModel):
@@ -95,6 +114,19 @@ class DemandePDF(BaseModel):
     choix_investisseur: str | None = None
 
 
+class DemandeAnalogie(BaseModel):
+    texte: str = Field(description="Texte ou argument technique à vulgariser")
+    acteur: str | None = Field(default=None, description="Nom de l'acteur ou témoin (ex: Dr. Laurent)")
+    role: str | None = Field(default=None, description="Rôle au tribunal (ex: temoin, avocat_defense...)")
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
+
+
+class ReponseAnalogie(BaseModel):
+    analogie: str
+    titre: str = "L'Analogie du Juré"
+    source: str = "bedrock"
+
+
 _RISQUES_PERSONA = {
     "faible": ("Faible", 0.08),
     "faible_a_modere": ("Faible à modéré", 0.12),
@@ -106,7 +138,7 @@ _RISQUES_PERSONA = {
 
 class PersonaPersonnalise(BaseModel):
     nom: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
-    age: int = Field(ge=1, le=120)
+    age: int = Field(ge=18, le=120, description="Simulation réservée aux adultes : 18 ans minimum")
     risque: Literal["faible", "faible_a_modere", "modere", "modere_a_eleve", "eleve"]
     horizon_min: int = Field(ge=1, le=100)
     horizon_max: int = Field(ge=1, le=100)
@@ -118,9 +150,12 @@ class PersonaPersonnalise(BaseModel):
             raise ValueError("L’horizon maximal doit être au moins égal à l’horizon minimal.")
         return self
 
-    def creer_profil(self) -> Profil:
-        # Capital, diversification et plafonds fictifs communs à toutes les simulations personnalisées.
+    def creer_profil(self, univers: dict[str, str] | None = None) -> Profil:
+        # Capital et plafonds fictifs communs à toutes les simulations personnalisées. Le portefeuille
+        # vient de la note quand elle le décrit assez (« SPY 60 %, XBB.TO 40 % ») ; sinon un portefeuille
+        # de référence fictif, que les agents ne présentent jamais comme celui de l'investisseur.
         risque, budget = _RISQUES_PERSONA[self.risque]
+        declare = portefeuille_depuis_note(self.note, univers if univers is not None else _univers_noms())
         horizon = (f"{self.horizon_min} ans" if self.horizon_min == self.horizon_max
                    else f"{self.horizon_min} à {self.horizon_max} ans")
         return Profil(
@@ -134,10 +169,40 @@ class PersonaPersonnalise(BaseModel):
             plafond_position=0.20,
             plafond_secteur=0.40,
             preferences=self.note.strip(),
-            portefeuille={"XIU.TO": 35, "SPY": 25, "XBB.TO": 40},
+            portefeuille=declare or {"XIU.TO": 35, "SPY": 25, "XBB.TO": 40},
             horizon_max_declare=self.horizon_max,
             risque_declare=risque.lower(),
+            portefeuille_declare=bool(declare),
         )
+
+
+_POURCENT = re.compile(r"(\d{1,3}(?:[.,]\d+)?)\s*%")
+_SEPARATEURS = re.compile(r"[,;/+\n]|\bet\b", re.IGNORECASE)
+
+
+def portefeuille_depuis_note(note: str, univers: dict[str, str]) -> dict[str, float]:
+    """Positions décrites dans la note (« SPY 60 %, 40 % en XBB.TO »), en pourcentages.
+
+    La note est jugée assez détaillée seulement si chaque morceau reconnu nomme un seul titre
+    de l'univers avec une part, et si les parts totalisent de 90 % à 110 % ; sinon {}.
+    """
+    if not note or not univers:
+        return {}
+    positions: dict[str, float] = {}
+    for morceau in _SEPARATEURS.split(note):
+        parts = _POURCENT.findall(morceau)
+        titres = questions.trouver_titres(morceau, univers)
+        if len(parts) == 1 and len(titres) == 1:
+            positions[titres[0]] = positions.get(titres[0], 0) + float(parts[0].replace(",", "."))
+    total = sum(positions.values())
+    return positions if positions and 90 <= total <= 110 else {}
+
+
+def _univers_noms() -> dict[str, str]:
+    try:
+        return {t: str(n) for t, n in donnees.charger().univers["name"].items()}
+    except Exception:  # données indisponibles : le portefeuille de référence s'applique
+        return {}
 
 
 _COOKIE_PERSONA = "rdc_persona"
@@ -215,6 +280,7 @@ def _dossier_investisseur(p, univers) -> dict:
         "budgetPerte": p.budget_perte, "plafondPosition": p.plafond_position,
         "plafondSecteur": p.plafond_secteur, "classesExclues": list(p.classes_exclues),
         "filtreEsg": p.filtre_esg, "secteursAJustifier": list(p.secteurs_a_justifier),
+        "portefeuilleDeclare": p.portefeuille_declare,
         "portefeuille": [{"ticker": t, "nomTitre": str(univers.loc[t, "name"]) if t in univers.index else t,
                           "classe": str(univers.loc[t, "asset_class"]) if t in univers.index else "",
                           "poids": v / total} for t, v in p.portefeuille.items()],
@@ -234,6 +300,7 @@ def _profil_public(p: Profil) -> dict:
         "budgetPerte": p.budget_perte,
         "plafondPosition": p.plafond_position,
         "portefeuille": [{"ticker": t, "poids": v / total} for t, v in p.portefeuille.items()],
+        "portefeuilleDeclare": p.portefeuille_declare,
         "demandeExemple": {"ticker": p.demande_exemple[0], "taille": p.demande_exemple[1]},
     }
 
@@ -254,6 +321,14 @@ def enregistrer_persona(persona: PersonaPersonnalise, request: Request, response
     response.set_cookie(_COOKIE_PERSONA, cookie, httponly=True, samesite="lax",
                         secure=request.url.scheme == "https")
     return {**_profil_public(persona.creer_profil()), "configuration": persona.model_dump()}
+
+
+@app.delete("/api/profils/personnalise", status_code=204)
+def oublier_persona(response: Response) -> Response:
+    """Chaque arrivée sur la page des personas repart de zéro : on oublie le persona personnalisé."""
+    response.status_code = 204
+    response.delete_cookie(_COOKIE_PERSONA, httponly=True, samesite="lax")
+    return response
 
 
 @app.get("/api/actifs")
@@ -296,12 +371,22 @@ def analyser_question(q: Question, request: Request) -> dict:
                                  "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
         return questions.Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
                                  fiches=r["fiches"], choix=choix).en_json()
+    if q.audience and audience.concerne_le_debat(q.texte, q.audience):
+        # Question sur le débat qui vient d'être plaidé : l'archiviste répond à partir des pièces.
+        r = audience.repondre(q.texte, q.audience)
+        reponse = questions.Analyse("audience", "audience", r.message, agent="archiviste", extraits=r.extraits)
+        if not profil.portefeuille_declare:
+            questions.adapter_au_portefeuille_de_reference(reponse)
+        return reponse.en_json()
     ticker = q.ticker if q.ticker in univers else None
     analyse = questions.analyser(q.texte, univers, ticker, q.taille, titre_exemple=profil.demande_exemple[0],
                                  resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
                                  historique=[h[:500] for h in q.historique],
                                  profil_info=_dossier_investisseur(profil, _donnees().univers))
+    if not profil.portefeuille_declare:
+        # Persona trop peu détaillé : le greffier ne parle pas d'un portefeuille qu'il ne connaît pas.
+        questions.adapter_au_portefeuille_de_reference(analyse)
     return analyse.en_json()
 
 
@@ -377,6 +462,11 @@ def proces(demande: DemandeProces, request: Request) -> dict:
     rapport_explicabilite = greffier.generer_rapport_explicabilite(p)
     discussion = construire_timeline_discussion(p)
 
+    from reportlab.graphics import renderSVG
+    from rdc import simulateur
+    svg_simu = renderSVG.drawToString(simulateur.creer_graphique_simulations(p.simulation)) if getattr(p, "simulation", None) else ""
+    svg_horiz = renderSVG.drawToString(simulateur.creer_graphique_horizons(p.simulation)) if getattr(p, "simulation", None) else ""
+
     return {
         "demande": {
             "profil": profil.cle,
@@ -421,7 +511,30 @@ def proces(demande: DemandeProces, request: Request) -> dict:
         ],
         "rapport_explicabilite": rapport_explicabilite,
         "discussion": discussion,
+        "simulations": p.simulation.en_dict() if getattr(p, "simulation", None) else None,
+        "svg_simulations": svg_simu,
+        "svg_horizons": svg_horiz,
     }
+
+
+@app.get("/api/proces/export-graphique/{nom}")
+def exporter_graphique(nom: str, profil: str, ticker: str, request: Request, taille: float = 0.20) -> Response:
+    """Exporte un graphique vectoriel haute fidélité (simulations ou horizons) au format SVG."""
+    from reportlab.graphics import renderSVG
+    from rdc import simulateur
+    p_obj = _profil(request, profil)
+    dossier = construire_dossier(p_obj, ticker, taille)
+    simu = simulateur.simuler_impact_decision(dossier)
+    if nom.lower().startswith("horiz"):
+        dw = simulateur.creer_graphique_horizons(simu)
+        fname = f"alphaforge_horizons_{profil}_{ticker}.svg"
+    else:
+        dw = simulateur.creer_graphique_simulations(simu)
+        fname = f"alphaforge_simulations_{profil}_{ticker}.svg"
+    svg_str = renderSVG.drawToString(dw)
+    return Response(content=svg_str, media_type="image/svg+xml", headers={
+        "Content-Disposition": f"attachment; filename={fname}"
+    })
 
 
 @app.post("/api/proces/discussion")
@@ -515,3 +628,52 @@ def telecharger_pdf(demande: DemandePDF, request: Request) -> Response:
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{nom_fichier}"'},
     )
+
+
+@app.post("/api/analogie", response_model=ReponseAnalogie)
+def obtenir_analogie(demande: DemandeAnalogie) -> ReponseAnalogie:
+    resultat = generer_analogie(
+        texte=demande.texte,
+        acteur=demande.acteur,
+        role=demande.role,
+        mode=demande.mode,
+    )
+    titre = f"L'Analogie du Juré · {demande.acteur}" if demande.acteur else "L'Analogie du Juré"
+    return ReponseAnalogie(
+        analogie=resultat["analogie"],
+        titre=titre,
+        source=resultat.get("source", "gabarit"),
+    )
+
+
+# --------------------------------------------------------------------------- SPA Angular
+STATIC_DIR = Path(os.environ.get("RDC_STATIC_DIR") or (Path(__file__).resolve().parent.parent / "frontend" / "dist" / "menu" / "browser"))
+
+@app.get("/")
+def serve_racine():
+    if STATIC_DIR.exists():
+        index_file = STATIC_DIR / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+    return {"status": "ok", "service": "API Règlement de comptes"}
+
+@app.get("/{full_path:path}")
+def serve_frontend_spa(full_path: str):
+    if full_path.startswith("api/") or full_path == "api":
+        raise HTTPException(status_code=404, detail="Endpoint API introuvable")
+
+    if STATIC_DIR.exists():
+        target = (STATIC_DIR / full_path).resolve()
+        try:
+            target.relative_to(STATIC_DIR.resolve())
+            if target.is_file():
+                return FileResponse(target)
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Accès interdit")
+
+        index_file = STATIC_DIR / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+
+    raise HTTPException(status_code=404, detail="Interface introuvable")
+

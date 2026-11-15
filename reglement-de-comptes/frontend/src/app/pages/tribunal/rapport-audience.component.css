@@ -122,3 +122,10 @@ button:focus-visible, summary:focus-visible { outline: 3px solid #773c6f; outlin
   .bandeau-encours { display: none; }
   .synthese, .tuile, .camp, .piece { break-inside: avoid; }
 }
+
+.synthese--scellee {
+  border: 1.5px dashed #c9b3be;
+  border-left: 5px solid #773c6f;
+  background: #f5eaf2;
+}
+.synthese--scellee .verdict { color: #58354d; }

@@ -31,7 +31,25 @@ export function effacer(cle: string): void {
 export const cleConversation = (profil: string) => `rdc-conversation-${profil}`;
 export const cleRetour = (profil: string) => `rdc-retour-${profil}`;
 
+/** L'audience que l'investisseur vient de quitter, pour la reprendre depuis le greffier. */
+export interface AudienceSuspendue {
+  ticker: string;
+  nomTitre: string;
+  taille: number;
+  question: string;
+  /** Le camp retenu par l'investisseur, ou null s'il n'a pas encore voté. */
+  vote: 'avocat_defense' | 'procureur' | null;
+  /** Rempli seulement après le vote : la décision du tribunal reste scellée avant. */
+  verdictTribunal: string | null;
+  accord: boolean | null;
+}
+
+export interface Retour {
+  texte: string;
+  audience?: AudienceSuspendue;
+}
+
 /** Ce que le tribunal ou le duel laisse pour le greffier : un résumé à afficher au retour. */
-export function laisserUnRetour(profil: string, texte: string): void {
-  ecrire(cleRetour(profil), { texte });
+export function laisserUnRetour(profil: string, texte: string, audience?: AudienceSuspendue): void {
+  ecrire(cleRetour(profil), { texte, audience } satisfies Retour);
 }

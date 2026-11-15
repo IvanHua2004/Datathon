@@ -494,3 +494,48 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 .lignes-portefeuille li { display: flex; align-items: center; gap: 0.5rem; }
 .lignes-portefeuille strong { margin-left: auto; font-variant-numeric: tabular-nums; }
 .pastille-couleur { width: 0.7rem; height: 0.7rem; border-radius: 2px; flex: none; }
+
+/* ---------- Retour d'audience : reprendre le débat là où il s'est arrêté ---------- */
+.carte-audience {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 0.4rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgb(119 60 111 / 30%);
+  border-left: 4px solid #773c6f;
+  border-radius: 4px;
+  background: #fff;
+}
+.tete-audience { display: grid; gap: 0.15rem; }
+.sur-audience { color: #773c6f; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.tete-audience strong { font-size: 1.05rem; }
+.etat-audience {
+  justify-self: start;
+  margin-top: 0.15rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #f5eaf2;
+  color: #58354d;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.etat-audience.accord { background: #eaf6ef; color: #1e6b3c; }
+.etat-audience.desaccord { background: #fbecea; color: #8a1c1c; }
+.sous-audience { margin: 0.1rem 0 0; color: #5c4a55; font-size: 0.85rem; }
+.pastilles-audience { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0; padding: 0; list-style: none; }
+.pastilles-audience button {
+  min-height: 2.4rem;
+  padding: 0 0.8rem;
+  border: 1px solid rgb(119 60 111 / 35%);
+  border-radius: 999px;
+  background: #fff;
+  color: #58354d;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+.pastilles-audience button:hover { border-color: #773c6f; background: rgb(119 60 111 / 8%); }
+.pastilles-audience button:focus-visible, .carte-audience .actions button:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
+.fiche-piece { border-left: 3px solid #773c6f; }
+.actions--discretes { margin-top: 0.5rem; }
+.actions--discretes .secondaire { min-height: 2.4rem; font-size: 0.88rem; }
+.suggestions-debat { margin-top: 0.4rem; }

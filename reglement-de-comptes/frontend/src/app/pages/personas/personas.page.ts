@@ -1,11 +1,16 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
-import { ConfigurationPersona, NiveauRisque } from '../../models/proces.model';
+import { cleConversation, cleRetour, effacer } from '../../shared/memoire';
+import { ConfigurationPersona, NiveauRisque, Profil } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
+
+/** Simulation réservée aux adultes : pas de persona de moins de 18 ans. */
+const AGE_MINIMUM = 18;
+const MESSAGE_AGE = 'Le persona doit avoir au moins 18 ans.';
 
 @Component({
   selector: 'rdc-personas',
@@ -19,6 +24,10 @@ import { ProcesService } from '../../services/proces.service';
     .custom-summary { display: grid; gap: 0.5rem; }
     .custom-summary, .custom-title { overflow-wrap: anywhere; }
     .custom-note { white-space: pre-wrap; }
+    .custom-portfolio { margin: 0; font-size: 0.8rem; line-height: 1.35; }
+    .custom-portfolio strong { color: #fec946; }
+    .custom-portfolio.vague { color: #d9b9c6; font-style: italic; }
+    .custom-hint { margin: 0; color: #d9b9c6; font-size: 0.78rem; line-height: 1.35; }
     .card-select {
       position: absolute;
       z-index: 1;
@@ -160,6 +169,11 @@ import { ProcesService } from '../../services/proces.service';
               <p class="persona-details">{{ config.age }} ans · Risque {{ riskLabels[config.risque].toLowerCase() }}<br>Horizon de {{ config.horizon_min }}{{ config.horizon_max !== config.horizon_min ? ' à ' + config.horizon_max : '' }} ans
               </p>
               @if (config.note) { <p class="custom-note">{{ config.note }}</p> }
+              @if (portefeuilleNote(); as positions) {
+                <p class="custom-portfolio"><strong>Portefeuille :</strong> {{ positions }}</p>
+              } @else {
+                <p class="custom-portfolio vague">Positions non précisées : les agents raisonneront sur un portefeuille de référence fictif.</p>
+              }
             </div>
           } @else {
             <button class="card-select" type="button" aria-label="Repérer le bouton de configuration du persona personnalisé"
@@ -177,8 +191,9 @@ import { ProcesService } from '../../services/proces.service';
               <input name="nom" type="text" maxlength="50" pattern=".*\\S.*"
                 [attr.value]="configuration()?.nom ?? ''" required autofocus>
             </label>
-            <label>Âge (ans)
-              <input name="age" type="number" min="1" max="120" step="1" [attr.value]="configuration()?.age" required>
+            <label>Âge (18 ans minimum)
+              <input name="age" type="number" min="18" max="120" step="1" [attr.value]="configuration()?.age" required
+                (input)="verifierAge($any($event.target))">
             </label>
             <label>Niveau de risque
               <select name="risque" required>
@@ -198,9 +213,11 @@ import { ProcesService } from '../../services/proces.service';
               </label>
             </fieldset>
             <label>Note (facultative)
-              <textarea name="note" rows="2" maxlength="200" placeholder="Ex. Je préfère éviter la crypto."
+              <textarea name="note" rows="3" maxlength="200" aria-describedby="custom-note-hint"
+                placeholder="Ex. SPY 60 %, XBB.TO 40 %. Je préfère éviter la crypto."
                 [defaultValue]="configuration()?.note ?? ''"></textarea>
             </label>
+            <p id="custom-note-hint" class="custom-hint">Indique tes positions avec leur part (au total environ 100 %) pour que les agents parlent de ton portefeuille. Sinon, ils utiliseront un portefeuille de référence fictif.</p>
             <div class="custom-actions">
               <button type="button" class="custom-button custom-cancel" [disabled]="saving()" (click)="details.close()">Annuler</button>
               <button class="custom-button" type="submit" [disabled]="saving()">
@@ -226,7 +243,15 @@ export class PersonasPage {
   readonly confirming = signal(false);
   readonly saving = signal(false);
   readonly saveError = signal('');
-  readonly configuration = signal<ConfigurationPersona | undefined>(undefined);
+  /** Le persona enregistré pendant cette visite de la page : la carte repart vide à chaque chargement. */
+  private readonly enregistre = signal<Profil | undefined>(undefined);
+  readonly configuration = computed<ConfigurationPersona | undefined>(() => this.enregistre()?.configuration);
+  /** Positions lues dans la note, ou null si la note ne les décrit pas assez. */
+  readonly portefeuilleNote = computed(() => {
+    const p = this.enregistre();
+    if (!p || p.portefeuilleDeclare === false) return null;
+    return p.portefeuille.map((x) => `${x.ticker} ${Math.round(x.poids * 100)} %`).join(', ');
+  });
   readonly riskLabels: Record<NiveauRisque, string> = {
     faible: 'Faible',
     faible_a_modere: 'Faible à modéré',
@@ -277,6 +302,19 @@ export class PersonasPage {
     },
   ];
 
+  constructor() {
+    // Chaque arrivée sur cette page repart de zéro : le persona personnalisé précédent est oublié
+    // partout (cookie du serveur, liste des profils, conversation du greffier).
+    this.oublierPersonnalise();
+    this.api.oublierPersona().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => undefined });
+  }
+
+  private oublierPersonnalise(): void {
+    this.tribunal.personaPersonnalise.set(null);
+    effacer(cleConversation('personnalise'));
+    effacer(cleRetour('personnalise'));
+  }
+
   highlightEditButton(button: HTMLButtonElement): void {
     button.focus({ preventScroll: true });
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -295,12 +333,21 @@ export class PersonasPage {
     dialog.showModal();
   }
 
+  /** Message en français à la place de celui du navigateur : le persona doit être majeur. */
+  verifierAge(champ: HTMLInputElement): void {
+    champ.setCustomValidity(champ.value !== '' && Number(champ.value) < AGE_MINIMUM ? MESSAGE_AGE : '');
+  }
+
   savePersona(event: Event, dialog: HTMLDialogElement, form: HTMLFormElement): void {
     event.preventDefault();
     if (this.saving()) return;
     const values = new FormData(form);
     const horizon_min = Number(values.get('horizon_min'));
     const horizon_max = Number(values.get('horizon_max'));
+    if (Number(values.get('age')) < AGE_MINIMUM) {
+      this.saveError.set(MESSAGE_AGE);
+      return;
+    }
     if (horizon_min > horizon_max) {
       this.saveError.set('L’horizon maximal doit être au moins égal à l’horizon minimal.');
       return;
@@ -319,10 +366,14 @@ export class PersonasPage {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (persona) => {
+          // Nouveau persona : le greffier recommence une conversation neuve avec lui.
+          this.oublierPersonnalise();
           this.tribunal.personaPersonnalise.set(persona);
-          this.configuration.set(persona.configuration);
+          this.enregistre.set(persona);
           this.saving.set(false);
           dialog.close();
+          // Le persona qu'on vient de configurer reste sélectionné, prêt à confirmer.
+          this.selectedPersona.set('personnalise');
         },
         error: () => {
           this.saveError.set('Impossible d’enregistrer le persona. Réessaie dans un instant.');
