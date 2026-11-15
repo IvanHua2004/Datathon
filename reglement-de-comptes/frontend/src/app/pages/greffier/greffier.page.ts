@@ -7,6 +7,7 @@ import { Router, RouterLink } from '@angular/router';
 import { EnteteComponent } from '../../components/entete/entete.component';
 import { AnalyseQuestion, ChoixDossier } from '../../models/question.model';
 import { ApiService } from '../../services/api.service';
+import { DicteeService } from '../../services/dictee.service';
 import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { Attente, completer } from '../../shared/autocompletion';
@@ -44,6 +45,9 @@ interface Sauvegarde {
 })
 export class GreffierPage {
   private readonly api = inject(ApiService);
+  readonly dictee = inject(DicteeService);
+  /** Vrai tant que la phrase dictée n'est pas fixée (affichée en gris). */
+  readonly dicteeProvisoire = signal(false);
   private readonly sonAudience = inject(SonAudienceService);
   private readonly router = inject(Router);
   readonly tribunal = inject(ProcesService);
@@ -207,6 +211,30 @@ export class GreffierPage {
   }
 
   // ----- Saisie et suggestions -----
+
+  /** Micro : dicter la question au lieu de la taper. Rien n'est envoyé sans Entrée. */
+  basculerDictee(): void {
+    if (this.dictee.actif()) {
+      this.dictee.arreter();
+      return;
+    }
+    const debut = this.saisie().trim();
+    this.ouverte.set(false);
+    this.dictee.demarrer({
+      texte: (texte, provisoire) => {
+        this.saisie.set(debut ? `${debut} ${texte}` : texte);
+        this.dicteeProvisoire.set(provisoire);
+        this.ouverte.set(false);
+      },
+      fin: () => {
+        this.dicteeProvisoire.set(false);
+        const champ = this.champ()?.nativeElement;
+        champ?.focus();
+        champ?.setSelectionRange(champ.value.length, champ.value.length);
+        this.ouverte.set(false);
+      },
+    });
+  }
 
   taper(event: Event): void {
     this.saisie.set((event.target as HTMLInputElement).value);

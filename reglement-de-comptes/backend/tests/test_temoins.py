@@ -6,9 +6,8 @@ from rdc.greffier import Greffier, Piece
 
 @pytest.fixture(scope="module")
 def dossier_robert_nvda():
-    d = donnees.charger()
     p = profils.PROFILS["robert"]
-    return proces.construire_dossier(d, p, "NVDA", 0.2)
+    return proces.construire_dossier(p, "NVDA", 0.2)
 
 
 def test_dictionnaire_temoins():
