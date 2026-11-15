@@ -1030,8 +1030,11 @@ p { margin: 0; }
 
 @media (max-width: 36rem) {
   .dialogue { column-gap: 0.5rem; }
+  .replique { min-width: 0; overflow-wrap: anywhere; }
   .commandes { grid-template-columns: minmax(0, 1fr) auto; }
-  .progression { grid-column: 1 / -1; }
-  .commandes button { padding-inline: 0.4rem; font-size: 0.8rem; }
+  .progression, .verdict-final .progression { grid-column: 1 / -1; }
+  .commandes button { min-height: 2.75rem; padding-inline: 0.4rem; font-size: 0.8rem; }
+  .outils-rapport { flex-wrap: wrap; max-width: 100%; }
+  .entete-rapport h2 { font-size: 1.15rem; overflow-wrap: anywhere; }
   .plaidoiries-verdict { grid-template-columns: minmax(0, 1fr); }
 }

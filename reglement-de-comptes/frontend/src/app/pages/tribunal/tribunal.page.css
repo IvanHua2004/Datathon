@@ -362,7 +362,7 @@ legend {
 
 .audiences {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 1rem;
 }
 
@@ -791,7 +791,7 @@ code {
 
 .grille-comparaison {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
@@ -840,7 +840,7 @@ code {
 
 .grille-scenarios {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 1rem;
   margin-top: 1rem;
 }
@@ -1157,4 +1157,17 @@ code {
 .carte-arbitrage {
   background: #fff8ec;
   border-left: 6px solid #ffc247;
+}
+
+@media (max-width: 36rem) {
+  .barre { gap: 0.65rem; }
+  .titres { flex-basis: 100%; min-width: 0; order: 1; }
+  .version-tribunal { margin-inline-start: auto; }
+  .disposition { padding: 0.9rem 0.75rem 1.75rem; }
+  .dossier, .audience { flex-basis: 100%; min-width: 0; max-width: none; }
+  .dossier select { width: 100%; min-width: 0; }
+  .groupe-intention .champ-texte { min-width: 0; }
+  .boutons-choix .btn { flex: 1 1 10rem; min-height: 2.75rem; }
+  .statut-audience { flex-wrap: wrap; }
+  .carte, .bulle-tour { overflow-wrap: anywhere; }
 }

@@ -60,11 +60,13 @@ h1 span[aria-hidden] { color: #ffc247; margin: 0 0.4rem; }
 .tour[data-role='avocat_b'] .avatar { background: #ffe5bf; color: #773c6f; }
 .tour[data-role='juge'] .avatar { background: #ffc247; color: #200e0c; font-size: 1.3rem; }
 .parole {
+  min-width: 0;
   padding: 0.85rem 1rem;
   border-radius: 6px;
   background: #fff8ec;
   color: #200e0c;
   line-height: 1.5;
+  overflow-wrap: anywhere;
   box-shadow: 0 4px 0 rgb(0 0 0 / 30%);
   animation: arrivee 300ms ease-out backwards;
 }
@@ -104,6 +106,7 @@ h1 span[aria-hidden] { color: #ffc247; margin: 0 0.4rem; }
 
 .cote {
   position: relative;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -111,6 +114,7 @@ h1 span[aria-hidden] { color: #ffc247; margin: 0 0.4rem; }
   border-radius: 6px;
   background: #fff8ec;
   color: #200e0c;
+  overflow-wrap: anywhere;
   border: 3px solid transparent;
   box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
 }
@@ -171,3 +175,18 @@ a:focus-visible, summary:focus-visible { outline: 3px solid #ffc247; outline-off
 }
 
 @media (prefers-reduced-motion: reduce) { .points i { animation: none; } }
+
+@media (max-width: 40rem) {
+  .scene { padding: 1rem 0.75rem 2rem; }
+  .tour { gap: 0.4rem; }
+  .tour .avatar { width: 2.25rem; height: 2.25rem; font-size: 0.6rem; }
+  .tour[data-role='juge'] .avatar { font-size: 1rem; }
+  .parole, .decision, .cote { padding: 0.7rem; }
+  .decision { gap: 0.5rem; }
+  .decision h2 { font-size: 1.1rem; }
+  .sceau { font-size: 1.4rem; }
+  .cotes { grid-template-columns: minmax(0, 1fr); }
+  .ruban { position: static; display: inline-block; margin-bottom: 0.35rem; }
+  th, td { padding-inline: 0.25rem; }
+  .secondaire { display: flex; align-items: center; min-height: 2.75rem; }
+}
