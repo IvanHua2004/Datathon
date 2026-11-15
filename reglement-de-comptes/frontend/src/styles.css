@@ -245,7 +245,8 @@ rdc-menu {
   color: #f1ebe6;
 }
 
-.persona-page h1 {
+.persona-page h1,
+.titre-style-persona {
   margin: 0;
   color: #feedd3;
   font-family: "Bookman Old Style", "URW Bookman", Georgia, serif;
@@ -262,7 +263,8 @@ rdc-menu {
   font-display: swap;
 }
 
-.persona-page h1 span {
+.persona-page h1 span,
+.titre-style-persona span {
   color: #fc4447;
   font-family: "Society", "Bookman Old Style", Georgia, serif;
   font-size: 0.8em;
@@ -373,7 +375,7 @@ rdc-menu {
 
 .persona-coins {
   position: absolute;
-  inset: 0;
+  inset: var(--coin-zone, 0);
   pointer-events: none;
 }
 
@@ -383,17 +385,17 @@ rdc-menu {
   top: var(--coin-y);
   display: grid;
   place-items: center;
-  width: 1.3rem;
+  width: var(--coin-size, 1.3rem);
   aspect-ratio: 1;
   border: 1px solid #ffeab0;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 28%, #ffefb3, #f3bb50 62%, #d28a25);
   box-shadow: inset 0 0 0 1px #bd781c, inset 0 0 0 3px rgb(255 240 185 / 28%), 0 2px 0 #9d6119;
   color: #633808;
-  font-size: 0.8rem;
+  font-size: var(--coin-font-size, 0.8rem);
   font-weight: 800;
   opacity: 0;
-  animation: persona-coin-burst var(--coin-duration) calc(var(--selection-duration) + var(--coin-delay)) both;
+  animation: persona-coin-burst var(--coin-duration) calc(var(--selection-duration, 0ms) + var(--coin-delay)) both;
 }
 
 @keyframes persona-coin-burst {

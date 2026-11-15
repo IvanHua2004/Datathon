@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
+import { PiecesMonnaieComponent } from '../../components/pieces-monnaie/pieces-monnaie.component';
 import { cleConversation, cleRetour, effacer } from '../../shared/memoire';
 import { ConfigurationPersona, NiveauRisque, Profil } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
@@ -14,7 +15,7 @@ const MESSAGE_AGE = 'Le persona doit avoir au moins 18 ans.';
 
 @Component({
   selector: 'rdc-personas',
-  imports: [EnteteComponent],
+  imports: [EnteteComponent, PiecesMonnaieComponent],
   // Le bandeau du parcours (logo + étapes) au-dessus de la page.
   styles: `
     :host { display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); height: 100dvh; }
@@ -43,7 +44,6 @@ const MESSAGE_AGE = 'Le persona doit avoir au moins 18 ans.';
     .confirm-persona:hover:enabled { background: var(--confirm-background-hover); }
     @media (prefers-reduced-motion: reduce) {
       .persona-card.persona-selected { animation: none; }
-      .persona-coins { display: none; }
     }
     .custom-dialog {
       box-sizing: border-box;
@@ -134,16 +134,7 @@ const MESSAGE_AGE = 'Le persona doit avoir au moins 18 ans.';
             <p class="persona-details">{{ persona.age }} ans · {{ persona.risk }}<br>Horizon de {{ persona.horizon }}</p>
             <p class="persona-summary" [id]="'persona-summary-' + persona.id">{{ persona.summary }}</p>
             @if (selectedPersona() === persona.id) {
-              <span class="persona-coins" [style.--coin-duration]="coinDuration + 'ms'" aria-hidden="true">
-                @for (coin of coins; track $index) {
-                  <span class="persona-coin"
-                    [style.--coin-x]="coin.x + '%'"
-                    [style.--coin-y]="coin.y + '%'"
-                    [style.--coin-drift]="coin.drift + 'px'"
-                    [style.--coin-spin]="coin.spin + 'deg'"
-                    [style.--coin-delay]="coin.delay + 'ms'">$</span>
-                }
-              </span>
+              <rdc-pieces-monnaie />
             }
           </article>
         }
@@ -261,19 +252,6 @@ export class PersonasPage {
   };
   readonly riskLevels = Object.keys(this.riskLabels) as NiveauRisque[];
   readonly selectionDuration = 180;
-  readonly coinDuration = 940;
-  readonly coins = [
-    { x: 4, y: 16, drift: -13, spin: -36, delay: 0 },
-    { x: 14, y: 4, drift: -9, spin: 29, delay: 27 },
-    { x: 29, y: -1, drift: 8, spin: -58, delay: 11 },
-    { x: 67, y: 2, drift: 12, spin: 31, delay: 46 },
-    { x: 88, y: 8, drift: 17, spin: 69, delay: 0 },
-    { x: 97, y: 26, drift: 13, spin: -32, delay: 34 },
-    { x: 99, y: 44, drift: 9, spin: 52, delay: 18 },
-    { x: 2, y: 47, drift: -12, spin: -44, delay: 56 },
-    { x: 5, y: 68, drift: -8, spin: 33, delay: 71 },
-    { x: 94, y: 73, drift: 13, spin: -41, delay: 79 },
-  ];
 
   readonly personas = [
     {

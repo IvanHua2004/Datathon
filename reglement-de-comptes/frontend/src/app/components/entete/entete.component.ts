@@ -1,5 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import type { Profil } from '../../models/proces.model';
 
 /** Bandeau commun aux pages du parcours : logo (retour au menu) et étapes. */
 @Component({
@@ -19,6 +20,12 @@ import { RouterLink } from '@angular/router';
           </li>
         }
       </ol>
+      @if (persona(); as p) {
+        <div class="persona-entete">
+          <img [src]="'assets/' + p.cle + '.png'" alt="" width="48" height="48">
+          <strong>Dossier de {{ p.nom }}</strong>
+        </div>
+      }
       <ng-content />
     </header>
   `,
@@ -86,10 +93,33 @@ import { RouterLink } from '@angular/router';
     .numero { min-width: 1ch; font-weight: 700; text-align: center; }
     .etapes li.faite { border-color: rgb(255 229 191 / 60%); color: #ffe5bf; }
     .etapes li.courante { background: #ffc247; border-color: #ffc247; color: #200e0c; font-weight: 700; }
+    .persona-entete {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      min-width: 0;
+      max-width: min(100%, 20rem);
+      margin-inline-start: auto;
+      padding: 0.25rem 0.85rem 0.25rem 0.25rem;
+      border: 1px solid rgb(254 237 211 / 42%);
+      border-radius: 4px;
+      background: #3b2836;
+      color: #feedd3;
+      line-height: 1.2;
+    }
+    .persona-entete img { flex: none; border-radius: 2px; object-fit: cover; }
+    .persona-entete strong { overflow-wrap: anywhere; }
 
     @media (max-width: 650px) {
       .entete { justify-content: space-between; gap: 0.35rem 0.5rem; padding: 0.4rem 0.65rem; }
       .marque { width: 5rem; height: 3rem; }
+      .persona-entete {
+        max-width: calc(100% - 5.5rem);
+        gap: 0.45rem;
+        padding-inline-end: 0.5rem;
+        font-size: 0.88rem;
+      }
+      .persona-entete img { width: 2rem; height: 2rem; }
       .etapes {
         order: 1;
         display: grid;
@@ -115,5 +145,6 @@ import { RouterLink } from '@angular/router';
 })
 export class EnteteComponent {
   readonly etape = input.required<number>();
+  readonly persona = input<Pick<Profil, 'cle' | 'nom'> | null>(null);
   readonly etapes = ['Persona', 'Question', 'Débat', 'Verdict'];
 }

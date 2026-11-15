@@ -1,4 +1,5 @@
 import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { DUREE_EFFET_PIECES, PiecesMonnaieComponent } from '../../components/pieces-monnaie/pieces-monnaie.component';
 import { Piece, Position, Proces, ReponseAnalogie, TourDiscussion } from '../../models/proces.model';
 import { RapportAudienceComponent, argumentsDe, chiffresCles } from './rapport-audience.component';
 import { dollars, pct } from '../../shared/format';
@@ -37,25 +38,30 @@ function clePortrait(tour: TourDiscussion): string {
 
 @Component({
   selector: 'rdc-audience-scene',
-  imports: [RapportAudienceComponent],
+  imports: [RapportAudienceComponent, PiecesMonnaieComponent],
   styleUrl: './audience-scene.component.css',
   template: `
     <ng-template #boutonVerdict>
-      @if (tour() && !verdictRendu()) {
+      @if (tour() && !verdictRendu() && imageMarteau() === null) {
         <button class="bouton-verdict" type="button" aria-haspopup="dialog"
           [class.verdict-attendu]="audienceTerminee() && !finOuverte() && !verdictOuvert()"
-          [class.verdict-enfonce]="impactVerdict()" (click)="ouvrirFin(fenetreFin)">
+          (click)="ouvrirFin(fenetreFin)">
           <img class="icone-verdict" src="assets/tribunal-2/marteau.png" alt="" />
           <span>Terminer</span>
           @if (impactVerdict()) {
-            <span class="eclats-verdict" aria-hidden="true">
-              <i></i><i></i><i></i><i></i><i></i><i></i>
-            </span>
+            <rdc-pieces-monnaie class="pieces-terminer" />
           }
         </button>
       }
     </ng-template>
-    <section class="scene" aria-label="Audience du Tribunal 2">
+    <div class="coup-marteau" [hidden]="imageMarteau() === null" aria-hidden="true">
+      <strong class="titre-coup-marteau">VERDICT !</strong>
+      @for (image of imagesMarteau; track image) {
+        <img [src]="'assets/tribunal-2/marteau-verdict-' + image + '.png'"
+          [class.visible]="imageMarteau() === image" alt="" />
+      }
+    </div>
+    <section class="scene" aria-label="Audience du Tribunal 2" [inert]="ouvertureRapport()">
       <div #ancrageSon hidden></div>
       <div class="plateau">
         @if (tomate(); as lancer) {
@@ -88,7 +94,7 @@ function clePortrait(tour: TourDiscussion): string {
         }
       </div>
       @if (tour(); as tour) {
-        <article class="dialogue" [class.verdict-final]="verdictRendu()">
+        <article class="dialogue" [class.verdict-final]="verdictRendu()" [inert]="imageMarteau() !== null">
           <div class="portrait" aria-hidden="true">
             @if (portraitVisible(); as image) {
               <img [src]="image" [class.miroir]="tour.role === 'procureur'"
@@ -233,21 +239,12 @@ function clePortrait(tour: TourDiscussion): string {
       (close)="finOuverte.set(false)" (click)="$event.target === fenetreFin && fenetreFin.close()">
       <div class="contenu-fin">
         <header class="entete-fin">
-          <div>
-            <p class="sur-titre">Fin de l’audience</p>
-            <h2 id="titre-fin" tabindex="-1" autofocus>Les deux camps ont plaidé. Et maintenant ?</h2>
-          </div>
-          <ol class="etapes-verdict" aria-label="Progression">
-            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
-            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
-            <li><span aria-hidden="true">3</span> Verdict</li>
-          </ol>
+          <h2 id="titre-fin" tabindex="-1" autofocus>Les deux camps ont plaidé. Et maintenant ?</h2>
           <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreFin.close()">×</button>
         </header>
         <div class="portes-fin">
           <span class="ou-fin" aria-hidden="true">ou</span>
           <button type="button" class="porte-fin porte-fin--verdict" (click)="passerAuVerdict(fenetreFin, fenetreVerdict)">
-            <span class="pastille-fin">Étape suivante</span>
             <span class="illustration-fin" aria-hidden="true"><img src="assets/tribunal-2/juge.png" alt=""></span>
             <span class="titre-porte">Passer au verdict</span>
             <span class="texte-porte">Départagez la Défense et le Procureur, chiffres clés à l’appui.</span>
@@ -264,32 +261,22 @@ function clePortrait(tour: TourDiscussion): string {
         </div>
       </div>
     </dialog>
-    @if (annonceTerminee()) {
+    @if (ouvertureRapport()) {
+      <div class="attente-rapport" role="status">
+        <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <p class="libelle-attente-rapport">Ouverture du tableau de bord comparatif</p>
+      </div>
+    } @else if (annonceTerminee()) {
       <section class="decision-finale" aria-labelledby="titre-decision-finale">
         <h2 id="titre-decision-finale">Rapport comparatif</h2>
-        @if (secondesAvantRapport() > 0) {
-          <p class="attente-rapport" role="status">
-            Ouverture dans {{ secondesAvantRapport() }} s
-            <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i></span>
-          </p>
-        } @else {
-          <button type="button" class="voir-comparaison"
-            (click)="continuerComparaison.emit()">Ouvrir le rapport comparatif →</button>
-        }
+        <button type="button" class="voir-comparaison"
+          (click)="continuerComparaison.emit()">Ouvrir le rapport comparatif →</button>
       </section>
     }
     <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
       <div class="contenu-verdict">
         <header class="entete-verdict">
-          <div>
-            <p class="sur-titre">Délibéré · étape finale</p>
-            <h2 id="titre-verdict" tabindex="-1" autofocus>Qui a gagné le débat ? Votez.</h2>
-          </div>
-          <ol class="etapes-verdict" aria-label="Progression">
-            <li class="fait"><span aria-hidden="true">✓</span> Audience</li>
-            <li class="en-cours" aria-current="step"><span aria-hidden="true">2</span> Votez</li>
-            <li><span aria-hidden="true">3</span> Verdict</li>
-          </ol>
+          <h2 id="titre-verdict" tabindex="-1" autofocus>Qui a gagné le débat ? Votez.</h2>
           <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreVerdict.close()">×</button>
         </header>
         <div class="corps-verdict">
@@ -437,7 +424,10 @@ export class AudienceSceneComponent {
   readonly delibere = input(false);
   private delibereOuvert = false;
   readonly continuerComparaison = output<void>();
-  readonly secondesAvantRapport = signal(0);
+  readonly ouvertureRapport = signal(false);
+  readonly imagesMarteau = [1, 2, 3, 4];
+  readonly imageMarteau = signal<number | null>(null);
+  private minuteriesMarteau: ReturnType<typeof setTimeout>[] = [];
   readonly index = linkedSignal({ source: this.tours, computation: () => 0 });
   readonly tour = computed<TourDiscussion | undefined>(() => this.annonceVerdict() ?? this.tours()[this.index()]);
   readonly preparation = computed(() => this.enCours() && !this.tour());
@@ -464,7 +454,8 @@ export class AudienceSceneComponent {
   });
   readonly mots = computed(() => motsDe(this.tour()?.texte ?? ''));
   readonly motsEnGras = computed(() => {
-    const mots = this.mots().map((mot) => mot.toLocaleLowerCase('fr').normalize('NFC')
+    const motsBruts = this.mots();
+    const mots = motsBruts.map((mot) => mot.toLocaleLowerCase('fr').normalize('NFC')
       .replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '').replace(/‑/gu, '-'));
     const emphase = new Set<number>();
     for (const index of mots.keys()) {
@@ -472,6 +463,13 @@ export class AudienceSceneComponent {
         if (expression.every((mot, offset) => mot === mots[index + offset])) {
           for (const offset of expression.keys()) emphase.add(index + offset);
         }
+      }
+    }
+    if (this.tour()?.etape === 'ANNONCE_VERDICT') {
+      const debut = motsBruts.findIndex((mot) => mot.trim() === '«');
+      const fin = motsBruts.findIndex((mot, index) => index > debut && mot.trim().startsWith('»'));
+      if (debut >= 0 && fin > debut) {
+        for (let index = debut + 1; index < fin; index++) emphase.add(index);
       }
     }
     return emphase;
@@ -519,7 +517,8 @@ export class AudienceSceneComponent {
   });
   private readonly repriseAppliquee = signal(false);
   readonly lectureActive = computed(() =>
-    !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert()
+    this.imageMarteau() === null
+    && !this.annonceActive() && !this.verdictOuvert() && !this.finOuverte() && !this.rapportOuvert()
     && !this.analogieAffichee()
     && this.lectureAuto()
     && this.motActif() < this.mots().length);
@@ -622,21 +621,24 @@ export class AudienceSceneComponent {
 
   constructor() {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.minuterieVerdict));
+    inject(DestroyRef).onDestroy(() => {
+      clearTimeout(this.minuterieVerdict);
+      for (const minuterie of this.minuteriesMarteau) clearTimeout(minuterie);
+      if (this.imageMarteau() !== null) this.lecteur.pause();
+    });
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     effect((nettoyer) => {
       if (!this.annonceTerminee() || this.reprendreVote()) return;
-      let secondes = 3;
-      this.secondesAvantRapport.set(secondes);
-      const minuterie = setInterval(() => {
-        this.secondesAvantRapport.set(--secondes);
-        if (secondes > 0) return;
-        clearInterval(minuterie);
-        this.continuerComparaison.emit();
-      }, 1000);
+      let minuterie = setTimeout(() => {
+        this.ouvertureRapport.set(true);
+        minuterie = setTimeout(() => {
+          this.continuerComparaison.emit();
+          this.ouvertureRapport.set(false);
+        }, 4000);
+      }, 2000);
       nettoyer(() => {
-        clearInterval(minuterie);
-        this.secondesAvantRapport.set(0);
+        clearTimeout(minuterie);
+        this.ouvertureRapport.set(false);
       });
     });
     // Retour depuis le greffier pour voter : dernière réplique affichée en entier, délibéré ouvert.
@@ -886,19 +888,14 @@ export class AudienceSceneComponent {
     this.analogieAffichee.set(false);
   }
 
-  /** « Terminé » : coup de marteau, puis le choix entre passer au verdict et poser plus de questions. */
   ouvrirFin(fenetre: HTMLDialogElement): void {
     if (fenetre.open || this.finOuverte()) return;
     this.finOuverte.set(true);
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      fenetre.showModal();
-      return;
-    }
     this.impactVerdict.set(true);
     this.minuterieVerdict = setTimeout(() => {
       this.impactVerdict.set(false);
       fenetre.showModal();
-    }, 230);
+    }, DUREE_EFFET_PIECES);
   }
 
 
@@ -930,18 +927,41 @@ export class AudienceSceneComponent {
 
   rendreVerdict(fenetre: HTMLDialogElement): void {
     const choix = this.vote();
-    if (!choix) return;
-    this.verdictRendu.set(choix);
+    if (!choix || this.imageMarteau() !== null) return;
+    const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.imageMarteau.set(mouvementReduit ? 4 : 1);
     this.voteRendu.emit(choix);
-    this.lectureAuto.set(true);
-    const panneau = this.replique()?.nativeElement;
-    if (panneau) panneau.scrollTop = 0;
     fenetre.close();
     this.verdictOuvert.set(false);
-    if (this.sonActive()) {
+
+    const frapper = () => {
+      this.imageMarteau.set(4);
+      if (!this.sonActive()) return;
       this.sonBloque.set(false);
-      this.jouerVoix();
+      const lecteur = this.lecteur;
+      lecteur.src = 'assets/tribunal-2/voix/coup-marteau.wav';
+      lecteur.loop = false;
+      lecteur.volume = 1;
+      lecteur.playbackRate = 1;
+      this.lancerSon();
+    };
+    if (mouvementReduit) {
+      frapper();
+    } else {
+      this.minuteriesMarteau.push(
+        setTimeout(() => this.imageMarteau.set(2), 125),
+        setTimeout(() => this.imageMarteau.set(3), 255),
+        setTimeout(frapper, 400),
+      );
     }
+    this.minuteriesMarteau.push(setTimeout(() => {
+      this.minuteriesMarteau = [];
+      this.verdictRendu.set(choix);
+      this.lectureAuto.set(true);
+      const panneau = this.replique()?.nativeElement;
+      if (panneau) panneau.scrollTop = 0;
+      this.imageMarteau.set(null);
+    }, mouvementReduit ? 435 : 835));
   }
 
   basculerLecture(): void {

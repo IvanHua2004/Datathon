@@ -1,15 +1,8 @@
-<rdc-entete [etape]="4">
-  @if (demandeValide()) {
-    <a class="retour" routerLink="/tribunal-2" [queryParams]="parametresRetourVote()">← Retour au vote et au rapport</a>
-  } @else {
-    <a class="retour" routerLink="/personas">← Choisir un personnage</a>
-  }
-</rdc-entete>
+<rdc-entete [etape]="4" [persona]="profil()" />
 
 <main class="rapport">
   <header class="titre">
-    <p class="sur-titre">Tribunal financier d'AlphaForge · Greffe officiel</p>
-    <h1>Carte de décision et rapport comparatif</h1>
+    <h1 class="titre-style-persona">Tableau de bord <span>comparatif</span></h1>
     <p class="avertissement">Simulation historique à visée pédagogique; ce rapport n'est pas un conseil financier.</p>
   </header>
 
@@ -21,30 +14,23 @@
     </section>
   } @else if (!choixValide()) {
     <section class="carte">
-      @if (tribunal.resultat(); as proces) {
-        <p class="sur-titre">Verdict du juge</p>
-        <p class="verdict">{{ proces.decision.verdict }}</p>
-      }
-      <h2>Votre décision d’investissement</h2>
-      <p>{{ profil()?.nom ?? profilCle() }} · {{ ticker() }} · {{ pct(tailleValeur(), 0) }} du portefeuille</p>
-      <div class="choix-rapport">
-        <a class="action-retour" routerLink="." queryParamsHandling="merge" [queryParams]="{ choix: 'OUI' }">OUI — investir</a>
-        <a class="action-retour" routerLink="." queryParamsHandling="merge" [queryParams]="{ choix: 'NON' }">NON — renoncer</a>
-      </div>
+      <h2>Vote requis</h2>
+      <p>Rendez votre verdict au tribunal pour ouvrir la comparaison.</p>
+      <a class="action-retour" routerLink="/tribunal-2" [queryParams]="parametresRetourVote()">Retour au tribunal</a>
     </section>
   } @else {
     <section class="dossier">
       <div>
-        <p class="sur-titre">Décision examinée</p>
-        <h2>{{ choixValide() === 'OUI' ? 'OUI — maintenir le projet' : 'NON — renoncer au projet' }}</h2>
+        <p class="sur-titre">Décision au tribunal</p>
+        <h2>{{ choixValide() === 'OUI' ? 'Investir' : 'Conserver le portefeuille initial' }}</h2>
         <p>
           {{ profil()?.nom ?? profilCle() }} · {{ ticker() }}
           @if (actif(); as a) { — {{ a.nom }} }
           · {{ pct(tailleValeur(), 0) }} du portefeuille
         </p>
       </div>
-      @if (tribunal.resultat(); as proces) {
-        <p class="verdict">{{ proces.decision.verdict }}</p>
+      @if (procesDuDossier(); as proces) {
+        <p class="verdict"><span>Verdict du juge</span>{{ proces.decision.verdict }}</p>
       }
     </section>
 
@@ -59,7 +45,6 @@
       <section class="carte erreur" role="alert">
         <h2>Comparaison impossible</h2>
         <p>{{ erreur }}</p>
-        <a class="action-retour" routerLink="/tribunal-2" [queryParams]="parametresRetourVote()">Retourner au vote et au rapport</a>
       </section>
     }
 
@@ -68,14 +53,19 @@
         <section class="carte erreur" role="alert">
           <h2>Profit initial incohérent</h2>
           <p>Le profit initial conservé au début du procès ne correspond plus aux données recalculées. Revenez au tribunal et recommencez le dossier.</p>
-          <a class="action-retour" routerLink="/tribunal-2" [queryParams]="parametresRetourVote()">Retourner au vote et au rapport</a>
         </section>
       } @else {
+        @if (bilanProfil(); as bilan) {
+          <section class="carte bilan-profil" [attr.data-ton]="bilan.ton" aria-labelledby="titre-bilan-profil">
+            <p class="sur-titre">Profil déclaré et choix observé</p>
+            <h2 id="titre-bilan-profil">{{ bilan.titre }}</h2>
+            <p>{{ bilan.detail }}</p>
+          </section>
+        }
         @if (profil(); as p) {
-          <section class="profils-cote-a-cote" aria-label="Situation avant et après la décision">
+          <section class="profils-cote-a-cote" aria-label="Comparaison entre le profil déclaré et le choix observé">
             <article class="carte profil">
-              <p class="sur-titre">Avant la décision</p>
-              <h2>Profil initial · {{ p.nom }}</h2>
+              <h2>Profil déclaré · {{ p.nom }}</h2>
               <p>{{ p.resume }}</p>
               <div class="faits-descriptifs">
                 <p><strong>Objectif :</strong> {{ p.objectif }}</p>
@@ -84,7 +74,13 @@
               <dl class="faits-profil">
                 <div><dt>Capital fictif</dt><dd>{{ dollars(p.capital) }}</dd></div>
                 <div><dt>Horizon</dt><dd>{{ p.horizonAns }} ans</dd></div>
-                <div><dt>Budget de perte</dt><dd>{{ pct(p.budgetPerte) }}</dd></div>
+                <div>
+                  <dt>Budget de perte déclaré</dt>
+                  <dd>
+                    @if (budgetDeclare() !== null) { {{ dollarsPrecises(budgetDeclare() ?? 0) }} · }
+                    {{ pct(p.budgetPerte < 0 ? -p.budgetPerte : p.budgetPerte) }}
+                  </dd>
+                </div>
                 <div><dt>Plafond par titre</dt><dd>{{ pct(p.plafondPosition) }}</dd></div>
               </dl>
               <details>
@@ -98,22 +94,19 @@
             </article>
 
             <article class="carte profil profil-final">
-              <p class="sur-titre">Après la décision</p>
-              <h2>Profil et portefeuille retenus · {{ p.nom }}</h2>
-              <p>{{ p.resume }}</p>
+              <h2>Ce que votre choix révèle</h2>
               <p class="decision-profil">
                 <strong>Choix final :</strong>
                 {{ comp.choix ? 'OUI — la position est ajoutée' : 'NON — le portefeuille initial est conservé' }}
               </p>
               <dl class="faits-profil">
                 <div><dt>Titre examiné</dt><dd>{{ ticker() }}</dd></div>
-                <div><dt>Part demandée</dt><dd>{{ pct(tailleValeur(), 0) }}</dd></div>
-                <div><dt>Pire perte observée</dt><dd>{{ dollars(comp.perte_max_dollars) }}</dd></div>
+                @if (comp.choix) {
+                  <div><dt>Part attribuée à la demande</dt><dd>{{ pct(tailleValeur(), 0) }}</dd></div>
+                }
+                <div [class.hors-budget]="perteHorsBudget()"><dt>Pire perte simulée</dt><dd>{{ dollarsPrecises(comp.perte_max_dollars) }}</dd></div>
                 <div><dt>Volatilité annualisée</dt><dd>{{ pct(comp.volatilite_finale) }}</dd></div>
               </dl>
-              <p class="note-profil">
-                Les objectifs et contraintes du persona restent les mêmes; c’est l’allocation du portefeuille qui change selon votre choix.
-              </p>
             </article>
           </section>
         }
@@ -121,42 +114,40 @@
         <section class="carte comparaison-profit" aria-labelledby="titre-comparaison-profit">
           <header class="entete-profit">
             <div>
-              <p class="sur-titre">Décision finale : {{ comp.choix ? 'OUI' : 'NON' }}</p>
-              <h2 id="titre-comparaison-profit">Comparaison des deux profits</h2>
+              <h2 id="titre-comparaison-profit">Résultats de la simulation</h2>
             </div>
             <p class="periode-profit">Simulation historique · {{ comp.periode_debut }} au {{ comp.periode_fin }}</p>
           </header>
           <p class="hypothese-profit">Profits hypothétiques en dollars canadiens, calculés sur les rendements quotidiens ajustés du portefeuille historique; ils ne prédisent pas les rendements futurs.</p>
           <div class="profits-cote-a-cote">
             <article class="tuile-profit">
-              <span>Profit initial</span>
+              <span>Profit du portefeuille initial</span>
               <strong>{{ dollarsPrecises(comp.profit_initial) }}</strong>
               <small>Portefeuille d’origine, avant la décision</small>
             </article>
             <article class="tuile-profit">
-              <span>Profit final</span>
+              <span>Profit selon votre décision</span>
               <strong>{{ dollarsPrecises(comp.profit_final) }}</strong>
               <small>{{ comp.choix ? 'Avec la position choisie' : 'En conservant le portefeuille d’origine' }}</small>
             </article>
-          </div>
-          <div class="variation-profit"
-            [class.hausse]="differenceProfit() > 0"
-            [class.baisse]="differenceProfit() < 0"
-            [class.stable]="differenceProfit() === 0">
-            <span class="indicateur-profit" aria-hidden="true">
-              {{ differenceProfit() > 0 ? '↑' : differenceProfit() < 0 ? '↓' : '↔' }}
-            </span>
-            <div>
-              <span>Différence (profit final − profit initial)</span>
-              <strong>{{ dollarsPrecises(differenceProfit()) }}</strong>
-            </div>
-            <div>
-              <span>Évolution</span>
-              @if (evolutionProfit() === null) {
-                <strong>Non calculable : profit initial nul</strong>
-              } @else {
-                <strong>{{ pct(evolutionProfit() ?? 0) }}</strong>
-              }
+            <div class="variation-profit"
+              [class.hausse]="differenceProfit() > 0"
+              [class.baisse]="differenceProfit() < 0">
+              <span class="indicateur-profit" aria-hidden="true">
+                {{ differenceProfit() > 0 ? '↑' : differenceProfit() < 0 ? '↓' : '↔' }}
+              </span>
+              <div>
+                <span>Écart de profit</span>
+                <strong>{{ dollarsPrecises(differenceProfit()) }}</strong>
+              </div>
+              <div>
+                <span>Évolution</span>
+                @if (evolutionProfit() === null) {
+                  <strong>Non calculable : profit initial nul</strong>
+                } @else {
+                  <strong>{{ pct(evolutionProfit() ?? 0) }}</strong>
+                }
+              </div>
             </div>
           </div>
         </section>
@@ -164,20 +155,20 @@
 
       <div class="sections">
         <section class="carte">
-          <p class="sur-titre">1 · Promesse vs réalité</p>
+          <p class="sur-titre">Impact sur le capital</p>
           <h2>{{ comp.titre_decision }}</h2>
           <p class="statut">{{ comp.statut_conformite }}</p>
           <p>{{ comp.impact_capital }}</p>
         </section>
 
         <section class="carte">
-          <p class="sur-titre">2 · Profil révélé par la décision</p>
+          <p class="sur-titre">Votre choix</p>
           <h2>{{ comp.choix ? 'Vous choisissez de maintenir le projet' : 'Vous choisissez de protéger le portefeuille de départ' }}</h2>
           <p>{{ comp.commentaire_conseil }}</p>
         </section>
 
         <section class="carte">
-          <p class="sur-titre">3 · Stress-test et risques</p>
+          <p class="sur-titre">Risques</p>
           <h2>Conséquences observées sur la période historique</h2>
           <dl class="mesures">
             <div>
@@ -186,7 +177,7 @@
             </div>
             <div>
               <dt>Budget de perte</dt>
-              <dd>{{ comp.budget_depasse ? 'Dépassé de ' + dollars(comp.montant_depassement) : 'Respecté' }}</dd>
+              <dd>{{ perteHorsBudget() ? 'Dépassé de ' + dollarsPrecises(ecartBudget() ?? comp.montant_depassement) : 'Respecté' }}</dd>
             </div>
             <div>
               <dt>Volatilité annualisée finale</dt>
@@ -204,8 +195,8 @@
           <p class="limite">Ces résultats décrivent les données historiques utilisées par le tribunal; ils ne prédisent pas les pertes futures.</p>
         </section>
 
-        <section class="carte verdict-final" [class.verdict-non]="!comp.choix">
-          <p class="sur-titre">4 · Verdict du juge</p>
+        <section class="carte verdict-final">
+          <p class="sur-titre">Verdict du juge</p>
           <h2>{{ comp.statut_conformite }}</h2>
           <p>{{ comp.commentaire_conseil }}</p>
           @if (comp.recommandations.length) {
@@ -220,8 +211,5 @@
       </div>
     }
 
-    <footer>
-      <a class="action-retour" routerLink="/personas">Terminer et choisir un personnage</a>
-    </footer>
   }
 </main>

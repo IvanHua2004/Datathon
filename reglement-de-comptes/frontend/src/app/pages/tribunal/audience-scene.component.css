@@ -19,6 +19,35 @@
 
 .plateau:has(.lancer-tomate) { overflow: hidden; }
 
+.coup-marteau {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  justify-items: center;
+  gap: clamp(0.25rem, 1.5dvh, 0.9rem);
+  background: rgb(0 0 0 / 70%);
+  pointer-events: none;
+}
+.coup-marteau[hidden] { display: none; }
+.titre-coup-marteau {
+  grid-area: 1 / 1;
+  color: var(--rouge-action);
+  font: 400 clamp(2.25rem, min(9vw, 15dvh), 6rem) / 1 "Society", "Bookman Old Style", Georgia, serif;
+  text-align: center;
+  text-shadow: 0 3px 0 #260b1a;
+}
+.coup-marteau img {
+  grid-area: 2 / 1;
+  width: min(94vw, 50rem);
+  max-height: 72dvh;
+  object-fit: contain;
+  visibility: hidden;
+}
+.coup-marteau img.visible { visibility: visible; }
+
 .lancer-tomate {
   --depart: -12%;
   --milieu: 29%;
@@ -197,8 +226,14 @@
   background: #fbde85;
   border-color: #ffeab6;
 }
-.bouton-verdict:is(:active, .verdict-enfonce) { transform: scale(0.95); }
+.bouton-verdict:active { transform: scale(0.95); }
 .bouton-verdict:focus-visible { outline: 2px solid #fff6eb; outline-offset: 4px; }
+
+.bouton-verdict .pieces-terminer {
+  --coin-zone: -1.8rem 0.35rem -0.65rem -2.6rem;
+  --coin-size: 1.65rem;
+  --coin-font-size: 1rem;
+}
 
 .bouton-verdict.verdict-attendu::after {
   position: absolute;
@@ -208,30 +243,6 @@
   pointer-events: none;
   content: '';
   animation: appel-terminer 1.05s ease-in-out 4;
-}
-/* Éclats du coup de marteau sur « Terminé ». */
-.eclats-verdict { position: absolute; inset: 0; pointer-events: none; }
-.eclats-verdict i {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0.6rem;
-  height: 0.6rem;
-  border: 1.5px solid #200d19;
-  border-radius: 50%;
-  background: #ffd578;
-  animation: eclat-verdict 230ms ease-out both;
-}
-.eclats-verdict i:nth-child(1) { --x: -4.1rem; --y: -1.2rem; }
-.eclats-verdict i:nth-child(2) { --x: -4.4rem; --y: 0.8rem; background: #fc4547; }
-.eclats-verdict i:nth-child(3) { --x: -3.4rem; --y: 2.5rem; border-radius: 0.12rem; }
-.eclats-verdict i:nth-child(4) { --x: -1.6rem; --y: 3.7rem; background: #fff4e6; }
-.eclats-verdict i:nth-child(5) { --x: 0.7rem; --y: 4rem; border-radius: 0.12rem; }
-.eclats-verdict i:nth-child(6) { --x: 2.35rem; --y: 3rem; background: #fc4547; }
-@keyframes eclat-verdict {
-  from { opacity: 0; transform: translate(calc(var(--x) * 0.48), calc(var(--y) * 0.48)) scale(0.45); }
-  35% { opacity: 1; }
-  to { opacity: 1; transform: translate(var(--x), var(--y)) rotate(45deg); }
 }
 
 @keyframes appel-terminer {
@@ -272,20 +283,12 @@
 }
 .contenu-verdict .rendre-verdict {
   margin-inline-start: auto;
-  border: 1px solid var(--rouge-action);
-  background: var(--rouge-action);
+  border: 1px solid var(--confirm-background);
+  background: var(--confirm-background);
   color: #200e0c;
 }
-.contenu-verdict .rendre-verdict:enabled:hover { background: var(--rouge-action-survol); }
+.contenu-verdict .rendre-verdict:enabled:hover { background: var(--confirm-background-hover); }
 .contenu-verdict .rendre-verdict:disabled { opacity: 0.5; cursor: not-allowed; }
-.sur-titre {
-  margin: 0;
-  color: #773c6f;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 
 /* ---------- Fin de l'audience : deux portes, le juge (verdict) ou le greffier (questions) ---------- */
 .fenetre-fin {
@@ -302,7 +305,7 @@
 .fenetre-fin::backdrop { background: rgb(28 13 23 / 75%); }
 .fenetre-fin[open] { animation: papier-entre 220ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
 .contenu-fin { display: grid; gap: 1.2rem; padding: clamp(1rem, 3vw, 1.6rem); }
-.entete-fin { display: flex; align-items: center; gap: 1rem; }
+.entete-fin { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
 .entete-fin h2 { margin: 0.15rem 0 0; font-size: clamp(1.25rem, 2.6vw, 1.55rem); }
 .entete-fin h2:focus { outline: none; }
 .entete-fin .fermer-verdict { margin-right: -0.6rem; }
@@ -378,21 +381,9 @@
 .porte-fin--verdict .action-porte { border-color: var(--rouge-action); background: var(--rouge-action); color: #200e0c; }
 .porte-fin--verdict:hover { border-color: #3f2537; }
 .porte-fin--verdict:hover .action-porte { background: var(--rouge-action-survol); border-color: var(--rouge-action-survol); }
-.pastille-fin {
-  position: absolute;
-  top: 0.7rem;
-  left: 0.7rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
-  background: #ffc247;
-  color: #200e0c;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
 @media (max-width: 40rem) {
   .portes-fin { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; }
   .ou-fin { display: none; }
-  .entete-fin .etapes-verdict { display: none; }
   .illustration-fin { height: 7rem; }
 }
 
@@ -406,17 +397,13 @@
 .fenetre-verdict .contenu-verdict { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; padding: 0; }
 .contenu-verdict .entete-verdict {
   flex: none;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem clamp(0.9rem, 2.5vw, 1.5rem);
   border-bottom: 1px solid #deccd4;
 }
 .entete-verdict h2 { margin: 0.1rem 0 0; font-size: clamp(1.25rem, 2.4vw, 1.6rem); }
 .entete-verdict h2:focus { outline: none; }
-.etapes-verdict { display: flex; gap: 0.4rem; margin: 0 0 0 auto; padding: 0; list-style: none; font-size: 0.8rem; font-weight: 700; }
-.etapes-verdict li { padding: 0.35rem 0.7rem; border: 1px solid #deccd4; border-radius: 999px; background: #fff; color: #8a6a7c; white-space: nowrap; }
-.etapes-verdict li.fait { border-color: #b9dcc6; background: #eef8f1; color: #2e7a4f; }
-.etapes-verdict li.en-cours { border-color: #58354d; background: #58354d; color: #fff9f2; }
 
 .corps-verdict {
   display: grid;
@@ -557,11 +544,9 @@
 @media (max-width: 64rem) {
   .corps-verdict { grid-template-columns: minmax(0, 1fr); }
   .rail-rapport { padding: 1rem 0 0; border-left: 0; border-top: 1px solid #deccd4; }
-  .etapes-verdict { display: none; }
 }
 @media (max-width: 40rem) {
   .duel { grid-template-columns: minmax(0, 1fr); }
-  .contenu-verdict .entete-verdict .fermer-verdict { margin-left: auto; }
 }
 
 /* Le <dialog> devient un rail transparent : le papier à gauche, la barre d'outils flottante à droite.
@@ -713,7 +698,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .fenetre-verdict[open], .bouton-verdict.verdict-attendu::after { animation: none; }
-  .bouton-verdict:is(:active, .verdict-enfonce) { transform: none; }
+  .bouton-verdict:active { transform: none; }
 }
 
 .personnage {
@@ -815,22 +800,39 @@
 .decision-finale .voir-comparaison { justify-self: start; border-color: #a62432; background: #a62432; color: #fff; }
 .decision-finale .voir-comparaison:hover { background: #871d29; }
 .decision-finale button:focus-visible { outline: 3px solid #a62432; outline-offset: 2px; }
-.attente-rapport { display: flex; align-items: center; gap: 0.5rem; }
-.points-rapport { display: inline-flex; gap: 0.22rem; color: #773c6f; }
+.attente-rapport {
+  position: fixed;
+  inset: 0;
+  z-index: 21;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: 1rem;
+  background: var(--rouge-action);
+  color: #200e0c;
+}
+.libelle-attente-rapport {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  text-align: center;
+}
+.points-rapport { display: flex; gap: clamp(0.6rem, 2.5vw, 2rem); }
 .points-rapport i {
-  width: 0.35rem;
-  height: 0.35rem;
-  border-radius: 50%;
+  width: clamp(1.6rem, 8vw, 6rem);
+  aspect-ratio: 1;
   background: currentColor;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .points-rapport i { animation: point-rapport 900ms ease-in-out infinite; }
+  .points-rapport i { animation: point-rapport 1.2s ease-in-out infinite; }
   .points-rapport i:nth-child(2) { animation-delay: 150ms; }
   .points-rapport i:nth-child(3) { animation-delay: 300ms; }
+  .points-rapport i:nth-child(4) { animation-delay: 450ms; }
 }
 @keyframes point-rapport {
-  0%, 70%, 100% { opacity: 0.35; }
-  35% { opacity: 1; }
+  0%, 70%, 100% { opacity: 0.22; transform: scale(0.72); }
+  35% { opacity: 1; transform: scale(1); }
 }
 
 h2, h3 { margin: 0; color: #58354d; font-family: "Bookman Old Style", Georgia, serif; }
@@ -840,6 +842,7 @@ p { margin: 0; }
 .texte-replique, .attente p { margin-top: 0.5rem; line-height: 1.5; white-space: pre-wrap; }
 .mot-masque { visibility: hidden; }
 .mot-emphase { font-weight: 750; }
+.verdict-final .mot-emphase { color: #631a30; font-weight: 850; }
 .texte-accessible {
   position: absolute;
   width: 1px;

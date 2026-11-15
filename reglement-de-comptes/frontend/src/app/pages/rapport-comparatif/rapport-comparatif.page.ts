@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
 import { ProcesService } from '../../services/proces.service';
-import { dollars, pct } from '../../shared/format';
+import { dollars, pct, tonVerdict } from '../../shared/format';
 
 /** Rapport de décision, recalculable depuis les paramètres de l'URL. */
 @Component({
@@ -37,11 +37,16 @@ export class RapportComparatifPage {
   readonly actif = computed(
     () => this.tribunal.actifs().find((actif) => actif.ticker === this.ticker()) ?? null,
   );
+  readonly tailleValeur = computed(() => Number(this.taille()));
+  readonly procesDuDossier = computed(() =>
+    this.tribunal.correspond(this.profilCle(), this.ticker(), this.tailleValeur())
+      ? this.tribunal.resultat() : null,
+  );
   readonly choixValide = computed(() => {
     const choix = (this.choix() ?? '').toUpperCase();
-    return choix === 'OUI' || choix === 'NON' ? choix : null;
+    if (choix === 'OUI' || choix === 'NON') return choix;
+    return this.procesDuDossier() ? this.tribunal.choixInvestisseur() : null;
   });
-  readonly tailleValeur = computed(() => Number(this.taille()));
   readonly profitInitialValeur = computed(() => {
     const valeur = (this.profitInitial() ?? '').trim();
     if (!valeur) return null;
@@ -70,6 +75,65 @@ export class RapportComparatifPage {
     const resultat = this.tribunal.comparaison();
     return resultat ? resultat.profit_final - resultat.profit_initial : 0;
   });
+  readonly budgetDeclare = computed(() => {
+    const profil = this.profil();
+    return profil && profil.capital > 0 ? Math.abs(profil.budgetPerte) * profil.capital : null;
+  });
+  readonly ecartBudget = computed(() => {
+    const budget = this.budgetDeclare();
+    const comparaison = this.tribunal.comparaison();
+    return budget !== null && comparaison ? Math.abs(comparaison.perte_max_dollars) - budget : null;
+  });
+  readonly perteHorsBudget = computed(() => {
+    const ecart = this.ecartBudget();
+    return ecart !== null ? ecart > 0.01 : !!this.tribunal.comparaison()?.budget_depasse;
+  });
+  readonly bilanProfil = computed(() => {
+    const comparaison = this.tribunal.comparaison();
+    if (!comparaison) return null;
+
+    const budget = this.budgetDeclare();
+    const verdict = this.procesDuDossier()?.decision.verdict;
+    const ton = verdict ? tonVerdict(verdict) : null;
+
+    if (this.perteHorsBudget()) {
+      const ecart = this.ecartBudget() ?? comparaison.montant_depassement;
+      return {
+        ton: 'ecart',
+        titre: 'Votre choix dépasse le budget de perte déclaré',
+        detail: `La pire perte simulée excède la limite du persona de ${this.dollarsPrecises(ecart)}.`,
+      };
+    }
+    if (!comparaison.choix) {
+      return {
+        ton: budget !== null ? 'accord' : 'incertain',
+        titre: 'Votre choix conserve le portefeuille initial',
+        detail: budget !== null
+          ? 'Vous renoncez à la position proposée. Le risque reste celui du portefeuille de départ, dans le budget déclaré sur la période simulée.'
+          : 'Vous renoncez à la position proposée. Le risque reste celui du portefeuille de départ.',
+      };
+    }
+    if (ton === 'contraire' || ton === 'tension' || comparaison.statut_conformite.startsWith('Divergence')) {
+      return {
+        ton: 'ecart',
+        titre: ton === 'tension' ? 'Votre choix est en tension avec le profil déclaré' : 'Votre choix s’écarte du profil déclaré',
+        detail: verdict ? `Vous maintenez l’investissement. Avis du juge : « ${verdict} ».`
+          : 'Vous maintenez l’investissement malgré les réserves relevées dans le dossier.',
+      };
+    }
+    if (ton === 'compatible') {
+      return {
+        ton: 'accord',
+        titre: 'Votre choix est cohérent avec le profil déclaré',
+        detail: 'Vous retenez un investissement jugé compatible avec les contraintes déclarées.',
+      };
+    }
+    return {
+      ton: 'incertain',
+      titre: 'Cohérence avec le profil à confirmer',
+      detail: 'La simulation mesure le risque pris et permet de le comparer au budget déclaré.',
+    };
+  });
   readonly evolutionProfit = computed(() => {
     const resultat = this.tribunal.comparaison();
     if (!resultat || resultat.profit_initial === 0) return null;
@@ -89,7 +153,6 @@ export class RapportComparatifPage {
       const dossier = `${this.profilCle()}|${this.ticker()}|${this.tailleValeur()}|${choix}|${profitInitial}`;
       if (dossier === this.dernierDossier) return;
       this.dernierDossier = dossier;
-      this.tribunal.choixInvestisseur.set(choix);
       this.tribunal.choisirArbitrage(
         choix,
         this.profilCle(),

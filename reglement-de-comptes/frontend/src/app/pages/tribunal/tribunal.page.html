@@ -1,12 +1,5 @@
 @if (versionScene) {
-  <rdc-entete [etape]="3">
-    @if (profil(); as p) {
-      <div class="persona-entete">
-        <img [src]="'assets/' + p.cle + '.png'" alt="" width="48" height="48">
-        <strong>Dossier de {{ p.nom }}</strong>
-      </div>
-    }
-  </rdc-entete>
+  <rdc-entete [etape]="3" [persona]="profil()" />
 } @else {
   <header class="barre">
     <a class="retour" routerLink="/question" [queryParams]="{ profil: profilCle() }">← Le greffier</a>

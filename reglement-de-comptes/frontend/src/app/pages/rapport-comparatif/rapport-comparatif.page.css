@@ -1,57 +1,49 @@
 :host {
   display: block;
   min-height: 100svh;
-  color: #ffe5bf;
+  color: #feedd3;
+  --carte-rapport: #3b2836;
+  --fond-chiffres: #21101d;
+  --trait-rapport: #745367;
+  --texte-secondaire: #dfc6d0;
+  --rouge-rapport: #fc4446;
+  --rouge-texte: #ff9293;
+  --jaune-rapport: #fec946;
+  --vert-rapport: var(--confirm-background);
+  --vert-texte: #a8dfb8;
+  --fond-alerte: #482532;
+  --fond-accord: #263c31;
   background:
-    repeating-linear-gradient(90deg, rgb(255 229 191 / 6%) 0 1px, transparent 1px 32px),
-    radial-gradient(ellipse at 50% 0%, #4a2a40, #281523 70%);
+    radial-gradient(ellipse at 50% 42%, rgb(0 0 0 / 20%), rgb(0 0 0 / 67%)),
+    repeating-linear-gradient(90deg, rgb(255 229 191 / 15%) 0 1px, transparent 1px 32px),
+    radial-gradient(ellipse at 50% 42%, #663b57, #281523 78%);
 }
 
-.retour {
-  padding: 0.6rem 0.9rem;
-  border-radius: 3px;
-  background: #ffc247;
-  color: #200e0c;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.retour:focus-visible,
 .action-retour:focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 3px;
 }
 
 .rapport {
-  width: min(100% - 2rem, 1100px);
+  width: min(100% - clamp(1.25rem, 3vw, 3rem), 100rem);
   margin: 0 auto;
-  padding: 2rem 0 3rem;
+  padding: clamp(1rem, 2vw, 2rem) 0 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1rem;
+  overflow-wrap: anywhere;
 }
 
 .titre {
   text-align: center;
-  padding: 0.75rem 0 1rem;
+  padding: 0.35rem 0 0.65rem;
 }
 
 .sur-titre {
   margin: 0;
-  color: #8a5a80;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.titre .sur-titre {
-  color: #ffc247;
-}
-
-h1 {
-  margin: 0.5rem 0;
-  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  color: var(--texte-secondaire);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .avertissement,
@@ -67,16 +59,16 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.2rem 1.4rem;
-  border: 2px solid #ffc247;
-  border-radius: 8px;
-  background: #fff8ec;
-  color: #200e0c;
+  padding: clamp(0.85rem, 2vw, 1.2rem);
+  border: 1px solid var(--trait-rapport);
+  border-radius: 5px;
+  background: var(--carte-rapport);
 }
 
 .dossier h2 {
   margin: 0.25rem 0;
-  font-size: 1.3rem;
+  color: var(--jaune-rapport);
+  font-size: clamp(1.3rem, 2.4vw, 1.85rem);
 }
 
 .dossier p {
@@ -84,24 +76,24 @@ h1 {
 }
 
 .verdict {
+  display: grid;
+  gap: 0.3rem;
   max-width: 24rem;
-  padding: 0.55rem 0.8rem;
-  border-radius: 5px;
-  background: #f3e6d2;
+  padding-inline-start: 1rem;
+  border-inline-start: 1px solid var(--trait-rapport);
   font-weight: 700;
 }
+.verdict span { color: var(--texte-secondaire); font-size: 0.85rem; font-weight: 600; }
 
 .carte {
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
   min-width: 0;
-  padding: 1.25rem 1.4rem;
-  border: 1px solid #e8d9c4;
-  border-radius: 8px;
-  background: #fff8ec;
-  color: #200e0c;
-  box-shadow: 0 4px 0 rgb(0 0 0 / 20%);
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  border: 1px solid var(--trait-rapport);
+  border-radius: 5px;
+  background: var(--carte-rapport);
 }
 
 .carte h2,
@@ -130,8 +122,16 @@ h1 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
-  gap: 1rem;
+  gap: 1px;
+  border: 1px solid var(--trait-rapport);
+  border-radius: 5px;
+  overflow: hidden;
+  background: var(--trait-rapport);
 }
+
+.profil.carte { border: 0; border-radius: 0; }
+.profil.carte:first-child { background: var(--fond-chiffres); }
+.profil h2 { color: var(--jaune-rapport); }
 
 .faits-descriptifs {
   display: grid;
@@ -143,25 +143,47 @@ h1 {
   line-height: 1.5;
 }
 
-.profil-final {
-  border-color: #d69e2e;
-}
-
 .decision-profil {
-  padding: 0.7rem 0.8rem;
-  border-left: 4px solid #d69e2e;
-  background: #f3e6d2;
+  padding: 0.55rem 0.75rem;
+  border-inline-start: 3px solid var(--jaune-rapport);
+  background: var(--fond-chiffres);
 }
 
-.note-profil {
-  color: #665248;
-  font-size: 0.88rem;
+.bilan-profil {
+  border-inline-start: 5px solid var(--rouge-rapport);
+  padding-block: clamp(1rem, 2.4vw, 1.5rem);
+}
+.bilan-profil h2 {
+  font-family: "Bookman Old Style", "URW Bookman", Georgia, serif;
+  font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+  line-height: 1.15;
+}
+.bilan-profil[data-ton="ecart"] { background: var(--fond-alerte); }
+.bilan-profil[data-ton="accord"] {
+  border-inline-start-color: var(--vert-rapport);
+  background: var(--fond-accord);
+}
+.bilan-profil[data-ton="incertain"] {
+  border-inline-start-color: var(--jaune-rapport);
+  background: #423329;
+}
+.bilan-profil[data-ton="ecart"] h2,
+.profil-final h2,
+.hors-budget dd {
+  color: var(--rouge-texte);
+}
+.bilan-profil[data-ton="accord"] h2 {
+  color: var(--vert-texte);
+}
+.faits-profil .hors-budget {
+  border-bottom-color: var(--rouge-rapport);
+  background: var(--fond-alerte);
 }
 
 .faits-profil,
 .mesures {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
   gap: 0.65rem;
   margin: 0;
 }
@@ -169,16 +191,13 @@ h1 {
 .faits-profil div,
 .mesures div {
   padding: 0.65rem 0.75rem;
-  border: 1px solid #ebdcc9;
-  border-radius: 6px;
-  background: #fdfaf4;
+  border-bottom: 1px solid var(--trait-rapport);
 }
 
 dt {
-  color: #665248;
+  color: var(--texte-secondaire);
   font-size: 0.76rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 dd {
@@ -194,7 +213,7 @@ details {
 summary {
   cursor: pointer;
   font-weight: 700;
-  color: #773c6f;
+  color: var(--jaune-rapport);
 }
 
 .positions,
@@ -216,12 +235,8 @@ summary {
   display: flex;
   justify-content: space-between;
   gap: 0.75rem;
-  border-bottom: 1px solid #ebdcc9;
+  border-bottom: 1px solid var(--trait-rapport);
   padding: 0.25rem 0;
-}
-
-.comparaison-profit {
-  border: 2px solid #ffc247;
 }
 
 .entete-profit {
@@ -234,58 +249,58 @@ summary {
 
 .entete-profit h2 {
   margin: 0.25rem 0 0;
+  color: var(--jaune-rapport);
   font-size: clamp(1.2rem, 3vw, 1.6rem);
 }
 
+.comparaison-profit { border-top: 3px solid var(--jaune-rapport); }
+
 .periode-profit,
 .hypothese-profit {
-  color: #665248;
+  color: var(--texte-secondaire);
   font-size: 0.85rem;
 }
 
 .profits-cote-a-cote {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--trait-rapport);
 }
+.profits-cote-a-cote > * + * { border-inline-start: 1px solid var(--trait-rapport); }
 
 .tuile-profit {
   display: grid;
   gap: 0.35rem;
-  padding: 1rem;
-  border: 1px solid #ebdcc9;
-  border-radius: 6px;
-  background: #fdfaf4;
+  padding: clamp(0.7rem, 2vw, 1.15rem);
 }
+.tuile-profit { background: var(--fond-chiffres); }
+.tuile-profit:nth-child(2) strong { color: var(--jaune-rapport); }
 
 .tuile-profit span,
 .variation-profit > div > span {
-  color: #665248;
+  color: var(--texte-secondaire);
   font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .tuile-profit strong {
-  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-size: clamp(1.3rem, 2.8vw, 2.35rem);
   font-variant-numeric: tabular-nums;
 }
 
 .tuile-profit small {
-  color: #665248;
+  color: var(--texte-secondaire);
 }
 
 .variation-profit {
   display: grid;
-  grid-template-columns: auto repeat(2, minmax(0, 1fr));
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 0.75rem;
   padding: 0.9rem 1rem;
-  border-left: 5px solid #d69e2e;
-  border-radius: 4px;
-  background: #f3e6d2;
   font-variant-numeric: tabular-nums;
 }
+.variation-profit > div:last-child { grid-column: 2; }
 
 .variation-profit > div {
   display: grid;
@@ -297,19 +312,13 @@ summary {
 }
 
 .variation-profit.hausse {
-  border-left-color: #2f855a;
-  background: #e7f4ec;
-  color: #1d5c3a;
+  background: var(--fond-accord);
+  color: var(--vert-texte);
 }
 
 .variation-profit.baisse {
-  border-left-color: #a3261a;
-  background: #fbe9e6;
-  color: #8c241a;
-}
-
-.variation-profit.stable {
-  border-left-color: #d69e2e;
+  background: var(--fond-alerte);
+  color: var(--rouge-texte);
 }
 
 .indicateur-profit {
@@ -319,25 +328,20 @@ summary {
 
 .sections {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--trait-rapport);
+  border-radius: 5px;
+  background: var(--trait-rapport);
 }
+
+.sections > .carte { border: 0; border-radius: 0; }
 
 .statut {
   align-self: flex-start;
-  padding: 0.35rem 0.65rem;
-  border-radius: 4px;
-  background: #f3e6d2;
-  color: #4a2a40;
-  font-weight: 800;
-}
-
-.verdict-final {
-  border: 2px solid #d69e2e;
-}
-
-.verdict-final.verdict-non {
-  border-color: #38a169;
+  color: var(--texte-secondaire);
+  font-weight: 700;
 }
 
 .verdict-final h3 {
@@ -351,12 +355,12 @@ summary {
 }
 
 .sceau {
-  color: #773c6f;
+  color: var(--jaune-rapport);
   font-size: 2rem;
 }
 
 .erreur {
-  border-left: 5px solid #a3261a;
+  border-left: 5px solid var(--rouge-rapport);
 }
 
 .action-retour {
@@ -365,39 +369,34 @@ summary {
   margin-top: 0.5rem;
   padding: 0.7rem 1rem;
   border-radius: 3px;
-  background: #773c6f;
-  color: #fff8ec;
+  background: var(--jaune-rapport);
+  color: var(--fond-chiffres);
   font-weight: 700;
   text-decoration: none;
 }
 
 .action-retour:hover {
-  background: #5a2c54;
-}
-
-.choix-rapport { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-
-footer {
-  display: flex;
-  justify-content: center;
+  background: #fbde85;
 }
 
 @media (max-width: 700px) {
+  .rapport { gap: 0.75rem; }
+  .verdict { width: 100%; max-width: none; padding: 0.65rem 0 0; border-inline-start: 0; border-top: 1px solid var(--trait-rapport); }
   .profils-cote-a-cote,
   .sections,
   .profits-cote-a-cote {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .variation-profit {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .variation-profit > div:last-child {
-    grid-column: 2;
-  }
+  .profits-cote-a-cote > * + * { border-inline-start: 0; border-top: 1px solid var(--trait-rapport); }
 
   details {
     grid-column: auto;
   }
+}
+
+@media (max-width: 420px) {
+  .dossier { gap: 0.65rem; }
+  .entete-profit { gap: 0.35rem; }
+  .faits-profil, .mesures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .faits-profil div, .mesures div { padding-inline: 0.25rem; }
 }

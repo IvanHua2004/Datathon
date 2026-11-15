@@ -58,23 +58,6 @@
 
 .version-tribunal:hover { background: rgb(255 229 191 / 14%); }
 
-.persona-entete {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.65rem;
-  min-width: 0;
-  max-width: 100%;
-  margin-inline-start: auto;
-  padding: 0.25rem 0.85rem 0.25rem 0.25rem;
-  border: 1px solid rgb(254 237 211 / 42%);
-  border-radius: 4px;
-  background: #3b2836;
-  color: #feedd3;
-  line-height: 1.2;
-}
-.persona-entete img { flex: none; border-radius: 2px; object-fit: cover; }
-.persona-entete strong { overflow-wrap: anywhere; }
-
 :host(.tribunal-scene) {
   background: radial-gradient(ellipse at 55% 15%, #503038, #21131f 72%);
 }

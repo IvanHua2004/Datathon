@@ -32,7 +32,10 @@ export class ProcesService {
 
   readonly comparaison = signal<AnalyseComparative | null>(null);
   readonly chargementComparaison = signal(false);
-  readonly choixInvestisseur = signal<'OUI' | 'NON' | null>(null);
+  readonly choixInvestisseur = computed(() => {
+    const vote = this.voteAudience();
+    return vote === 'avocat_defense' ? 'OUI' : vote === 'procureur' ? 'NON' : null;
+  });
 
   readonly scenarios = signal<ScenarioAlternatif[] | null>(null);
   readonly chargementScenarios = signal(false);
@@ -75,7 +78,6 @@ export class ProcesService {
     this.api.ouvrirProces(demande).subscribe({
       next: (proces) => {
         this.voteAudience.set(null);
-        this.choixInvestisseur.set(null);
         this.resultat.set(proces);
         this.enCours.set(false);
       },
@@ -177,7 +179,6 @@ export class ProcesService {
     this.resultat.set(null);
     this.comparaison.set(null);
     this.scenarios.set(null);
-    this.choixInvestisseur.set(null);
   }
 
   private message(e: unknown): string {
