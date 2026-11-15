@@ -21,6 +21,7 @@ DESCRIPTIONS = {
     "valeurs": "preuves ESG collectées à la main par l'équipe dans des documents publics",
     "macro": "taux directeur, rendement obligataire et inflation pendant la pire baisse",
     "action": "fiche d'identité financière avancée précalculée : VaR, Sharpe, Bêta, dividende, moments",
+    "simulation": "simulations probabilistes et historiques : pire cas de perte, cas probable moyen, meilleur cas de gain",
 }
 
 
@@ -180,10 +181,45 @@ def action_temoin(dossier, greffier: Greffier, appele_par: str) -> Piece:
     )
 
 
+def simulation(dossier, greffier: Greffier, appele_par: str) -> Piece:
+    """Témoin des simulations financières : modélise le pire cas, cas moyen et meilleur cas."""
+    from . import simulateur
+    simu = simulateur.simuler_impact_decision(dossier)
+    pire = simu.pire_cas
+    moyen = simu.cas_probable
+    meilleur = simu.meilleur_cas
+
+    faits = {
+        "Capital engagé de départ": dollars(simu.capital_initial),
+        "Pire cas de perte (Stress-test historique)": f"{dollars(pire.impact_dollars)} ({pct(pire.rendement_pct)})",
+        "Pire creux projeté du portefeuille": dollars(pire.capital_final),
+        "Période du pire creux historique": f"{pire.date_debut} au {pire.date_fin}",
+        "Cas probable / moyen (Rendement 1 an)": f"+{dollars(moyen.impact_dollars)} (+{pct(moyen.rendement_pct)} / an)",
+        "Capital final projeté au cas moyen": dollars(moyen.capital_final),
+        "Meilleur cas de gain (Rallye haussier 1 an)": f"+{dollars(meilleur.impact_dollars)} (+{pct(meilleur.rendement_pct)})",
+        "Capital final projeté au meilleur cas": dollars(meilleur.capital_final),
+        "Période du meilleur rallye historique": f"{meilleur.date_debut} au {meilleur.date_fin}",
+        "Budget de perte maximal déclaré": f"{pct(simu.budget_perte_pct)} ({dollars(simu.budget_perte_dollars)})",
+        "Statut de conformité du pire cas": pire.statut_libelle,
+        "Impact net du pire cas vs portefeuille actuel": dollars(pire.delta_vs_actuel_dollars),
+        "Gain annuel additionnel vs portefeuille actuel": dollars(moyen.delta_vs_actuel_dollars),
+        "Potentiel haussier additionnel vs portefeuille actuel": dollars(meilleur.delta_vs_actuel_dollars),
+    }
+    return greffier.deposer(
+        temoin="simulation", outil="rdc.simulateur.simuler_impact_decision", appele_par=appele_par,
+        parametres={"ticker": dossier.ticker, "taille": dossier.taille, "capital": simu.capital_initial},
+        faits=faits, source="Séries temporelles historiques en CAD (1 304 séances quotidiennes, 2021-2026)",
+        periode=f"{dossier.debut} au {dossier.fin}",
+        limites="Projections fondées sur les séances historiques observées à poids constants. "
+                "Le passé ne constitue pas une garantie du futur.",
+    )
+
+
 TEMOINS = {
     "risque": risque,
     "diversification": diversification,
     "valeurs": valeurs,
     "macro": macro,
     "action": action_temoin,
+    "simulation": simulation,
 }

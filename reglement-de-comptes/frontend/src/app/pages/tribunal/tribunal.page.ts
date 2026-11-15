@@ -326,6 +326,26 @@ export class TribunalPage {
     );
   }
 
+  exporterSvg(type: 'horizons' | 'simulations' = 'horizons'): void {
+    const pr = this.proces();
+    if (!pr) return;
+    const svgContent = type === 'horizons' ? pr.svg_horizons : pr.svg_simulations;
+    if (svgContent) {
+      const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `alphaforge_${type}_${pr.demande.profil}_${pr.demande.ticker}.svg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else {
+      const url = `/api/proces/export-graphique/${type}?profil=${pr.demande.profil}&ticker=${pr.demande.ticker}&taille=${pr.demande.taille}`;
+      window.open(url, '_blank');
+    }
+  }
+
   valeur(event: Event): string {
     return (event.target as HTMLSelectElement).value;
   }

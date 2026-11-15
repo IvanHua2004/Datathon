@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { Actif, AnalyseComparative, ConfigurationPersona, DemandeProces, IntentionResultat, Mode, Proces, Profil, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
+import { Actif, AnalyseComparative, ConfigurationPersona, DemandeAnalogie, DemandeProces, IntentionResultat, Mode, Proces, Profil, ReponseAnalogie, Sante, ScenarioAlternatif, TourDiscussion } from '../models/proces.model';
 import { AnalyseQuestion, DemandeAnalyse } from '../models/question.model';
 import { Duel } from '../models/duel.model';
 
@@ -76,5 +76,9 @@ export class ApiService {
     return this.http.post(`${this.base}/pdf`, { profil, ticker, taille, mode, intention_texte, choix_investisseur }, {
       responseType: 'blob',
     });
+  }
+
+  demanderAnalogie(demande: DemandeAnalogie): Observable<ReponseAnalogie> {
+    return this.http.post<ReponseAnalogie>(`${this.base}/analogie`, demande);
   }
 }

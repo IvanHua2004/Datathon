@@ -13,13 +13,28 @@ import re
 import os
 from base64 import urlsafe_b64decode, urlsafe_b64encode
 from dataclasses import asdict
+from pathlib import Path
 from typing import Annotated, Literal
 
 from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, StringConstraints, model_validator
+
+# Charger automatiquement le fichier .env si présent
+env_path = Path(__file__).resolve().parent.parent / ".env"
+if env_path.exists():
+    for ligne in env_path.read_text(encoding="utf-8").splitlines():
+        ligne = ligne.strip()
+        if ligne and not ligne.startswith("#") and "=" in ligne:
+            k, v = ligne.split("=", 1)
+            k = k.strip()
+            if k not in os.environ:
+                os.environ[k] = v.strip().strip('"').strip("'")
 
 from rdc import audience, donnees, greffier, questions, temoins
 from rdc.profils import PROFILS, Profil
+from rdc.agents import generer_analogie
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
                         construire_timeline_discussion)
 from rdc.intention import interpreter_intention
@@ -98,6 +113,19 @@ class DemandePDF(BaseModel):
     mode: Literal["gabarit", "bedrock"] = "bedrock"
     intention_texte: str | None = None
     choix_investisseur: str | None = None
+
+
+class DemandeAnalogie(BaseModel):
+    texte: str = Field(description="Texte ou argument technique à vulgariser")
+    acteur: str | None = Field(default=None, description="Nom de l'acteur ou témoin (ex: Dr. Laurent)")
+    role: str | None = Field(default=None, description="Rôle au tribunal (ex: temoin, avocat_defense...)")
+    mode: Literal["gabarit", "bedrock"] = "bedrock"
+
+
+class ReponseAnalogie(BaseModel):
+    analogie: str
+    titre: str = "L'Analogie du Juré"
+    source: str = "bedrock"
 
 
 _RISQUES_PERSONA = {
@@ -435,6 +463,11 @@ def proces(demande: DemandeProces, request: Request) -> dict:
     rapport_explicabilite = greffier.generer_rapport_explicabilite(p)
     discussion = construire_timeline_discussion(p)
 
+    from reportlab.graphics import renderSVG
+    from rdc import simulateur
+    svg_simu = renderSVG.drawToString(simulateur.creer_graphique_simulations(p.simulation)) if getattr(p, "simulation", None) else ""
+    svg_horiz = renderSVG.drawToString(simulateur.creer_graphique_horizons(p.simulation)) if getattr(p, "simulation", None) else ""
+
     return {
         "demande": {
             "profil": profil.cle,
@@ -480,7 +513,30 @@ def proces(demande: DemandeProces, request: Request) -> dict:
         ],
         "rapport_explicabilite": rapport_explicabilite,
         "discussion": discussion,
+        "simulations": p.simulation.en_dict() if getattr(p, "simulation", None) else None,
+        "svg_simulations": svg_simu,
+        "svg_horizons": svg_horiz,
     }
+
+
+@app.get("/api/proces/export-graphique/{nom}")
+def exporter_graphique(nom: str, profil: str, ticker: str, request: Request, taille: float = 0.20) -> Response:
+    """Exporte un graphique vectoriel haute fidélité (simulations ou horizons) au format SVG."""
+    from reportlab.graphics import renderSVG
+    from rdc import simulateur
+    p_obj = _profil(request, profil)
+    dossier = construire_dossier(p_obj, ticker, taille)
+    simu = simulateur.simuler_impact_decision(dossier)
+    if nom.lower().startswith("horiz"):
+        dw = simulateur.creer_graphique_horizons(simu)
+        fname = f"alphaforge_horizons_{profil}_{ticker}.svg"
+    else:
+        dw = simulateur.creer_graphique_simulations(simu)
+        fname = f"alphaforge_simulations_{profil}_{ticker}.svg"
+    svg_str = renderSVG.drawToString(dw)
+    return Response(content=svg_str, media_type="image/svg+xml", headers={
+        "Content-Disposition": f"attachment; filename={fname}"
+    })
 
 
 @app.post("/api/proces/discussion")
@@ -579,3 +635,52 @@ def telecharger_pdf(demande: DemandePDF, request: Request) -> Response:
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{nom_fichier}"'},
     )
+
+
+@app.post("/api/analogie", response_model=ReponseAnalogie)
+def obtenir_analogie(demande: DemandeAnalogie) -> ReponseAnalogie:
+    resultat = generer_analogie(
+        texte=demande.texte,
+        acteur=demande.acteur,
+        role=demande.role,
+        mode=demande.mode,
+    )
+    titre = f"L'Analogie du Juré · {demande.acteur}" if demande.acteur else "L'Analogie du Juré"
+    return ReponseAnalogie(
+        analogie=resultat["analogie"],
+        titre=titre,
+        source=resultat.get("source", "gabarit"),
+    )
+
+
+# --------------------------------------------------------------------------- SPA Angular
+STATIC_DIR = Path(os.environ.get("RDC_STATIC_DIR") or (Path(__file__).resolve().parent.parent / "frontend" / "dist" / "menu" / "browser"))
+
+@app.get("/")
+def serve_racine():
+    if STATIC_DIR.exists():
+        index_file = STATIC_DIR / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+    return {"status": "ok", "service": "API Règlement de comptes"}
+
+@app.get("/{full_path:path}")
+def serve_frontend_spa(full_path: str):
+    if full_path.startswith("api/") or full_path == "api":
+        raise HTTPException(status_code=404, detail="Endpoint API introuvable")
+
+    if STATIC_DIR.exists():
+        target = (STATIC_DIR / full_path).resolve()
+        try:
+            target.relative_to(STATIC_DIR.resolve())
+            if target.is_file():
+                return FileResponse(target)
+        except ValueError:
+            raise HTTPException(status_code=403, detail="Accès interdit")
+
+        index_file = STATIC_DIR / "index.html"
+        if index_file.is_file():
+            return FileResponse(index_file)
+
+    raise HTTPException(status_code=404, detail="Interface introuvable")
+

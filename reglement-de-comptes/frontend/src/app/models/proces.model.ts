@@ -184,4 +184,20 @@ export interface Proces {
   pieces: Piece[];
   rapport_explicabilite?: string;
   discussion?: TourDiscussion[];
+  simulations?: any;
+  svg_simulations?: string;
+  svg_horizons?: string;
+}
+
+export interface DemandeAnalogie {
+  texte: string;
+  acteur?: string;
+  role?: string;
+  mode?: Mode;
+}
+
+export interface ReponseAnalogie {
+  analogie: string;
+  titre?: string;
+  source?: string;
 }

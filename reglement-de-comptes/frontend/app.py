@@ -230,12 +230,13 @@ if st.session_state.get("afficher_scenarios"):
 
 # Bouton de téléchargement du PDF officiel
 st.divider()
-pdf_data = rapport_pdf.generer_pdf_rapport(
-    proces,
-    decision_investisseur=st.session_state.get("decision_investisseur"),
-    scenarios_alternatifs=st.session_state.get("alternatives"),
-    intention_texte=st.session_state.get("intention_texte", "")
-)
+with st.spinner("Génération de la Carte de Décision Auditée (PDF) en cours…"):
+    pdf_data = rapport_pdf.generer_pdf_rapport(
+        proces,
+        decision_investisseur=st.session_state.get("decision_investisseur"),
+        scenarios_alternatifs=st.session_state.get("alternatives"),
+        intention_texte=st.session_state.get("intention_texte", "")
+    )
 st.download_button(
     label="📄 Télécharger la Carte de Décision Auditée (PDF Officiel du Greffier)",
     data=pdf_data,

@@ -123,6 +123,7 @@
       <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []"
         [enCours]="tribunal.enCours() || (!!profilDemande() && !!tickerDemande() && tribunal.chargement())"
         [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []"
+        [chargementPdf]="tribunal.chargementPdf()" [succesPdf]="tribunal.succesPdf()"
         (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)"
         (autreQuestion)="versGreffier()"
         [delibere]="reprise()"
@@ -219,6 +220,35 @@
       <section class="carte carte-arbitrage" aria-label="Arbitrage de l'investisseur">
         <h2>🎯 Votre arbitrage d'investisseur : quelle est votre décision ?</h2>
         <p class="note-carte">Le tribunal éclaire les risques et audite les faits, mais le libre arbitre appartient à l'investisseur.</p>
+
+        @if (pr.simulations; as simu) {
+          <div class="synthese-securite-patrimoniale" [attr.data-zone]="simu.zone_securite">
+            <div class="score-jauge-bloc">
+              <span class="score-valeur">{{ simu.score_securite }}/100</span>
+              <div class="score-meta">
+                <span class="score-badge" [attr.data-zone]="simu.zone_securite">{{ simu.libelle_score }}</span>
+                <span class="score-label">Score de Sécurité Patrimoniale</span>
+              </div>
+            </div>
+            <div class="details-synthese-grille">
+              <div class="item-detail">
+                <span class="titre-detail">Coût d'opportunité (gain espéré vs statu quo)</span>
+                <span class="val-detail gain">+{{ dollars(simu.cout_opportunite_gain_annuel) }}/an</span>
+              </div>
+              <div class="item-detail">
+                <span class="titre-detail">Surcroît de risque en crise</span>
+                <span class="val-detail perte">-{{ dollars(simu.cout_opportunite_risque_creux) }}</span>
+              </div>
+              @if (simu.est_titre_usd) {
+                <div class="item-detail devise">
+                  <span class="titre-detail">Sensibilité Change USD/CAD (±5%)</span>
+                  <span class="val-detail">±{{ dollars(simu.impact_change_5pct) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         <div class="boutons-choix">
           <button type="button" class="btn btn-oui" (click)="choisirArbitrage('OUI')" [disabled]="tribunal.chargementComparaison()">
             {{ tribunal.chargementComparaison() ? 'Calcul en cours…' : '👍 OUI (Investir quand même)' }}
@@ -229,10 +259,34 @@
           <button type="button" class="btn btn-scenarios" (click)="demanderScenarios()" [disabled]="tribunal.chargementScenarios()">
             {{ tribunal.chargementScenarios() ? 'Recherche d\'alternatives…' : '💡 D\'autres scénarios ?' }}
           </button>
-          <button type="button" class="btn btn-pdf" (click)="telechargerPdf()">
-            📄 Télécharger la Carte Auditée (PDF)
+          <button type="button" class="btn btn-pdf" (click)="telechargerPdf()" [disabled]="tribunal.chargementPdf()"
+            [class.en-chargement]="tribunal.chargementPdf()" [class.succes]="tribunal.succesPdf()">
+            @if (tribunal.chargementPdf()) {
+              <span class="spinner-pdf" aria-hidden="true">⏳</span>
+              <span>Génération du rapport en cours…</span>
+            } @else if (tribunal.succesPdf()) {
+              <span>✅ Rapport téléchargé !</span>
+            } @else {
+              <span>📄 Télécharger la Carte Auditée (PDF)</span>
+            }
+          </button>
+          <button type="button" class="btn btn-svg" (click)="exporterSvg('horizons')" title="Exporter le graphique multi-horizons vectoriel au format SVG haute définition">
+            <span>🖼️ Exporter Graphique (SVG)</span>
           </button>
         </div>
+
+        @if (tribunal.chargementPdf()) {
+          <div class="feedback-chargement-pdf" role="status">
+            <span class="spinner-pdf" aria-hidden="true">⏳</span>
+            <span>Génération du rapport PDF officiel en cours (calcul des simulations, graphiques multi-horizons et audit du greffier)…</span>
+          </div>
+        }
+        @if (tribunal.succesPdf()) {
+          <div class="feedback-succes-pdf" role="status">
+            <span>✅</span>
+            <span>Le rapport PDF officiel (2 pages) a été généré et téléchargé avec succès !</span>
+          </div>
+        }
       </section>
 
       @if (tribunal.comparaison(); as comp) {
