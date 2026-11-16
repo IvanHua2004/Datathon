@@ -49,7 +49,7 @@ function departager(a: number, b: number, plusGrandGagne: boolean): Meilleur {
   selector: 'rdc-rapport-duel',
   imports: [RouterLink, EnteteComponent, RapportFinalComponent],
   templateUrl: './rapport-duel.page.html',
-  styleUrl: './rapport-duel.page.css',
+  styleUrl: './rapport-duel.page.scss',
 })
 export class RapportDuelPage {
   private readonly api = inject(ApiService);

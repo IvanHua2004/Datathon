@@ -35,7 +35,7 @@ const TUILES = ['Pire baisse du portefeuille', 'Volatilité annuelle', 'Résulta
   host: { class: 'tribunal-scene' },
   imports: [RouterLink, NgTemplateOutlet, EnteteComponent, AudienceSceneComponent],
   templateUrl: './duel.page.html',
-  styleUrl: './duel.page.css',
+  styleUrl: './duel.page.scss',
 })
 export class DuelPage {
   private readonly api = inject(ApiService);

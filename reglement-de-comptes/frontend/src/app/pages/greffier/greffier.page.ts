@@ -41,7 +41,7 @@ interface Sauvegarde {
   selector: 'rdc-greffier',
   imports: [RouterLink, EnteteComponent],
   templateUrl: './greffier.page.html',
-  styleUrl: './greffier.page.css',
+  styleUrl: './greffier.page.scss',
 })
 export class GreffierPage {
   private readonly api = inject(ApiService);

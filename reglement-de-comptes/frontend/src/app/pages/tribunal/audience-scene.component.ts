@@ -47,8 +47,8 @@ function clePortrait(tour: TourDiscussion): string {
 @Component({
   selector: 'rdc-audience-scene',
   imports: [RapportAudienceComponent, PiecesMonnaieComponent],
-  styleUrl: './audience-scene.component.css',
   templateUrl: './audience-scene.component.html',
+  styleUrl: './audience-scene.component.scss',
 })
 export class AudienceSceneComponent {
   readonly tours = input<readonly TourDiscussion[]>([]);
@@ -311,12 +311,6 @@ export class AudienceSceneComponent {
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     effect((nettoyer) => {
       if (!this.annonceTerminee() || this.reprendreVote()) return;
-      if (this.duel()) {
-        // Duel : pas de tableau de bord à ouvrir, la page du duel fait défiler jusqu'à la décision.
-        const fin = setTimeout(() => this.continuerComparaison.emit(), 1500);
-        nettoyer(() => clearTimeout(fin));
-        return;
-      }
       let minuterie: ReturnType<typeof setTimeout> | undefined;
       untracked(() => {
         this.jouerMarteau(2, () => {

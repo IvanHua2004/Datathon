@@ -17,7 +17,7 @@ import { AudienceSceneComponent } from './audience-scene.component';
   selector: 'rdc-tribunal',
   imports: [NgTemplateOutlet, RouterLink, PlaidoirieComponent, CourbeTailleComponent, AudienceSceneComponent, EnteteComponent],
   templateUrl: './tribunal.page.html',
-  styleUrl: './tribunal.page.css',
+  styleUrl: './tribunal.page.scss',
   host: { '[class.tribunal-scene]': 'versionScene' },
 })
 export class TribunalPage {

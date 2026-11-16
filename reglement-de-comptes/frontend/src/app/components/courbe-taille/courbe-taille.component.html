@@ -1,0 +1,37 @@
+<svg [attr.viewBox]="'0 0 ' + largeur + ' ' + hauteur" role="img"
+     [attr.aria-label]="description()">
+  @for (t of graduationsY(); track t.valeur) {
+    <line class="grille" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+          [attr.y1]="t.y" [attr.y2]="t.y"></line>
+    <text class="graduation" [attr.x]="marge.gauche - 10" [attr.y]="t.y + 4" text-anchor="end">{{ t.texte }}</text>
+  }
+  @for (t of graduationsX(); track t.valeur) {
+    <text class="graduation" [attr.x]="t.x" [attr.y]="hauteur - marge.bas + 22" text-anchor="middle">{{ t.texte }}</text>
+  }
+  <line class="axe" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+        [attr.y1]="hauteur - marge.bas" [attr.y2]="hauteur - marge.bas"></line>
+
+  <line class="budget" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+        [attr.y1]="yBudget()" [attr.y2]="yBudget()"></line>
+  <text class="etiquette-budget" [attr.x]="largeur - marge.droite" [attr.y]="yBudget() - 8" text-anchor="end">
+    Budget de perte déclaré : {{ budgetTexte() }}
+  </text>
+
+  <polyline class="ligne" [attr.points]="ligne()"></polyline>
+  @for (p of points(); track p.taille) {
+    <circle class="point" [attr.cx]="p.x" [attr.cy]="p.y" r="6">
+      <title>{{ p.infobulle }}</title>
+    </circle>
+  }
+  @if (pointDemande(); as d) {
+    <circle class="demande" [attr.cx]="d.x" [attr.cy]="d.y" r="13"></circle>
+    <text class="etiquette-demande" [attr.x]="d.x - 16" [attr.y]="d.y + 26" text-anchor="end">Demande</text>
+  }
+
+  <text class="titre-axe" [attr.x]="(marge.gauche + largeur - marge.droite) / 2" [attr.y]="hauteur - 10" text-anchor="middle">
+    Part du portefeuille placée dans le titre (%)
+  </text>
+  <text class="titre-axe" [attr.transform]="'translate(16 ' + (hauteur - marge.bas + marge.haut) / 2 + ') rotate(-90)'" text-anchor="middle">
+    Pire baisse observée (%)
+  </text>
+</svg>

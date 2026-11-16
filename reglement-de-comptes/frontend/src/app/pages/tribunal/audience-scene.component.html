@@ -223,18 +223,16 @@
     </div>
   </div>
 </dialog>
-@if (duel()) {
-  <!-- Duel : la décision s'affiche sous la salle, dans la page du duel. -->
-} @else if (ouvertureRapport()) {
+@if (ouvertureRapport()) {
   <div class="attente-rapport" role="status">
     <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i></span>
     <p class="libelle-attente-rapport">{{ duel() ? 'Ouverture de la décision du duel' : 'Ouverture du tableau de bord comparatif' }}</p>
   </div>
 } @else if (annonceTerminee() && imageMarteau() === null) {
   <section class="decision-finale" aria-labelledby="titre-decision-finale">
-    <h2 id="titre-decision-finale">{{ duel() ? 'Décision du duel' : 'Rapport comparatif' }}</h2>
+    <h2 id="titre-decision-finale">{{ duel() ? 'Tableau de bord du duel' : 'Rapport comparatif' }}</h2>
     <button type="button" class="voir-comparaison"
-      (click)="continuerComparaison.emit()">{{ duel() ? 'Voir la décision du duel →' : 'Ouvrir le rapport comparatif →' }}</button>
+      (click)="continuerComparaison.emit()">{{ duel() ? 'Ouvrir le tableau de bord comparatif →' : 'Ouvrir le rapport comparatif →' }}</button>
   </section>
 }
 <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict"

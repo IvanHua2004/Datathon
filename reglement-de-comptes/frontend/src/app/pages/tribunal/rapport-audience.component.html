@@ -1,0 +1,179 @@
+@if (proces(); as pr) {
+  <div class="rapport-imprimable">
+    @if (!audienceTerminee()) {
+      <p class="bandeau-encours" role="status">
+        Audience en cours : la synthèse est déjà disponible, la transcription se complète au fil des interventions.
+      </p>
+    }
+
+    <!-- A. La synthèse (la décision du tribunal reste scellée tant que l'investisseur n'a pas voté) -->
+    @if (masquerDecision()) {
+      <section class="synthese synthese--scellee" aria-labelledby="r-verdict">
+        <p class="sur-titre">Verdict du tribunal · règle fixe</p>
+        <h3 id="r-verdict" class="verdict">Révélé après votre vote</h3>
+        <p class="question">{{ pr.demande.nom }} · {{ pct(pr.demande.taille, 0) }} du portefeuille dans
+          {{ pr.demande.nomTitre }} ({{ pr.demande.ticker }}), soit {{ dollars(pr.demande.capital * pr.demande.taille) }}</p>
+        <p class="motif-unique">Pour ne pas vous influencer, la décision du tribunal et ce qui la ferait changer
+          s’affichent dès que vous avez rendu votre verdict.</p>
+      </section>
+    } @else {
+    <section class="synthese" [attr.data-ton]="ton()" aria-labelledby="r-verdict">
+      <p class="sur-titre">Verdict du tribunal · règle fixe</p>
+      <h3 id="r-verdict" class="verdict">{{ pr.decision.verdict }}</h3>
+      <p class="question">{{ pr.demande.nom }} · {{ pct(pr.demande.taille, 0) }} du portefeuille dans
+        {{ pr.demande.nomTitre }} ({{ pr.demande.ticker }}), soit {{ dollars(pr.demande.capital * pr.demande.taille) }}</p>
+      @if (motifs().length) {
+        <ul class="motifs">
+          @for (m of motifs(); track $index) { <li>{{ m }}</li> }
+        </ul>
+      } @else {
+        <p class="motif-unique">La demande respecte les contraintes déclarées et ne crée pas de tension notable avec le profil.</p>
+      }
+    </section>
+    }
+
+    @if (vote(); as v) {
+      <p class="vote" [class.accord]="accord()" [class.desaccord]="accord() === false">
+        <strong>Votre verdict :</strong> vous avez suivi {{ v === 'avocat_defense' ? 'la défense (pour la demande)' : 'l’accusation (contre la demande)' }}.
+        @if (accord() === true) { Le tribunal arrive à la même conclusion. }
+        @else if (accord() === false) { Le tribunal arrive à la conclusion inverse : relisez les motifs ci-dessus. }
+        @else { Le tribunal ne tranche pas : une information manque. }
+      </p>
+    } @else if (!pendantLeVote() && !horsAudience()) {
+      <p class="vote vote--attente">Vous n’avez pas encore rendu votre verdict : « Terminer », puis « Passer au verdict ».</p>
+    }
+
+    @if (chiffres(); as c) {
+      <div class="tuiles" role="list" aria-label="Chiffres clés">
+        <div class="tuile" role="listitem" [class.alerte]="c.depasse">
+          <span class="libelle">Pire baisse du portefeuille</span>
+          <span class="valeur">{{ pct(c.avant.pireBaisse) }} → <strong>{{ pct(c.apres.pireBaisse) }}</strong></span>
+          <span class="aide">budget déclaré : {{ pct(pr.budgetPerte, 0) }}{{ c.depasse ? ' · dépassé' : ' · respecté' }}</span>
+        </div>
+        <div class="tuile" role="listitem" [class.alerte]="c.depasse">
+          <span class="libelle">Perte au pire moment</span>
+          <span class="valeur"><strong>{{ dollars(c.apres.pireBaisse * pr.demande.capital) }}</strong></span>
+          <span class="aide">budget : {{ dollars(pr.budgetPerte * pr.demande.capital) }}</span>
+        </div>
+        <div class="tuile" role="listitem" [class.alerte]="c.apres.partDuRisque > 0.25">
+          <span class="libelle">Part du risque due à {{ pr.demande.ticker }}</span>
+          <span class="valeur"><strong>{{ pct(c.apres.partDuRisque, 0) }}</strong></span>
+          <span class="aide">pour {{ pct(pr.demande.taille, 0) }} du portefeuille</span>
+        </div>
+        <div class="tuile" role="listitem">
+          <span class="libelle">Mauvaise année (1 sur 20)</span>
+          <span class="valeur">{{ pct(c.avant.defavorable12Mois) }} → <strong>{{ pct(c.apres.defavorable12Mois) }}</strong></span>
+          <span class="aide">sur 12 mois, observé</span>
+        </div>
+      </div>
+    }
+
+    <!-- C. Ce qui changerait le verdict -->
+    @if (pr.salle.length && !masquerDecision()) {
+      <section aria-labelledby="r-salle">
+        <h3 id="r-salle">Qu’est-ce qui changerait le verdict ?</h3>
+        <table class="salle">
+          <thead><tr><th scope="col">Si…</th><th scope="col">Verdict</th><th scope="col">Change ?</th></tr></thead>
+          <tbody>
+            @for (h of pr.salle; track h.hypothese) {
+              <tr [class.change]="h.change">
+                <th scope="row">{{ h.hypothese }}</th>
+                <td><span class="pastille" [attr.data-ton]="tonVerdict(h.verdict)">{{ h.verdict }}</span></td>
+                <td>{{ h.change ? 'Oui' : 'Non' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </section>
+    }
+
+    <!-- B. Le visuel -->
+    <section aria-labelledby="r-visuel">
+      <h3 id="r-visuel">Où la limite est-elle franchie ?</h3>
+      <p class="note">Pire baisse observée du portefeuille selon la part placée dans {{ pr.demande.ticker }}
+        ({{ pr.periode.debut }} au {{ pr.periode.fin }}). Le passé observé, pas une prévision.</p>
+      <rdc-courbe-taille [courbe]="pr.courbe" [budget]="pr.budgetPerte" [tailleDemandee]="pr.demande.taille"
+        [ticker]="pr.demande.ticker" />
+      @if (portefeuilles(); as pf) {
+        <div class="portefeuilles">
+          @for (ligne of pf; track ligne.nom) {
+            <div class="portefeuille">
+              <span class="libelle">{{ ligne.nom }}</span>
+              <div class="barre" role="img" [attr.aria-label]="ligne.description">
+                @for (x of ligne.positions; track x.ticker; let i = $index) {
+                  <span [style.flex-basis.%]="x.poids * 100" [attr.data-i]="x.ticker === pr.demande.ticker ? 'demande' : i % 6"
+                    [title]="x.ticker + ' · ' + pct(x.poids, 0)"></span>
+                }
+              </div>
+            </div>
+          }
+          <p class="legende"><span class="carre" data-i="demande"></span> {{ pr.demande.ticker }}, le titre demandé ;
+            les autres couleurs sont les positions actuelles, réduites à proportion.</p>
+        </div>
+      }
+    </section>
+
+    <!-- D. Le débat résumé -->
+    <section aria-labelledby="r-debat">
+      <h3 id="r-debat">Le débat en bref</h3>
+      <div class="camps">
+        @for (camp of camps(); track camp.titre) {
+          <article class="camp" [attr.data-camp]="camp.cle">
+            <h4>{{ camp.titre }}</h4>
+            <ul>
+              @for (a of camp.arguments; track $index) { <li>{{ a }}</li> }
+            </ul>
+            <p class="controle" [class.alerte]="camp.nonVerifies.length">
+              @if (camp.nonVerifies.length) {
+                Greffier : chiffres absents des pièces → {{ camp.nonVerifies.join(', ') }}
+              } @else {
+                Greffier : tous les chiffres cités figurent dans les pièces.
+              }
+            </p>
+          </article>
+        }
+      </div>
+      <details class="transcription">
+        <summary>Transcription complète de l’audience ({{ interventions().length }} intervention{{ interventions().length > 1 ? 's' : '' }})</summary>
+        <ol>
+          @for (entree of interventions(); track entree.tour.ordre) {
+            <li>
+              <h4>{{ entree.tour.acteur }} · {{ entree.tour.titre }}</h4>
+              <p>{{ entree.extrait }}{{ entree.complet ? '' : '…' }}</p>
+              @if (entree.complet && entree.tour.non_verifies?.length) {
+                <p class="alerte">Chiffres non vérifiés : {{ entree.tour.non_verifies!.join(', ') }}</p>
+              }
+            </li>
+          } @empty {
+            <li>Les interventions apparaîtront au fil de l’audience.</li>
+          }
+        </ol>
+      </details>
+    </section>
+
+    <!-- E. Sources et limites -->
+    <section aria-labelledby="r-sources">
+      <h3 id="r-sources">Sources et limites</h3>
+      <ul class="limites">
+        <li>Données : prix quotidiens ajustés du jeu AlphaForge, convertis en dollars canadiens, du {{ pr.periode.debut }} au {{ pr.periode.fin }}.</li>
+        <li>Le verdict suit une règle fixe ; les agents argumentent, ils ne décident pas.</li>
+        <li>Le passé observé ne prédit pas l’avenir. Profil fictif : ce n’est pas un conseil financier.</li>
+        @if (pr.avertissement) { <li class="alerte">{{ pr.avertissement }}</li> }
+      </ul>
+      @for (piece of pieces(); track piece.numero) {
+        <details class="piece">
+          <summary>{{ piece.numero }} · {{ piece.description }}</summary>
+          <dl>
+            @for (fait of piece.faits; track $index) {
+              <dt>{{ fait.libelle }}</dt><dd>{{ fait.valeur }}</dd>
+            }
+          </dl>
+          <p>{{ piece.source }} · {{ piece.periode }}</p>
+          @if (piece.limites) { <p>Limites : {{ piece.limites }}</p> }
+        </details>
+      }
+    </section>
+  </div>
+} @else {
+  <p>Le rapport sera disponible dès que le tribunal aura statué.</p>
+}

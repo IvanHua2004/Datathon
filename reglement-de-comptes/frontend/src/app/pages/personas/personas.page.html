@@ -1,0 +1,103 @@
+<rdc-entete [etape]="1" />
+<main class="menu persona-page">
+  <h1>Choisis ton <span>persona</span></h1>
+  <div class="persona-grid">
+    @for (persona of personas; track persona.id) {
+      <article class="persona-card"
+        [class.persona-selected]="selectedPersona() === persona.id"
+        [style.--selection-duration]="selectionDuration + 'ms'">
+        <button class="card-select" type="button" [attr.aria-label]="'Sélectionner ' + persona.name"
+          [attr.aria-describedby]="'persona-summary-' + persona.id"
+          [attr.aria-pressed]="selectedPersona() === persona.id" (click)="selectedPersona.set(persona.id)"></button>
+        <img class="persona-portrait" [src]="'assets/' + persona.id + '.png'" alt="" width="1254" height="1254">
+        <h2>{{ persona.name }}</h2>
+        <p class="persona-details">{{ persona.age }} ans · {{ persona.risk }}<br>Horizon de {{ persona.horizon }}</p>
+        <p class="persona-summary" [id]="'persona-summary-' + persona.id">{{ persona.summary }}</p>
+        @if (selectedPersona() === persona.id) {
+          <rdc-pieces-monnaie />
+        }
+      </article>
+    }
+    <article class="persona-card" aria-labelledby="custom-card-title"
+      [class.persona-selected]="selectedPersona() === 'personnalise'"
+      [style.--selection-duration]="selectionDuration + 'ms'">
+      <div class="custom-portrait">
+        <img class="persona-portrait" src="assets/personnalise.png" alt="" width="1254" height="1254">
+        <button #editPersona class="custom-edit" type="button" aria-label="Modifier le persona personnalisé"
+          title="Modifier le persona" (click)="openPersonaForm(details, customForm)">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="m16 4 4 4M4 20l4-.8L20 7a2.8 2.8 0 0 0-4-4L4 15z" />
+          </svg>
+        </button>
+      </div>
+      <h2 id="custom-card-title" class="custom-title">{{ configuration()?.nom ?? 'Personnalisé' }}</h2>
+      @if (configuration(); as config) {
+        <button class="card-select" type="button" [attr.aria-label]="'Sélectionner ' + config.nom"
+          [attr.aria-pressed]="selectedPersona() === 'personnalise'"
+          (click)="selectedPersona.set('personnalise')"></button>
+        <div class="custom-summary">
+          <p class="persona-details">{{ config.age }} ans · Risque {{ riskLabels[config.risque].toLowerCase() }}<br>Horizon de {{ config.horizon_min }}{{ config.horizon_max !== config.horizon_min ? ' à ' + config.horizon_max : '' }} ans
+          </p>
+          @if (config.note) { <p class="custom-note">{{ config.note }}</p> }
+          @if (portefeuilleNote(); as positions) {
+            <p class="custom-portfolio"><strong>Portefeuille :</strong> {{ positions }}</p>
+          } @else {
+            <p class="custom-portfolio vague">Positions non précisées : les agents raisonneront sur un portefeuille de référence fictif.</p>
+          }
+        </div>
+      } @else {
+        <button class="card-select" type="button" aria-label="Repérer le bouton de configuration du persona personnalisé"
+          (click)="highlightEditButton(editPersona)"></button>
+      }
+    </article>
+  </div>
+  <button class="custom-button confirm-persona" type="button" [disabled]="!selectedPersona() || confirming()"
+    (click)="confirmPersona()">Confirmer</button>
+  <dialog #details class="custom-dialog" aria-labelledby="custom-persona-title"
+    (cancel)="saving() && $event.preventDefault()">
+      <h2 id="custom-persona-title">Configurer le persona</h2>
+      <form #customForm class="custom-form" (submit)="savePersona($event, details, customForm)">
+        <label>Nom du persona
+          <input name="nom" type="text" maxlength="50" pattern=".*\S.*"
+            [attr.value]="configuration()?.nom ?? ''" required autofocus>
+        </label>
+        <label>Âge (18 ans minimum)
+          <input name="age" type="number" min="18" max="120" step="1" [attr.value]="configuration()?.age" required
+            (input)="verifierAge($any($event.target))">
+        </label>
+        <label>Niveau de risque
+          <select name="risque" required>
+            <option value="" disabled [attr.selected]="configuration() ? null : ''">Sélectionner</option>
+            @for (level of riskLevels; track level) {
+              <option [value]="level" [attr.selected]="configuration()?.risque === level ? '' : null">{{ riskLabels[level] }}</option>
+            }
+          </select>
+        </label>
+        <fieldset class="custom-horizon">
+          <legend>Horizon (ans)</legend>
+          <label>Minimum
+            <input name="horizon_min" type="number" min="1" max="100" step="1" [attr.value]="configuration()?.horizon_min" required>
+          </label>
+          <label>Maximum
+            <input name="horizon_max" type="number" min="1" max="100" step="1" [attr.value]="configuration()?.horizon_max" required>
+          </label>
+        </fieldset>
+        <label>Note (facultative)
+          <textarea name="note" rows="3" maxlength="200" aria-describedby="custom-note-hint"
+            placeholder="Ex. SPY 60 %, XBB.TO 40 %. Je préfère éviter la crypto."
+            [defaultValue]="configuration()?.note ?? ''"></textarea>
+        </label>
+        <p id="custom-note-hint" class="custom-hint">Indique tes positions avec leur part (au total environ 100 %) pour que les agents parlent de ton portefeuille. Sinon, ils utiliseront un portefeuille de référence fictif.</p>
+        <div class="custom-actions">
+          <button type="button" class="custom-button custom-cancel" [disabled]="saving()" (click)="details.close()">Annuler</button>
+          <button class="custom-button" type="submit" [disabled]="saving()">
+            {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+          </button>
+        </div>
+        @if (saveError()) {
+          <p role="alert">{{ saveError() }}</p>
+        }
+      </form>
+  </dialog>
+</main>

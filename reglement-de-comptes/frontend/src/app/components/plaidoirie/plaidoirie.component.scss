@@ -1,0 +1,79 @@
+:host { display: block; min-width: 0; }
+.carte {
+  height: 100%;
+  background: #fff8ec;
+  color: #200e0c;
+  border: 1px solid #e8d9c4;
+  border-radius: 10px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.entete-carte {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+h2 { margin: 0; font-size: 1.2rem; }
+.bouton-analogie {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #c9a463;
+  border-radius: 9999px;
+  background: #fff;
+  color: #633e08;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.bouton-analogie:hover {
+  background: #fdf0d2;
+  border-color: #a87e35;
+}
+.bouton-analogie.actif {
+  background: #eedcb3;
+  border-color: #8c6523;
+}
+.encart-analogie {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #e0c896;
+  border-left: 3px solid #d49a37;
+  border-radius: 0.35rem;
+  background: #fffcf4;
+  color: #382414;
+  font-size: 0.88rem;
+  margin: 0.2rem 0;
+}
+.encart-analogie.en-cours {
+  font-style: italic;
+  color: #7d6b56;
+}
+.titre-juré {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  color: #7a4e10;
+}
+.fermer {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #8c735d;
+  padding: 0 0.2rem;
+}
+.texte-analogie {
+  margin: 0;
+  line-height: 1.5;
+}
+.temoins { margin: 0; font-size: 0.85rem; color: #5c4a55; }
+.texte { margin: 0; line-height: 1.6; }
+.greffier { margin: auto 0 0; font-size: 0.85rem; color: #1e6b38; }
+.greffier--alerte { color: #a3261a; font-weight: 600; }

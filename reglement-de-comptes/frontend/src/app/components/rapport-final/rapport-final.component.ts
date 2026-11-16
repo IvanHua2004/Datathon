@@ -19,7 +19,7 @@ let compteur = 0;
   selector: 'rdc-rapport-final',
   imports: [RapportAudienceComponent],
   templateUrl: './rapport-final.component.html',
-  styleUrl: './rapport-final.component.css',
+  styleUrl: './rapport-final.component.scss',
 })
 export class RapportFinalComponent {
   private readonly api = inject(ApiService);

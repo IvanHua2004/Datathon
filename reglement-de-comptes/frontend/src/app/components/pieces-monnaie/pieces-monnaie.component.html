@@ -1,0 +1,10 @@
+<span class="persona-coins" [style.--coin-duration]="duree + 'ms'" aria-hidden="true">
+  @for (piece of pieces; track $index) {
+    <span class="persona-coin"
+      [style.--coin-x]="piece.x + '%'"
+      [style.--coin-y]="piece.y + '%'"
+      [style.--coin-drift]="piece.drift + 'px'"
+      [style.--coin-spin]="piece.spin + 'deg'"
+      [style.--coin-delay]="piece.delay + 'ms'">$</span>
+  }
+</span>
