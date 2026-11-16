@@ -1,37 +1,136 @@
 <svg [attr.viewBox]="'0 0 ' + largeur + ' ' + hauteur" role="img"
-     [attr.aria-label]="description()">
+     [attr.aria-label]="description()" (mouseleave)="survolPoint.set(null)">
+  <defs>
+    <!-- Dégradé sous la courbe -->
+    <linearGradient id="degradeCourbe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0.01" />
+    </linearGradient>
+    <!-- Filtre ombre portée pour les badges -->
+    <filter id="ombreBadge" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2" flood-color="#0f172a" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Fond général du graphique -->
+  <rect x="0" y="0" [attr.width]="largeur" [attr.height]="hauteur" rx="8" class="fond-carte" />
+
+  <!-- Zone de dépassement de budget (danger) -->
+  @if (yBudget() < hauteur - marge.bas) {
+    <rect class="zone-danger" [attr.x]="marge.gauche" [attr.y]="yBudget()"
+          [attr.width]="largeur - marge.gauche - marge.droite"
+          [attr.height]="hauteur - marge.bas - yBudget()" rx="3" />
+    <text class="texte-zone-danger" [attr.x]="largeur - marge.droite - 12"
+          [attr.y]="yBudget() + 18" text-anchor="end">
+      ⛔ Zone de dépassement du budget de perte
+    </text>
+  }
+
+  <!-- Grille horizontale discrète & graduations Y -->
   @for (t of graduationsY(); track t.valeur) {
     <line class="grille" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-          [attr.y1]="t.y" [attr.y2]="t.y"></line>
-    <text class="graduation" [attr.x]="marge.gauche - 10" [attr.y]="t.y + 4" text-anchor="end">{{ t.texte }}</text>
+          [attr.y1]="t.y" [attr.y2]="t.y" />
+    <text class="graduation-y" [attr.x]="marge.gauche - 12" [attr.y]="t.y + 4" text-anchor="end">
+      {{ t.texte }}
+    </text>
   }
+
+  <!-- Ligne de référence 0% (Statu Quo / Pas de perte additionnelle) -->
+  <line class="ligne-zero" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+        [attr.y1]="yZero()" [attr.y2]="yZero()" />
+
+  <!-- Ligne horizontale de l'axe X (bas) -->
+  <line class="axe-x" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+        [attr.y1]="hauteur - marge.bas" [attr.y2]="hauteur - marge.bas" />
+
+  <!-- Graduations X (Part allouée) -->
   @for (t of graduationsX(); track t.valeur) {
-    <text class="graduation" [attr.x]="t.x" [attr.y]="hauteur - marge.bas + 22" text-anchor="middle">{{ t.texte }}</text>
+    <line class="tick-x" [attr.x1]="t.x" [attr.x2]="t.x"
+          [attr.y1]="hauteur - marge.bas" [attr.y2]="hauteur - marge.bas + 5" />
+    <text class="graduation-x" [attr.x]="t.x" [attr.y]="hauteur - marge.bas + 22" text-anchor="middle">
+      {{ t.texte }} %
+    </text>
   }
-  <line class="axe" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-        [attr.y1]="hauteur - marge.bas" [attr.y2]="hauteur - marge.bas"></line>
 
-  <line class="budget" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-        [attr.y1]="yBudget()" [attr.y2]="yBudget()"></line>
-  <text class="etiquette-budget" [attr.x]="largeur - marge.droite" [attr.y]="yBudget() - 8" text-anchor="end">
-    Budget de perte déclaré : {{ budgetTexte() }}
-  </text>
+  <!-- Ligne de budget rouge pointillée -->
+  <line class="budget-ligne" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
+        [attr.y1]="yBudget()" [attr.y2]="yBudget()" />
 
-  <polyline class="ligne" [attr.points]="ligne()"></polyline>
+  <!-- Badge officiel du Seuil de perte toléré -->
+  <g class="badge-budget" [attr.transform]="'translate(' + (marge.gauche + 8) + ', ' + (yBudget() - 11) + ')'" filter="url(#ombreBadge)">
+    <rect class="badge-budget-bg" width="200" height="22" rx="4" />
+    <text class="badge-budget-txt" x="100" y="15" text-anchor="middle">
+      🛑 Seuil max toléré : {{ budgetTexte() }}
+    </text>
+  </g>
+
+  <!-- Surface sous la courbe (dégradé subtil) -->
+  @if (surfaceChemin()) {
+    <path [attr.d]="surfaceChemin()" fill="url(#degradeCourbe)" />
+  }
+
+  <!-- Tracé principal de la courbe de baisse -->
+  <polyline class="courbe-principale" [attr.points]="ligne()" />
+
+  <!-- Points de données sur la courbe -->
   @for (p of points(); track p.taille) {
-    <circle class="point" [attr.cx]="p.x" [attr.cy]="p.y" r="6">
-      <title>{{ p.infobulle }}</title>
-    </circle>
-  }
-  @if (pointDemande(); as d) {
-    <circle class="demande" [attr.cx]="d.x" [attr.cy]="d.y" r="13"></circle>
-    <text class="etiquette-demande" [attr.x]="d.x - 16" [attr.y]="d.y + 26" text-anchor="end">Demande</text>
+    <g class="groupe-point" (mouseenter)="survolPoint.set(p)">
+      <!-- Zone d'interaction large pour faciliter le survol -->
+      <circle [attr.cx]="p.x" [attr.cy]="p.y" r="14" class="hitbox-point" />
+      <!-- Point visible -->
+      <circle [attr.cx]="p.x" [attr.cy]="p.y" [attr.r]="p.taille === tailleDemandee() ? 7 : 4.5"
+              [class.point-depasse]="p.pireBaisse < budget()"
+              class="point-donnee" />
+    </g>
   }
 
-  <text class="titre-axe" [attr.x]="(marge.gauche + largeur - marge.droite) / 2" [attr.y]="hauteur - 10" text-anchor="middle">
-    Part du portefeuille placée dans le titre (%)
+  <!-- Mise en valeur du Point de la Demande -->
+  @if (pointDemande(); as d) {
+    <!-- Anneau extérieur animé/accentué -->
+    <circle class="demande-halo" [attr.cx]="d.x" [attr.cy]="d.y" r="13"
+            [class.halo-danger]="d.pireBaisse < budget()" />
+    <circle class="demande-centre" [attr.cx]="d.x" [attr.cy]="d.y" r="6"
+            [class.centre-danger]="d.pireBaisse < budget()" />
+
+    <!-- Étiquette / Badge de la demande -->
+    <g class="badge-demande" [attr.transform]="badgeDemandeTransform(d)" filter="url(#ombreBadge)">
+      <rect class="badge-demande-bg" [class.badge-danger]="d.pireBaisse < budget()"
+            width="168" height="38" rx="6" />
+      <text class="badge-demande-titre" x="84" y="16" text-anchor="middle">
+        🎯 Demande ({{ pct(d.taille, 0) }}) : {{ pct(d.pireBaisse) }}
+      </text>
+      <text class="badge-demande-statut" [class.statut-danger]="d.pireBaisse < budget()"
+            x="84" y="30" text-anchor="middle">
+        {{ d.pireBaisse < budget() ? '⛔ DÉPASSEMENT BUDGET' : '✅ MARGE RESPECTÉE' }}
+      </text>
+    </g>
+  }
+
+  <!-- Infobulle interactive dynamique au survol d'un point quelconque -->
+  @if (survolPoint(); as sp) {
+    @if (sp.taille !== tailleDemandee()) {
+      <g class="infobulle-survol" [attr.transform]="infobulleTransform(sp)" filter="url(#ombreBadge)">
+        <rect class="infobulle-bg" width="140" height="34" rx="5" />
+        <text class="infobulle-t1" x="70" y="14" text-anchor="middle">
+          Taille : {{ pct(sp.taille, 0) }} · Baisse : {{ pct(sp.pireBaisse) }}
+        </text>
+        <text class="infobulle-t2" x="70" y="27" text-anchor="middle"
+              [class.infobulle-danger]="sp.pireBaisse < budget()">
+          {{ sp.pireBaisse < budget() ? '⛔ Non conforme' : '✅ Sous le seuil' }}
+        </text>
+      </g>
+    }
+  }
+
+  <!-- Titres des axes -->
+  <text class="titre-axe titre-axe-x"
+        [attr.x]="(marge.gauche + largeur - marge.droite) / 2"
+        [attr.y]="hauteur - 12" text-anchor="middle">
+    Part du portefeuille allouée dans {{ ticker() ? ticker() : 'le titre' }} (%)
   </text>
-  <text class="titre-axe" [attr.transform]="'translate(16 ' + (hauteur - marge.bas + marge.haut) / 2 + ') rotate(-90)'" text-anchor="middle">
-    Pire baisse observée (%)
+  <text class="titre-axe titre-axe-y"
+        [attr.transform]="'translate(18 ' + (hauteur - marge.bas + marge.haut) / 2 + ') rotate(-90)'"
+        text-anchor="middle">
+    Pire baisse historique observée (%)
   </text>
 </svg>
