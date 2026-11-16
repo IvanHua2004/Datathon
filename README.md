@@ -1,4 +1,12 @@
-# 🐳 Guide Complet Docker — Règlement de Comptes
+# Règlement de comptes
+
+**Êtes-vous vraiment l’investisseur que vous pensez être ?**
+
+À travers des débats financiers interactifs entre deux avocats virtuels, prenez des décisions, rendez vos verdicts et découvrez si vos choix reflètent réellement le profil d’investisseur que vous pensiez avoir.
+
+Projet réalisé dans le cadre du **Datathon PolyFinances 2026 (AlphaForge AI)**.
+
+## 🐳 Guide Docker
 
 Ce guide détaille pas à pas comment installer **Docker**, configurer l'environnement et lancer le projet **Règlement de Comptes** en conteneur sur votre machine (Windows, macOS ou Linux).
 
