@@ -298,12 +298,6 @@ export class AudienceSceneComponent {
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     effect((nettoyer) => {
       if (!this.annonceTerminee() || this.reprendreVote()) return;
-      if (this.duel()) {
-        // Duel : pas de tableau de bord à ouvrir, la page du duel fait défiler jusqu'à la décision.
-        const fin = setTimeout(() => this.continuerComparaison.emit(), 1500);
-        nettoyer(() => clearTimeout(fin));
-        return;
-      }
       let minuterie = setTimeout(() => {
         this.ouvertureRapport.set(true);
         minuterie = setTimeout(() => {
