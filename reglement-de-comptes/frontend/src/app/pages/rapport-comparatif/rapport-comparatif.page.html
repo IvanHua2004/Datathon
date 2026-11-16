@@ -62,6 +62,12 @@
             <p>{{ bilan.detail }}</p>
           </section>
         }
+        <section class="rapport-tribunal" aria-label="Le rapport d’analyse du tribunal">
+          <rdc-rapport-final [profil]="profil()" [ticker]="ticker()" [taille]="tailleValeur()"
+            [nomTitre]="actif()?.nom ?? ''" [proces]="procesDuDossier()" [choix]="choixValide()"
+            [vote]="procesDuDossier() ? tribunal.voteAudience() : null" />
+        </section>
+
         @if (profil(); as p) {
           <section class="profils-cote-a-cote" aria-label="Comparaison entre le profil déclaré et le choix observé">
             <article class="carte profil">
@@ -210,6 +216,10 @@
         </section>
       </div>
     }
-
   }
+
+  <nav class="actions-finales" aria-label="Suite du parcours">
+    <a class="action-finale action-finale--secondaire" routerLink="/question" [queryParams]="{ profil: profilCle() }">Poser d'autres questions au greffier</a>
+    <a class="action-finale" routerLink="/personas">Nouveau dossier : choisir un personnage →</a>
+  </nav>
 </main>

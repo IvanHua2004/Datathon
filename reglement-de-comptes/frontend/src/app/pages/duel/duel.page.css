@@ -2,7 +2,8 @@
   display: block;
   min-height: 100svh;
   color: #ffe5bf;
-  background: radial-gradient(ellipse at 55% 15%, #503038, #21131f 72%);
+  background-color: #281523;
+  background-image: var(--fond-ligne-parcours);
 }
 
 .retour { color: #ffc247; font-weight: 700; text-decoration: none; }
@@ -128,18 +129,8 @@
   rdc-audience-scene { flex: 1; min-height: 0; }
 }
 
-/* ----- Après le vote : la décision du duel et le détail des deux dossiers ----- */
-.resultat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 1.5rem clamp(1rem, 4vw, 2.5rem) 3rem;
-  scroll-margin-top: 0.5rem;
-}
-.resultat:focus { outline: none; }
-.votre-vote { margin-top: 0.35rem !important; font-weight: 700; }
-.voir-decision, .vers-greffier {
+/* ----- Après le vote : vers le tableau de bord comparatif ----- */
+.voir-decision {
   min-height: 2.75rem;
   padding: 0 1.25rem;
   border: 0;
@@ -150,102 +141,6 @@
   font-weight: 700;
   cursor: pointer;
 }
-.voir-decision:hover, .vers-greffier:hover { background: #fbde85; }
-.voir-decision:focus-visible, .vers-greffier:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-
-.decision {
-  width: min(100%, 72rem);
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1.1rem 1.25rem;
-  border-radius: 6px;
-  background: #ffc247;
-  color: #200e0c;
-  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
-}
-.decision.egalite { background: #fff8ec; }
-.decision h2 { margin: 0 0 0.3rem; font-size: 1.35rem; }
-.decision p { margin: 0; line-height: 1.5; }
-.decision .regle { margin-top: 0.4rem; font-size: 0.8rem; opacity: 0.8; }
-.sceau { font-size: 2rem; line-height: 1; }
-
-.cotes {
-  width: min(100%, 72rem);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: 1.25rem;
-}
-
-.cote {
-  position: relative;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  border-radius: 6px;
-  background: #fff8ec;
-  color: #200e0c;
-  overflow-wrap: anywhere;
-  border: 3px solid transparent;
-  box-shadow: 0 6px 0 rgb(0 0 0 / 35%);
-}
-.cote.gagnante { border-color: #ffc247; }
-.cote header h3 { margin: 0; font-size: 1.25rem; }
-.cote header p { margin: 0.2rem 0 0; font-size: 0.85rem; color: #5c4a55; }
-
-.ruban {
-  position: absolute;
-  top: -0.8rem;
-  right: 1rem;
-  padding: 0.2rem 0.7rem;
-  border-radius: 2px;
-  background: #ffc247;
-  font-size: 0.8rem;
-  font-weight: 800;
-}
-
-.verdict { margin: 0; padding: 0.5rem 0.75rem; border-radius: 4px; font-weight: 700; }
-[data-ton='contraire'] .verdict { background: rgb(179 38 30 / 12%); color: #8a1c1c; }
-[data-ton='tension'] .verdict { background: rgb(224 162 27 / 18%); color: #7a5208; }
-[data-ton='indecidable'] .verdict { background: rgb(92 74 85 / 12%); color: #4a3a44; }
-[data-ton='compatible'] .verdict { background: rgb(46 139 87 / 15%); color: #1e6b3c; }
-
-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-th, td { padding: 0.4rem 0.5rem; border-bottom: 1px solid rgb(119 60 111 / 15%); text-align: left; }
-thead th { font-size: 0.8rem; color: #5c4a55; font-weight: 600; }
-tbody th { font-weight: 400; }
-tr.alerte td strong { color: #8a1c1c; }
-tr.alerte th::after { content: ' ⚠'; color: #b3261e; }
-
-h4 { margin: 0; font-size: 0.9rem; color: #773c6f; }
-.motifs { margin: 0; padding-left: 1.1rem; line-height: 1.45; font-size: 0.9rem; }
-
-
-.secondaire {
-  margin-top: auto;
-  align-self: flex-start;
-  padding: 0.6rem 1rem;
-  border: 1px solid #773c6f;
-  border-radius: 2px;
-  color: #773c6f;
-  font-weight: 700;
-  text-decoration: none;
-}
-.secondaire:hover { background: rgb(119 60 111 / 8%); }
-
-a:focus-visible { outline: 3px solid #ffc247; outline-offset: 2px; }
-
+.voir-decision:hover { background: #fbde85; }
+.voir-decision:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-@media (max-width: 40rem) {
-  .decision, .cote { padding: 0.7rem; }
-  .decision { gap: 0.5rem; }
-  .decision h2 { font-size: 1.1rem; }
-  .sceau { font-size: 1.4rem; }
-  .cotes { grid-template-columns: minmax(0, 1fr); }
-  .ruban { position: static; display: inline-block; margin-bottom: 0.35rem; }
-  th, td { padding-inline: 0.25rem; }
-  .secondaire { display: flex; align-items: center; min-height: 2.75rem; }
-}

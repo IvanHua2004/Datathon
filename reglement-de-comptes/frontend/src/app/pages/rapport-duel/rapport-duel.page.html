@@ -1,0 +1,236 @@
+<rdc-entete [etape]="4" [persona]="profil()" />
+
+<main class="rapport">
+  <header class="titre">
+    <h1 class="titre-style-persona">Tableau de bord <span>comparatif</span></h1>
+    @if (coteA() && coteB()) {
+      <p class="duel-titres">
+        <span class="pastille" data-cote="a">A</span> {{ coteA()!.ticker }}
+        <span class="contre">contre</span>
+        <span class="pastille" data-cote="b">B</span> {{ coteB()!.ticker }}
+        · {{ pct(coteA()!.taille, 0) }} du portefeuille
+      </p>
+    }
+    <p class="avertissement">Simulation historique à visée pédagogique; ce rapport n'est pas un conseil financier.</p>
+  </header>
+
+  @if (!demandeValide()) {
+    <section class="carte" role="alert">
+      <h2>Duel incomplet</h2>
+      <p>Le profil et les deux titres comparés sont nécessaires pour produire le tableau de bord.</p>
+      <a class="action" routerLink="/personas">Choisir un profil</a>
+    </section>
+  } @else {
+    @if (bilan(); as b) {
+      <section class="carte bilan" [attr.data-ton]="b.ton" aria-labelledby="titre-bilan">
+        <p class="sur-titre">Votre vote et la décision du tribunal</p>
+        <h2 id="titre-bilan">{{ b.titre }}</h2>
+        <p>{{ b.detail }}</p>
+        <p class="regle">Règle fixe du duel : le verdict le moins grave l'emporte ; à verdict égal, la plus petite pire baisse du portefeuille.</p>
+      </section>
+    }
+
+    <!-- Les deux dossiers en en-tête de colonnes -->
+    <section class="face-a-face" aria-label="Les deux titres comparés">
+      @for (cote of ['a', 'b']; track cote) {
+        @let c = cote === 'a' ? coteA()! : coteB()!;
+        @let dossier = dossiers()?.[cote === 'a' ? 0 : 1];
+        <article class="carte titre-duel" [attr.data-cote]="cote" [class.gagnant]="gagnant() === cote">
+          <div class="haut-titre">
+            <span class="pastille" [attr.data-cote]="cote">{{ cote === 'a' ? 'A' : 'B' }}</span>
+            @if (gagnant() === cote) { <span class="ruban">Retenu par le tribunal</span> }
+            @if (voteCote() === cote) { <span class="ruban ruban--vote">Votre vote</span> }
+          </div>
+          <h2>{{ cote === 'a' ? nomA() : nomB() }}</h2>
+          <p class="sous-titre">{{ c.ticker }} · défendu par {{ cote === 'a' ? 'Me Vigor' : 'Me Austère' }}</p>
+          @if (dossier) {
+            <p class="verdict" [attr.data-ton]="tonVerdict(dossier.verdict)"><span>Verdict du juge</span>{{ dossier.verdict }}</p>
+          }
+          @if (comparaisons(); as comp) {
+            @let x = cote === 'a' ? comp.a : comp.b;
+            <dl class="cles">
+              <div><dt>Profit simulé</dt><dd>{{ cad(x.profit_final) }}</dd></div>
+              <div [class.alerte]="x.budget_depasse"><dt>Pire perte</dt><dd>{{ cad(x.perte_max_dollars) }}</dd></div>
+            </dl>
+          }
+          @if (comparaisons()) {
+            @let gagnes = cote === 'a' ? score().a : score().b;
+            <p class="score"><strong>{{ gagnes }}</strong> critère{{ gagnes > 1 ? 's' : '' }} sur {{ score().total }} en sa faveur</p>
+          }
+        </article>
+      }
+    </section>
+
+    @if (chargement()) {
+      <section class="carte attente" role="status">
+        <span class="sceau" aria-hidden="true">⚖</span>
+        <p>Le greffe simule les deux décisions sur la même période historique…</p>
+      </section>
+    }
+    @if (erreur(); as e) {
+      <section class="carte erreur" role="alert"><h2>Comparaison impossible</h2><p>{{ e }}</p></section>
+    }
+
+    @if (comparaisons(); as comp) {
+      <!-- Les deux rapports d'analyse, un par titre -->
+      <section class="rapports" aria-labelledby="titre-rapports">
+        <h2 id="titre-rapports" class="titre-section">Les rapports du tribunal</h2>
+        <div class="rapports-grille">
+          <rdc-rapport-final lettre="A" [profil]="profil()" [ticker]="coteA()!.ticker" [taille]="coteA()!.taille"
+            [nomTitre]="nomA()" [verdict]="dossiers()?.[0]?.verdict ?? null" choix="OUI" />
+          <rdc-rapport-final lettre="B" [profil]="profil()" [ticker]="coteB()!.ticker" [taille]="coteB()!.taille"
+            [nomTitre]="nomB()" [verdict]="dossiers()?.[1]?.verdict ?? null" choix="OUI" />
+        </div>
+      </section>
+
+      <!-- Le face-à-face chiffré -->
+      <section class="carte" aria-labelledby="titre-tableau">
+        <header class="entete-section">
+          <h2 id="titre-tableau">Le face-à-face, critère par critère</h2>
+          <p class="periode">Simulation historique · {{ comp.a.periode_debut }} au {{ comp.a.periode_fin }}</p>
+        </header>
+        <div class="defilement-tableau">
+          <table class="tableau-duel">
+            <thead>
+              <tr>
+                <th scope="col">Critère</th>
+                <th scope="col"><span class="pastille" data-cote="a">A</span> {{ coteA()!.ticker }}</th>
+                <th scope="col"><span class="pastille" data-cote="b">B</span> {{ coteB()!.ticker }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of lignes(); track l.libelle) {
+                <tr>
+                  <th scope="row">{{ l.libelle }}<small>{{ l.aide }}</small></th>
+                  <td [class.meilleur]="l.meilleur === 'a'" [class.alerte]="l.alerteA">
+                    {{ l.a }}
+                    @if (l.meilleur === 'a') { <span class="marque" aria-label="meilleur">✓</span> }
+                  </td>
+                  <td [class.meilleur]="l.meilleur === 'b'" [class.alerte]="l.alerteB">
+                    {{ l.b }}
+                    @if (l.meilleur === 'b') { <span class="marque" aria-label="meilleur">✓</span> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="limite">✓ = le meilleur des deux sur ce critère. Les profits sont hypothétiques, en dollars canadiens, et ne prédisent pas les rendements futurs.</p>
+      </section>
+
+      <!-- Deux graphiques simples -->
+      <div class="graphiques">
+        <section class="carte" aria-labelledby="titre-profits">
+          <h2 id="titre-profits">Profit simulé sur la période</h2>
+          <ul class="barres">
+            @for (b of barresProfit(); track b.cle) {
+              <li [attr.data-cote]="b.cle">
+                <span class="etiquette">{{ b.libelle }}</span>
+                <span class="piste"><span class="barre" [class.negatif]="b.negatif" [style.width.%]="b.largeur"></span></span>
+                <strong>{{ cad(b.valeur) }}</strong>
+              </li>
+            }
+          </ul>
+        </section>
+
+        @if (barresPerte(); as bp) {
+          <section class="carte" aria-labelledby="titre-pertes">
+            <h2 id="titre-pertes">Pire perte face au budget déclaré</h2>
+            <ul class="barres barres--perte">
+              @for (b of bp.barres; track b.cle) {
+                <li [attr.data-cote]="b.cle">
+                  <span class="etiquette">{{ b.libelle }}</span>
+                  <span class="piste">
+                    <span class="barre" [class.depasse]="b.depasse" [style.width.%]="b.largeur"></span>
+                    @if (bp.budget; as budget) { <span class="ligne-budget" [style.left.%]="budget.position" aria-hidden="true"></span> }
+                  </span>
+                  <strong [class.alerte]="b.depasse">{{ cad(-b.valeur) }}</strong>
+                </li>
+              }
+            </ul>
+            @if (bp.budget; as budget) {
+              <p class="legende"><span class="trait-budget" aria-hidden="true"></span> Budget de perte déclaré : {{ cad(-budget.valeur) }}</p>
+            }
+          </section>
+        }
+      </div>
+
+      <!-- Les chiffres du dossier scellé -->
+      @if (chiffresDossier().length) {
+        <section class="carte" aria-labelledby="titre-dossier">
+          <h2 id="titre-dossier">Les chiffres des dossiers scellés</h2>
+          <div class="defilement-tableau">
+            <table class="tableau-duel tableau-duel--dossier">
+              <thead>
+                <tr><th scope="col">Portefeuille</th><th scope="col">Avant</th>
+                  <th scope="col">Avec {{ coteA()!.ticker }}</th><th scope="col">Avec {{ coteB()!.ticker }}</th></tr>
+              </thead>
+              <tbody>
+                @for (x of chiffresDossier(); track x.libelle) {
+                  <tr>
+                    <th scope="row">{{ x.libelle }}</th>
+                    <td>{{ x.avant }}</td>
+                    <td [class.alerte]="x.alerteA">{{ x.a }}@if (x.alerteA) { <span class="marque-alerte" aria-label="au-delà de la limite"> ⚠</span> }</td>
+                    <td [class.alerte]="x.alerteB">{{ x.b }}@if (x.alerteB) { <span class="marque-alerte" aria-label="au-delà de la limite"> ⚠</span> }</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+
+      <!-- Motifs du juge et recommandations, titre par titre -->
+      <section class="motifs-duel" aria-label="Motifs et recommandations">
+        @for (cote of ['a', 'b']; track cote) {
+          @let x = cote === 'a' ? comp.a : comp.b;
+          @let dossier = dossiers()?.[cote === 'a' ? 0 : 1];
+          <article class="carte" [attr.data-cote]="cote">
+            <p class="sur-titre"><span class="pastille" [attr.data-cote]="cote">{{ cote === 'a' ? 'A' : 'B' }}</span> {{ cote === 'a' ? coteA()!.ticker : coteB()!.ticker }}</p>
+            <h2>{{ x.statut_conformite }}</h2>
+            <p>{{ x.impact_capital }}</p>
+            @if (dossier?.motifs?.length) {
+              <h3>Motifs du juge</h3>
+              <ul>@for (m of dossier!.motifs; track $index) { <li>{{ m }}</li> }</ul>
+            }
+            @if (x.recommandations.length) {
+              <h3>Recommandations de gouvernance</h3>
+              <ul>@for (r of x.recommandations; track $index) { <li>{{ r }}</li> }</ul>
+            }
+            <a class="action action--secondaire" routerLink="/tribunal-2" (click)="sonAudience.amorcer()"
+              [queryParams]="{ profil: profilCle(), ticker: cote === 'a' ? coteA()!.ticker : coteB()!.ticker, taille: cote === 'a' ? coteA()!.taille : coteB()!.taille }">
+              Voir le procès complet de {{ cote === 'a' ? coteA()!.ticker : coteB()!.ticker }} →</a>
+          </article>
+        }
+      </section>
+
+      @if (profil(); as p) {
+        <details class="carte profil">
+          <summary>Profil déclaré · {{ p.nom }}</summary>
+          <p>{{ p.resume }}</p>
+          <dl class="faits">
+            <div><dt>Capital fictif</dt><dd>{{ dollars(p.capital) }}</dd></div>
+            <div><dt>Horizon</dt><dd>{{ p.horizonAns }} ans</dd></div>
+            <div><dt>Budget de perte</dt><dd>{{ pct(p.budgetPerte < 0 ? -p.budgetPerte : p.budgetPerte) }}</dd></div>
+            <div><dt>Plafond par titre</dt><dd>{{ pct(p.plafondPosition) }}</dd></div>
+          </dl>
+          <ul class="positions">
+            @for (position of p.portefeuille; track position.ticker) {
+              <li><span>{{ position.ticker }}</span><strong>{{ pct(position.poids) }}</strong></li>
+            }
+          </ul>
+        </details>
+      }
+    }
+
+  }
+
+  <nav class="actions-finales" aria-label="Suite du parcours">
+    @if (demandeValide()) {
+      <a class="action action--secondaire" routerLink="/duel" (click)="sonAudience.amorcer()"
+        [queryParams]="{ profil: profilCle(), a: a(), b: b() }">Rejouer le duel</a>
+    }
+    <a class="action action--secondaire" routerLink="/question" [queryParams]="{ profil: profilCle() }">Poser d'autres questions au greffier</a>
+    <a class="action" routerLink="/personas">Nouveau dossier : choisir un personnage →</a>
+  </nav>
+</main>

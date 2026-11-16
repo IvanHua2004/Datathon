@@ -1,0 +1,87 @@
+<article class="fiche" [attr.data-lettre]="lettre()" [attr.aria-labelledby]="uid + '-fiche'">
+  <div class="document" aria-hidden="true">
+    <span class="pli"></span>
+    <span class="ligne l1"></span><span class="ligne l2"></span><span class="ligne l3"></span>
+    <span class="ligne l4"></span><span class="ligne l5"></span>
+    <span class="sceau-doc">⚖</span>
+  </div>
+
+  <div class="corps-fiche">
+    <p class="sur-titre">
+      @if (lettre(); as l) { <span class="pastille">{{ l }}</span> }
+      Rapport d’analyse du tribunal
+    </p>
+    <h3 [id]="uid + '-fiche'">{{ nomTitre() || ticker() }} <span class="ticker">{{ ticker() }} · {{ pct(taille(), 0) }}</span></h3>
+    @if (verdictAffiche(); as v) {
+      <p class="verdict" [attr.data-ton]="ton()">{{ v }}</p>
+    }
+    @if (dossier(); as d) {
+      <p class="meta">Données du {{ d.periode.debut }} au {{ d.periode.fin }} · {{ d.pieces.length }} pièces scellées</p>
+    } @else {
+      <p class="meta">Verdict, chiffres clés, ce qui changerait le verdict, débat en bref, sources et limites.</p>
+    }
+
+    <div class="gestes">
+      <button type="button" class="geste geste--principal" (click)="lire()" [disabled]="chargement()"
+        [attr.aria-busy]="chargement()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>
+        {{ chargement() ? 'Ouverture…' : 'Lire le rapport' }}
+      </button>
+      <button type="button" class="geste" (click)="telecharger()" [disabled]="chargementPdf()" [attr.aria-busy]="chargementPdf()">
+        @if (succesPdf()) {
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> PDF prêt
+        } @else {
+          <svg viewBox="0 0 24 24" aria-hidden="true" [class.tourne]="chargementPdf()">
+            @if (chargementPdf()) { <circle cx="12" cy="12" r="8" stroke-dasharray="26 26"/> }
+            @else { <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/> }
+          </svg>
+          {{ chargementPdf() ? 'Génération…' : 'PDF' }}
+        }
+      </button>
+      <button type="button" class="geste" (click)="imprimer()" [disabled]="chargement()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>
+        Imprimer
+      </button>
+    </div>
+    @if (erreur(); as e) { <p class="erreur" role="alert">{{ e }}</p> }
+  </div>
+</article>
+
+<dialog #fenetre class="fenetre-rapport" [attr.aria-labelledby]="uid + '-titre'" (close)="ouvert.set(false)"
+  (click)="$event.target === fenetre && fenetre.close()">
+  <div class="contenu-rapport">
+    <header class="entete-rapport">
+      <h2 [id]="uid + '-titre'" tabindex="-1" autofocus>Rapport d’analyse · {{ ticker() }}</h2>
+      <button class="fermer-verdict" type="button" aria-label="Fermer le rapport" (click)="fermer()">×</button>
+    </header>
+    <div class="corps-rapport">
+      @if (ouvert() && dossier(); as d) {
+        <rdc-rapport-audience
+          [proces]="d"
+          [interventions]="interventions()"
+          [pieces]="d.pieces"
+          [vote]="vote()"
+          [audienceTerminee]="true"
+          [horsAudience]="true"
+          [portefeuille]="profil()?.portefeuille ?? []" />
+      }
+    </div>
+  </div>
+  @if (ouvert()) {
+    <aside class="outils-rapport" aria-label="Emporter le rapport">
+      <button type="button" class="outil-rapport outil-principal" title="Télécharger le rapport en PDF"
+        (click)="telecharger()" [disabled]="chargementPdf()">
+        <svg viewBox="0 0 24 24" aria-hidden="true" [class.tourne]="chargementPdf()">
+          @if (chargementPdf()) { <circle cx="12" cy="12" r="8" stroke-dasharray="26 26"/> }
+          @else if (succesPdf()) { <path d="M20 6 9 17l-5-5"/> }
+          @else { <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14"/> }
+        </svg>
+        <span>{{ chargementPdf() ? 'Génération…' : succesPdf() ? 'Prêt !' : 'PDF' }}</span>
+      </button>
+      <button type="button" class="outil-rapport" title="Imprimer le rapport" (click)="imprimer()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z"/></svg>
+        <span>Imprimer</span>
+      </button>
+    </aside>
+  }
+</dialog>

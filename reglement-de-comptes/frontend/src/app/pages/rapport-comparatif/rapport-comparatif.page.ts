@@ -2,13 +2,14 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
+import { RapportFinalComponent } from '../../components/rapport-final/rapport-final.component';
 import { ProcesService } from '../../services/proces.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
 
 /** Rapport de décision, recalculable depuis les paramètres de l'URL. */
 @Component({
   selector: 'rdc-rapport-comparatif',
-  imports: [RouterLink, EnteteComponent],
+  imports: [RouterLink, EnteteComponent, RapportFinalComponent],
   templateUrl: './rapport-comparatif.page.html',
   styleUrl: './rapport-comparatif.page.css',
 })

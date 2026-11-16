@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ElementRef, afterRenderEffect, computed, effect, inject, input, signal, viewChild } from '@angular/core';
+import { Component, computed, effect, inject, input, signal, viewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
@@ -8,7 +8,8 @@ import { Duel } from '../../models/duel.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
-import { pct, tonVerdict } from '../../shared/format';
+import { cleDuel, memoriserDuel } from '../../shared/duel-memoire';
+import { pct } from '../../shared/format';
 import { laisserUnRetour } from '../../shared/memoire';
 import { AudienceSceneComponent, ConfigDuel } from '../tribunal/audience-scene.component';
 
@@ -50,17 +51,11 @@ export class DuelPage {
   readonly duel = signal<Duel | null>(null);
   readonly erreur = signal<string | null>(null);
   readonly enCours = signal(false);
-  /** Le détail des deux dossiers ne s'affiche qu'après le vote, pour ne pas l'influencer. */
-  readonly decisionVisible = signal(false);
   readonly vote = signal<Camp | null>(null);
-  /** Chaque demande de « voir la décision » fait défiler jusqu'à elle. */
-  private readonly defilement = signal(0);
 
   readonly pct = pct;
-  readonly tonVerdict = tonVerdict;
 
   readonly scene = viewChild(AudienceSceneComponent);
-  private readonly blocDecision = viewChild<ElementRef<HTMLElement>>('blocDecision');
 
   readonly persona = computed(() => this.tribunal.profils().find((p) => p.cle === this.profil()) ?? null);
   readonly cotes = computed(() => [lireCote(this.a()), lireCote(this.b())]);
@@ -108,14 +103,6 @@ export class DuelPage {
       this.lance = cle;
       this.juger(a, b);
     });
-    // Après le vote et l'annonce du juge : le détail du duel apparaît sous la salle.
-    afterRenderEffect(() => {
-      if (!this.defilement() || !this.decisionVisible()) return;
-      this.blocDecision()?.nativeElement.scrollIntoView({
-        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-        block: 'start',
-      });
-    });
   }
 
   private juger(a: { ticker: string; taille: number }, b: { ticker: string; taille: number }): void {
@@ -123,11 +110,10 @@ export class DuelPage {
     this.erreur.set(null);
     this.duel.set(null);
     this.vote.set(null);
-    this.decisionVisible.set(false);
-    this.defilement.set(0);
     this.api.duel(this.profil(), a, b).subscribe({
       next: (d) => {
         this.duel.set(d);
+        memoriserDuel(cleDuel(this.profil(), this.a(), this.b()), d);
         this.laisserRetour(d);
         this.enCours.set(false);
       },
@@ -152,21 +138,23 @@ export class DuelPage {
 
   voter(camp: Camp): void {
     this.vote.set(camp);
-    this.decisionVisible.set(true);
     const d = this.duel();
     if (d) this.laisserRetour(d, camp);
   }
 
+  /** Après l'annonce du juge : le tableau de bord comparatif des deux titres. */
   montrerDecision(): void {
-    this.decisionVisible.set(true);
-    this.defilement.update((n) => n + 1);
+    const d = this.duel();
+    const v = this.vote();
+    this.router.navigate(['/rapport-duel'], {
+      queryParams: {
+        profil: this.profil(), a: this.a(), b: this.b(),
+        vote: d && v ? (v === 'avocat_defense' ? d.cotes[0].ticker : d.cotes[1].ticker) : null,
+      },
+    });
   }
 
   versGreffier(): void {
     this.router.navigate(['/question'], { queryParams: { profil: this.profil() } });
-  }
-
-  gagnant(ticker: string): boolean {
-    return this.duel()?.decision.gagnant === ticker;
   }
 }
