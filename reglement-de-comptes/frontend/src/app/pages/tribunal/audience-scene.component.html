@@ -12,7 +12,9 @@
   }
 </ng-template>
 <div class="coup-marteau" [hidden]="imageMarteau() === null" aria-hidden="true">
-  <strong class="titre-coup-marteau">VERDICT !</strong>
+  @if (!verdictRendu()) {
+    <strong class="titre-coup-marteau">VERDICT !</strong>
+  }
   @for (image of imagesMarteau; track image) {
     <img [src]="'assets/tribunal-2/marteau-verdict-' + image + '.png'"
       [class.visible]="imageMarteau() === image" alt="" />
@@ -38,10 +40,14 @@
       </div>
     }
     @for (personnage of personnages(); track personnage.role) {
-      <div class="personnage" aria-hidden="true" [attr.data-emplacement]="personnage.emplacement"
+      <div class="personnage" [attr.data-emplacement]="personnage.emplacement"
         [class.parle]="lectureActive() && tour()?.role === personnage.role">
         @if (personnage.role !== 'juge') {
-          <span class="nom-avocat"><strong>{{ personnage.nom }}</strong><span>{{ personnage.cote }}</span></span>
+          <span class="nom-avocat">
+            <strong>{{ personnage.nom }}</strong>
+            <span>{{ personnage.cote }}</span>
+            <span class="position-scene" [class.contre]="!personnage.pour">{{ personnage.positionScene }}</span>
+          </span>
         }
         <picture>
           <source media="(prefers-reduced-motion: reduce)" [srcset]="personnage.image + '.png'">
@@ -221,20 +227,26 @@
   <!-- Duel : la décision s'affiche sous la salle, dans la page du duel. -->
 } @else if (ouvertureRapport()) {
   <div class="attente-rapport" role="status">
-    <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i></span>
     <p class="libelle-attente-rapport">{{ duel() ? 'Ouverture de la décision du duel' : 'Ouverture du tableau de bord comparatif' }}</p>
   </div>
-} @else if (annonceTerminee()) {
+} @else if (annonceTerminee() && imageMarteau() === null) {
   <section class="decision-finale" aria-labelledby="titre-decision-finale">
     <h2 id="titre-decision-finale">{{ duel() ? 'Décision du duel' : 'Rapport comparatif' }}</h2>
     <button type="button" class="voir-comparaison"
       (click)="continuerComparaison.emit()">{{ duel() ? 'Voir la décision du duel →' : 'Ouvrir le rapport comparatif →' }}</button>
   </section>
 }
-<dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
+<dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict"
+  [attr.aria-describedby]="question() ? 'question-verdict' : null" (close)="verdictOuvert.set(false)">
   <div class="contenu-verdict">
     <header class="entete-verdict">
-      <h2 id="titre-verdict" class="titre-style-persona" tabindex="-1" autofocus>Qui a gagné le débat ? <span>Votez.</span></h2>
+      <div>
+        <h2 id="titre-verdict" class="titre-style-persona" tabindex="-1" autofocus>Qui a gagné le débat ? <span>Votez.</span></h2>
+        @if (question(); as questionDebat) {
+          <p id="question-verdict" class="question-verdict">{{ questionDebat }}</p>
+        }
+      </div>
       <button class="fermer-verdict" type="button" aria-label="Revenir à l’audience" (click)="fenetreVerdict.close()">×</button>
     </header>
     <div class="corps-verdict">
@@ -244,7 +256,7 @@
             (click)="choisirCamp(camp.role, $any($event.currentTarget))">
             <input type="radio" name="vote-audience" [id]="'vote-' + camp.role" [value]="camp.role"
               [checked]="vote() === camp.role" [disabled]="!camp.arguments.length"
-              [attr.aria-describedby]="'arguments-' + camp.role" (change)="vote.set(camp.role)">
+              [attr.aria-describedby]="'position-' + camp.role + ' arguments-' + camp.role" (change)="vote.set(camp.role)">
             @if (vote() === camp.role) {
               <span class="coche-camp" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
             }
@@ -254,9 +266,9 @@
                 <span class="lettre-camp" aria-hidden="true">{{ i === 0 ? 'A' : 'B' }}</span>
                 <h3>{{ camp.cote }}</h3>
                 <span class="avocat-camp">{{ camp.nom }}</span>
-                <span class="position-camp">{{ duel() ? 'Défend ' + duel()!.camps[camp.role].nomTitre : (camp.role === 'avocat_defense' ? 'Pour la demande' : 'Contre la demande') }}</span>
               </div>
             </div>
+            <p class="position-camp" [id]="'position-' + camp.role">{{ camp.position }}</p>
             @if (camp.chiffre; as c) {
               <p class="chiffre-camp"><strong>{{ c.valeur }}</strong><span>{{ c.texte }}</span></p>
             }
@@ -306,19 +318,10 @@
         @if (!duel()) {
           <button type="button" class="rapport-complet" (click)="ouvrirRapport()">Ouvrir le rapport complet</button>
         }
+        <button type="button" class="rendre-verdict" [disabled]="!vote()"
+          (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict →</button>
       </aside>
     </div>
-    <footer class="pied-vote">
-      <p role="status">
-        @if (vote(); as v) {
-          Votre choix : <strong>{{ libelleCamp(v) }} ({{ v === 'avocat_defense' ? 'A' : 'B' }})</strong>. Vous pouvez encore changer.
-        } @else {
-          Choisissez le camp qui vous a convaincu.
-        }
-      </p>
-      <button type="button" class="rendre-verdict" [disabled]="!vote()"
-        (click)="rendreVerdict(fenetreVerdict)">Rendre mon verdict →</button>
-    </footer>
   </div>
 </dialog>
 <dialog #fenetreRapport class="fenetre-rapport" aria-labelledby="titre-rapport" (close)="rapportOuvert.set(false)"

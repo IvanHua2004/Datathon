@@ -122,7 +122,7 @@
     @if (versionScene) {
       <rdc-audience-scene [tours]="toursScene()" [pieces]="proces()?.pieces ?? []"
         [enCours]="tribunal.enCours() || (!!profilDemande() && !!tickerDemande() && tribunal.chargement())"
-        [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []"
+        [proces]="proces()" [portefeuille]="profil()?.portefeuille ?? []" [question]="questionDossier()"
         [chargementPdf]="tribunal.chargementPdf()" [succesPdf]="tribunal.succesPdf()"
         (telecharger)="telechargerPdf($event === 'avocat_defense' ? 'OUI' : $event === 'procureur' ? 'NON' : undefined)"
         (autreQuestion)="versGreffier()"

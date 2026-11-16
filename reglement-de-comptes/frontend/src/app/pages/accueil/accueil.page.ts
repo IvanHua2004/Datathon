@@ -33,7 +33,7 @@ import { RouterLink } from '@angular/router';
         <li>Posez vos questions</li>
         <li>Assistez aux débats entre deux avocats</li>
         <li>Rendez votre verdict</li>
-        <li>Découvrez ensuite si vos décisions correspondent au profil d'investisseur que vous pensiez avoir.</li>
+        <li>Découvrez si vos décisions reflètent vraiment votre profil d’investisseur</li>
       </ul>
       <img class="judge-runner" src="assets/juge-course.gif" alt="" width="443" height="443">
     </main>

@@ -84,8 +84,8 @@ export class DuelPage {
     };
     return {
       camps: {
-        avocat_defense: { ticker: a.ticker, nomTitre: a.nomTitre },
-        procureur: { ticker: b.ticker, nomTitre: b.nomTitre },
+        avocat_defense: { ticker: a.ticker, nomTitre: a.nomTitre, taille: a.taille },
+        procureur: { ticker: b.ticker, nomTitre: b.nomTitre, taille: b.taille },
       },
       annonce: `${d.decision.titre} : ${d.decision.raison}. Cette simulation n’est pas un conseil financier.`,
       tuiles: TUILES.flatMap(ligne),

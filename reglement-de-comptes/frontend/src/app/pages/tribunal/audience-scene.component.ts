@@ -1,4 +1,4 @@
-import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
+import { Component, DestroyRef, ElementRef, TemplateRef, afterNextRender, afterRenderEffect, computed, effect, inject, input, linkedSignal, output, signal, untracked, viewChild } from '@angular/core';
 import { DUREE_EFFET_PIECES, PiecesMonnaieComponent } from '../../components/pieces-monnaie/pieces-monnaie.component';
 import { Piece, Position, Proces, ReponseAnalogie, TourDiscussion } from '../../models/proces.model';
 import { RapportAudienceComponent, argumentsDe, chiffresCles } from './rapport-audience.component';
@@ -20,7 +20,7 @@ type Camp = 'avocat_defense' | 'procureur';
 
 /** Un duel A contre B joué dans la même salle : Me Vigor défend A, Me Austère défend B. */
 export interface ConfigDuel {
-  camps: Record<Camp, { ticker: string; nomTitre: string }>;
+  camps: Record<Camp, { ticker: string; nomTitre: string; taille: number }>;
   /** La décision du tribunal, révélée seulement après le vote. */
   annonce: string;
   /** Les chiffres clés côte à côte dans le rail du vote. */
@@ -52,6 +52,7 @@ function clePortrait(tour: TourDiscussion): string {
 })
 export class AudienceSceneComponent {
   readonly tours = input<readonly TourDiscussion[]>([]);
+  readonly question = input('');
   readonly pieces = input<readonly Piece[]>([]);
   readonly enCours = input(false);
   /** Duel entre deux titres : mêmes personnages, autre question, autres libellés. */
@@ -186,8 +187,19 @@ export class AudienceSceneComponent {
   });
   readonly personnages = computed(() => {
     const duel = this.duel();
-    return PERSONNAGES.map((p) => p.role === 'juge' || !duel ? p
-      : { ...p, cote: `Avocat de ${duel.camps[p.role].ticker}` });
+    const demande = this.proces()?.demande;
+    return PERSONNAGES.map((p) => {
+      if (p.role === 'juge') return p;
+      const option = duel?.camps[p.role];
+      const placement = option ?? demande;
+      const allocation = placement ? `${pct(placement.taille)} dans ${placement.ticker}` : '';
+      const pour = !!option || p.role === 'avocat_defense';
+      const positionScene = `${pour ? 'Pour' : 'Contre'} · ${allocation || 'la demande'}`;
+      const position = placement
+        ? `Recommande de ${pour ? 'placer' : 'ne pas placer'} ${pct(placement.taille)} du portefeuille dans ${placement.ticker}${option ? ` (${option.nomTitre})` : ''}.`
+        : pour ? 'Soutient la demande d’investissement.' : 'S’oppose à la demande d’investissement.';
+      return { ...p, cote: option ? `Avocat de ${option.ticker}` : p.cote, position, positionScene, pour };
+    });
   });
   /** « la Défense » / « le Procureur », ou le titre défendu pendant un duel. */
   libelleCamp(role: Camp): string {
@@ -198,11 +210,13 @@ export class AudienceSceneComponent {
   readonly plaidoiries = computed(() => this.personnages().filter((p) => p.role !== 'juge').map((p) => {
     const texte = this.tours().find((tour) => tour.role === p.role)?.texte ?? '';
     const c = this.chiffres();
-    const t = this.proces()?.demande.ticker ?? 'le titre';
+    const demande = this.proces()?.demande;
+    const t = demande?.ticker ?? 'le titre';
     const budget = this.proces()?.budgetPerte ?? 0;
+    const defense = p.role === 'avocat_defense';
     // Le chiffre qui sert le mieux chaque camp : la pire baisse face au budget pour la défense,
     // la concentration du risque pour l'accusation.
-    const chiffre = !c ? null : p.role === 'avocat_defense'
+    const chiffre = !c ? null : defense
       ? { valeur: pct(c.apres.pireBaisse), texte: `pire baisse avec ${t}, pour un budget déclaré de ${pct(budget, 0)}` }
       : { valeur: pct(c.apres.partDuRisque, 0), texte: `du risque porté par ${t}, pour ${pct(this.proces()?.demande.taille ?? 0, 0)} du portefeuille` };
     return { ...p, arguments: texte ? argumentsDe(texte, 3) : [], chiffre };
@@ -292,8 +306,7 @@ export class AudienceSceneComponent {
     const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal, rdc-duel');
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.minuterieVerdict);
-      for (const minuterie of this.minuteriesMarteau) clearTimeout(minuterie);
-      if (this.imageMarteau() !== null) this.lecteur.pause();
+      this.arreterMarteau();
     });
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     effect((nettoyer) => {
@@ -304,15 +317,19 @@ export class AudienceSceneComponent {
         nettoyer(() => clearTimeout(fin));
         return;
       }
-      let minuterie = setTimeout(() => {
-        this.ouvertureRapport.set(true);
-        minuterie = setTimeout(() => {
-          this.continuerComparaison.emit();
-          this.ouvertureRapport.set(false);
-        }, 4000);
-      }, 2000);
+      let minuterie: ReturnType<typeof setTimeout> | undefined;
+      untracked(() => {
+        this.jouerMarteau(2, () => {
+          this.ouvertureRapport.set(true);
+          minuterie = setTimeout(() => {
+            this.continuerComparaison.emit();
+            this.ouvertureRapport.set(false);
+          }, 4000);
+        });
+      });
       nettoyer(() => {
         clearTimeout(minuterie);
+        this.arreterMarteau();
         this.ouvertureRapport.set(false);
       });
     });
@@ -603,12 +620,20 @@ export class AudienceSceneComponent {
   rendreVerdict(fenetre: HTMLDialogElement): void {
     const choix = this.vote();
     if (!choix || this.imageMarteau() !== null) return;
-    const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.imageMarteau.set(mouvementReduit ? 4 : 1);
+    this.jouerMarteau(1, () => {
+      this.verdictRendu.set(choix);
+      this.lectureAuto.set(true);
+      const panneau = this.replique()?.nativeElement;
+      if (panneau) panneau.scrollTop = 0;
+    });
     this.voteRendu.emit(choix);
     fenetre.close();
     this.verdictOuvert.set(false);
+  }
 
+  private jouerMarteau(coups: number, terminer: () => void): void {
+    const mouvementReduit = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dureeCoup = mouvementReduit ? 435 : 835;
     const frapper = () => {
       this.imageMarteau.set(4);
       if (!this.sonActive()) return;
@@ -620,23 +645,36 @@ export class AudienceSceneComponent {
       lecteur.playbackRate = 1;
       this.lancerSon();
     };
-    if (mouvementReduit) {
-      frapper();
-    } else {
-      this.minuteriesMarteau.push(
-        setTimeout(() => this.imageMarteau.set(2), 125),
-        setTimeout(() => this.imageMarteau.set(3), 255),
-        setTimeout(frapper, 400),
-      );
-    }
-    this.minuteriesMarteau.push(setTimeout(() => {
-      this.minuteriesMarteau = [];
-      this.verdictRendu.set(choix);
-      this.lectureAuto.set(true);
-      const panneau = this.replique()?.nativeElement;
-      if (panneau) panneau.scrollTop = 0;
-      this.imageMarteau.set(null);
-    }, mouvementReduit ? 435 : 835));
+    const animerCoup = (restants: number) => {
+      if (mouvementReduit) {
+        frapper();
+      } else {
+        this.imageMarteau.set(1);
+        this.minuteriesMarteau.push(
+          setTimeout(() => this.imageMarteau.set(2), 125),
+          setTimeout(() => this.imageMarteau.set(3), 255),
+          setTimeout(frapper, 400),
+        );
+      }
+      this.minuteriesMarteau.push(setTimeout(() => {
+        this.minuteriesMarteau = [];
+        if (restants > 1) {
+          animerCoup(restants - 1);
+          return;
+        }
+        this.imageMarteau.set(null);
+        terminer();
+      }, dureeCoup));
+    };
+    animerCoup(coups);
+  }
+
+  private arreterMarteau(): void {
+    if (!this.minuteriesMarteau.length) return;
+    for (const minuterie of this.minuteriesMarteau) clearTimeout(minuterie);
+    this.minuteriesMarteau = [];
+    this.imageMarteau.set(null);
+    if (this.lecteur.getAttribute('src') === 'assets/tribunal-2/voix/coup-marteau.wav') this.lecteur.pause();
   }
 
   basculerLecture(): void {

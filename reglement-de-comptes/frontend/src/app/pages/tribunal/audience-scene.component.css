@@ -267,9 +267,7 @@
 
 
 .contenu-verdict, .contenu-rapport { display: grid; gap: 1rem; padding: clamp(0.85rem, 3vw, 1.6rem); }
-.contenu-verdict :is(header, footer), .contenu-rapport header { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
-.contenu-verdict footer { flex-wrap: wrap; }
-.contenu-verdict footer p { color: var(--texte-fenetre-secondaire); font-size: 0.875rem; }
+.contenu-verdict header, .contenu-rapport header { display: flex; align-items: center; justify-content: space-between; gap: 0.65rem; }
 .contenu-verdict button { min-height: 2.5rem; padding: 0.4rem 0.7rem; border-radius: 0.25rem; font: inherit; font-weight: 700; cursor: pointer; }
 .fermer-verdict, .contenu-verdict .fermer-verdict {
   min-width: 2.5rem;
@@ -282,10 +280,14 @@
   cursor: pointer;
 }
 .contenu-verdict .rendre-verdict {
-  margin-inline-start: auto;
+  align-self: flex-end;
+  margin-block-start: auto;
+  min-height: 2.9rem;
+  padding: 0.5rem 1.4rem;
   border: 0;
   background: var(--confirm-background);
   color: #fff;
+  font-size: 1rem;
 }
 .contenu-verdict .rendre-verdict:enabled:hover { background: var(--confirm-background-hover); }
 .contenu-verdict .rendre-verdict:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -390,6 +392,7 @@
 .fenetre-verdict .contenu-verdict { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; padding: 0; }
 .contenu-verdict .entete-verdict {
   flex: none;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
   padding: 0.85rem clamp(0.9rem, 2.5vw, 1.5rem);
@@ -398,6 +401,13 @@
 }
 .entete-verdict h2 { margin: 0.1rem 0 0; color: var(--texte-fenetre); font-size: clamp(1.25rem, 2.4vw, 1.6rem); text-align: start; }
 .entete-verdict h2:focus { outline: none; }
+.question-verdict {
+  margin: 0.5rem 0 0;
+  color: var(--texte-fenetre);
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
 
 .corps-verdict {
   display: grid;
@@ -458,7 +468,15 @@
 }
 .identite-camp h3 { margin: 0; color: var(--encre-camp); font-size: 1.45rem; }
 .avocat-camp { color: #654455; }
-.position-camp { margin-top: 0.2rem; padding: 0.2rem 0.55rem; border-radius: 999px; background: var(--c); color: var(--fond-fenetre); font-size: 0.78rem; font-weight: 700; }
+.position-camp {
+  margin: 0.65rem 1.2rem 0;
+  padding-inline-start: 0.65rem;
+  border-inline-start: 0.25rem solid var(--c);
+  color: var(--encre-camp);
+  font-weight: 750;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
 .chiffre-camp {
   display: flex;
   align-items: baseline;
@@ -523,15 +541,6 @@
 .scelle-rail svg { flex: none; stroke-width: 1.8; }
 .contenu-verdict .rapport-complet { border: 0; background: var(--jaune-fenetre); color: var(--fond-fenetre); }
 .contenu-verdict .rapport-complet:hover { background: #fbde85; }
-.contenu-verdict .pied-vote {
-  flex: none;
-  padding: 0.85rem clamp(0.9rem, 2.5vw, 1.5rem);
-  border-top: 1px solid var(--bord-fenetre);
-  background: var(--carte-fenetre);
-}
-.pied-vote p { margin: 0; }
-.pied-vote strong { color: #fff; }
-.contenu-verdict .rendre-verdict { min-height: 2.9rem; padding: 0.5rem 1.4rem; font-size: 1rem; }
 
 @media (max-width: 64rem) {
   .corps-verdict { grid-template-columns: minmax(0, 1fr); }
@@ -712,6 +721,8 @@
   left: 50%;
   bottom: calc(100% + 0.25rem);
   display: grid;
+  width: max-content;
+  max-width: 150%;
   gap: 0.1rem;
   padding: 0.2rem 0.45rem;
   border-radius: 0.25rem;
@@ -721,9 +732,15 @@
   font-size: clamp(0.65rem, 1.1vw, 0.95rem);
   line-height: 1.2;
   text-align: center;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .nom-avocat span { color: #ffdb98; font-size: 0.85em; }
+.nom-avocat .position-scene {
+  margin-top: 0.15rem;
+  color: #bfd9ff;
+  font-weight: 750;
+}
+.nom-avocat .position-scene.contre { color: #ffb7b7; }
 .personnage[data-emplacement="droite"] img, .portrait img.miroir { transform: scaleX(-1); }
 .personnage.parle {
   filter: drop-shadow(0 0 0.4rem rgb(255 226 155 / 90%))
@@ -820,7 +837,6 @@
   .points-rapport i { animation: point-rapport 1.2s ease-in-out infinite; }
   .points-rapport i:nth-child(2) { animation-delay: 150ms; }
   .points-rapport i:nth-child(3) { animation-delay: 300ms; }
-  .points-rapport i:nth-child(4) { animation-delay: 450ms; }
 }
 @keyframes point-rapport {
   0%, 70%, 100% { opacity: 0.22; transform: scale(0.72); }

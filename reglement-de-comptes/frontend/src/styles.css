@@ -79,9 +79,9 @@ rdc-menu {
   text-shadow: 0 2px 6px #281523;
 }
 
-.menu-intro li:nth-child(2) { --intro-delay: 3.8s; --intro-animation: menu-intro-debat; }
-.menu-intro li:nth-child(3) { --intro-delay: 8.3s; }
-.menu-intro li:nth-child(4) { --intro-delay: 11.9s; --intro-animation: menu-intro-profil; }
+.menu-intro li:nth-child(2) { --intro-delay: 3.28s; --intro-animation: menu-intro-debat; }
+.menu-intro li:nth-child(3) { --intro-delay: 7.28s; }
+.menu-intro li:nth-child(4) { --intro-delay: 10.48s; --intro-animation: menu-intro-profil; }
 
 @media (min-width: 72rem) and (min-height: 44rem) {
   .menu-intro {
@@ -159,8 +159,8 @@ rdc-menu {
 @media (prefers-reduced-motion: no-preference) {
   .menu-intro li {
     /* Every phrase shares the same cycle so the stagger repeats in order. */
-    animation: var(--intro-animation, menu-intro-apparition) 19.5s ease-in-out
-      var(--intro-delay, 200ms) infinite backwards;
+    animation: var(--intro-animation, menu-intro-apparition) 17.5s ease-in-out
+      var(--intro-delay, 80ms) infinite backwards;
   }
 
   .menu-accents span {
@@ -185,20 +185,20 @@ rdc-menu {
 
 @keyframes menu-intro-apparition {
   0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
-  2.2%, 16% { opacity: 1; transform: none; }
-  18.46%, 100% { opacity: 0; transform: translateY(-0.35rem); }
+  1%, 15.5% { opacity: 1; transform: none; }
+  18.28%, 100% { opacity: 0; transform: translateY(-0.35rem); }
 }
 
 @keyframes menu-intro-debat {
   0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
-  2.8%, 20% { opacity: 1; transform: none; }
-  23.07%, 100% { opacity: 0; transform: translateY(-0.35rem); }
+  1%, 19.4% { opacity: 1; transform: none; }
+  22.85%, 100% { opacity: 0; transform: translateY(-0.35rem); }
 }
 
 @keyframes menu-intro-profil {
   0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
-  4.3%, 31.2% { opacity: 1; transform: none; }
-  35.89%, 100% { opacity: 0; transform: translateY(-0.35rem); }
+  1%, 30.2% { opacity: 1; transform: none; }
+  35.42%, 100% { opacity: 0; transform: translateY(-0.35rem); }
 }
 
 @keyframes accent-flash {

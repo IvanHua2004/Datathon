@@ -24,7 +24,7 @@
       }
     }
     <rdc-audience-scene [tours]="duel()?.discussion ?? []" [enCours]="enCours()" [duel]="config()"
-      [messageAttente]="messageAttente()"
+      [messageAttente]="messageAttente()" [question]="question()"
       (voteRendu)="voter($event)" (autreQuestion)="versGreffier()" (continuerComparaison)="montrerDecision()" />
   </main>
 
