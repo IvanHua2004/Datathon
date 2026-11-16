@@ -516,6 +516,13 @@
 .tuiles-rail dd { margin: 0.2rem 0 0; font-size: 1rem; }
 .tuiles-rail small { display: block; margin-top: 0.1rem; color: #8a6a7c; font-size: 0.72rem; }
 .tuiles-rail .alerte strong { color: #a62432; }
+.tuiles-duel { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.tuiles-duel th, .tuiles-duel td { padding: 0.45rem 0.4rem; border-bottom: 1px solid #deccd4; text-align: right; }
+.tuiles-duel thead th { color: #773c6f; font-size: 0.8rem; }
+.tuiles-duel tbody th { text-align: left; font-weight: 500; color: #654455; }
+.tuiles-duel td { font-weight: 700; color: #200e0c; }
+.tuiles-duel td.alerte { color: #a62432; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .scelle-rail {
   display: flex;
   gap: 0.6rem;

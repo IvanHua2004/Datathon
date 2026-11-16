@@ -37,7 +37,7 @@
         </div>
       </div>
     }
-    @for (personnage of personnages; track personnage.role) {
+    @for (personnage of personnages(); track personnage.role) {
       <div class="personnage" aria-hidden="true" [attr.data-emplacement]="personnage.emplacement"
         [class.parle]="lectureActive() && tour()?.role === personnage.role">
         @if (personnage.role !== 'juge') {
@@ -188,7 +188,7 @@
   } @else {
     <div class="dialogue attente">
       <h2>Salle d’audience</h2>
-      <p role="status">{{ preparation() ? 'Les parties préparent leurs interventions…' : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
+      <p role="status">{{ preparation() ? (messageAttente() ?? 'Les parties préparent leurs interventions…') : 'Soumettez une question au greffier pour commencer l’audience.' }}</p>
     </div>
   }
 </section>
@@ -204,7 +204,7 @@
       <button type="button" class="porte-fin porte-fin--verdict" (click)="passerAuVerdict(fenetreFin, fenetreVerdict)">
         <span class="illustration-fin" aria-hidden="true"><img src="assets/tribunal-2/juge.png" alt=""></span>
         <span class="titre-porte">Passer au verdict</span>
-        <span class="texte-porte">Départagez la Défense et le Procureur, chiffres clés à l’appui.</span>
+        <span class="texte-porte">Départagez {{ duel() ? duel()!.camps.avocat_defense.ticker + ' et ' + duel()!.camps.procureur.ticker : 'la Défense et le Procureur' }}, chiffres clés à l’appui.</span>
         <span class="action-porte">Passer au verdict
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></span>
       </button>
@@ -218,16 +218,18 @@
     </div>
   </div>
 </dialog>
-@if (ouvertureRapport()) {
+@if (duel()) {
+  <!-- Duel : la décision s'affiche sous la salle, dans la page du duel. -->
+} @else if (ouvertureRapport()) {
   <div class="attente-rapport" role="status">
     <span class="points-rapport" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-    <p class="libelle-attente-rapport">Ouverture du tableau de bord comparatif</p>
+    <p class="libelle-attente-rapport">{{ duel() ? 'Ouverture de la décision du duel' : 'Ouverture du tableau de bord comparatif' }}</p>
   </div>
 } @else if (annonceTerminee()) {
   <section class="decision-finale" aria-labelledby="titre-decision-finale">
-    <h2 id="titre-decision-finale">Rapport comparatif</h2>
+    <h2 id="titre-decision-finale">{{ duel() ? 'Décision du duel' : 'Rapport comparatif' }}</h2>
     <button type="button" class="voir-comparaison"
-      (click)="continuerComparaison.emit()">Ouvrir le rapport comparatif →</button>
+      (click)="continuerComparaison.emit()">{{ duel() ? 'Voir la décision du duel →' : 'Ouvrir le rapport comparatif →' }}</button>
   </section>
 }
 <dialog #fenetreVerdict class="fenetre-verdict" aria-labelledby="titre-verdict" (close)="verdictOuvert.set(false)">
@@ -253,7 +255,7 @@
                 <span class="lettre-camp" aria-hidden="true">{{ i === 0 ? 'A' : 'B' }}</span>
                 <h3>{{ camp.cote }}</h3>
                 <span class="avocat-camp">{{ camp.nom }}</span>
-                <span class="position-camp">{{ camp.role === 'avocat_defense' ? 'Pour la demande' : 'Contre la demande' }}</span>
+                <span class="position-camp">{{ duel() ? 'Défend ' + duel()!.camps[camp.role].nomTitre : (camp.role === 'avocat_defense' ? 'Pour la demande' : 'Contre la demande') }}</span>
               </div>
             </div>
             @if (camp.chiffre; as c) {
@@ -269,17 +271,28 @@
             <label class="voter-camp" [for]="'vote-' + camp.role">
               @if (vote() === camp.role) {
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>
-                Vous votez pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                Vous votez pour {{ libelleCamp(camp.role) }}
               } @else {
-                Voter pour {{ camp.role === 'avocat_defense' ? 'la Défense' : 'le Procureur' }}
+                Voter pour {{ libelleCamp(camp.role) }}
               }
             </label>
           </article>
         }
       </div>
       <aside class="rail-rapport" aria-labelledby="titre-rail">
-        <h3 id="titre-rail">Rapport d’analyse</h3>
-        @if (chiffres(); as c) {
+        <h3 id="titre-rail">{{ duel() ? 'Les deux dossiers' : 'Rapport d’analyse' }}</h3>
+        @if (duel(); as d) {
+          <table class="tuiles-duel">
+            <thead><tr><th scope="col"><span class="visually-hidden">Chiffre</span></th>
+              <th scope="col">{{ d.camps.avocat_defense.ticker }}</th><th scope="col">{{ d.camps.procureur.ticker }}</th></tr></thead>
+            <tbody>
+              @for (t of d.tuiles; track t.libelle) {
+                <tr><th scope="row">{{ t.libelle }}</th>
+                  <td [class.alerte]="t.alerteA">{{ t.a }}</td><td [class.alerte]="t.alerteB">{{ t.b }}</td></tr>
+              }
+            </tbody>
+          </table>
+        } @else if (chiffres(); as c) {
           <dl class="tuiles-rail">
             <div [class.alerte]="c.depasse"><dt>Pire baisse</dt><dd><strong>{{ pct(c.apres.pireBaisse) }}</strong><small>avant : {{ pct(c.avant.pireBaisse) }}</small></dd></div>
             <div><dt>Perte au pire</dt><dd><strong>{{ dollars(c.apres.pireBaisse * (proces()?.demande?.capital ?? 0)) }}</strong></dd></div>
@@ -291,13 +304,15 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5zM12 15v2"/></svg>
           La décision du tribunal est révélée après votre vote, pour ne pas vous influencer.
         </p>
-        <button type="button" class="rapport-complet" (click)="ouvrirRapport()">Ouvrir le rapport complet</button>
+        @if (!duel()) {
+          <button type="button" class="rapport-complet" (click)="ouvrirRapport()">Ouvrir le rapport complet</button>
+        }
       </aside>
     </div>
     <footer class="pied-vote">
       <p role="status">
         @if (vote(); as v) {
-          Votre choix : <strong>{{ v === 'avocat_defense' ? 'la Défense (A)' : 'le Procureur (B)' }}</strong>. Vous pouvez encore changer.
+          Votre choix : <strong>{{ libelleCamp(v) }} ({{ v === 'avocat_defense' ? 'A' : 'B' }})</strong>. Vous pouvez encore changer.
         } @else {
           Choisissez le camp qui vous a convaincu.
         }
