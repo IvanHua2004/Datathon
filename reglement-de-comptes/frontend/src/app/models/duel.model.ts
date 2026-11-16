@@ -1,4 +1,5 @@
 /** Réponse de POST /api/duel : deux procès sur le même profil, puis une décision A contre B. */
+import { TourDiscussion } from './proces.model';
 
 export interface ChiffreDuel {
   libelle: string;
@@ -33,6 +34,10 @@ export interface TourDuel {
 
 export interface Duel {
   debat: TourDuel[];
+  /** Le duel raconté comme un procès simple, pour la salle d'audience animée. */
+  discussion: TourDiscussion[];
+  /** La question posée au tribunal : « Pour Robert : NVDA ou XBB.TO… ? » */
+  question: string;
   avertissementDebat: string | null;
   profil: string;
   nom: string;

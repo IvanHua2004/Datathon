@@ -18,6 +18,15 @@ const EXPRESSIONS_A_SOULIGNER = [
 ].map((expression) => expression.split(' '));
 type Camp = 'avocat_defense' | 'procureur';
 
+/** Un duel A contre B joué dans la même salle : Me Vigor défend A, Me Austère défend B. */
+export interface ConfigDuel {
+  camps: Record<Camp, { ticker: string; nomTitre: string }>;
+  /** La décision du tribunal, révélée seulement après le vote. */
+  annonce: string;
+  /** Les chiffres clés côte à côte dans le rail du vote. */
+  tuiles: readonly { libelle: string; a: string; b: string; alerteA: boolean; alerteB: boolean }[];
+}
+
 function motsDe(texte: string): string[] {
   return texte.match(/\S+\s*/gu) ?? [];
 }
@@ -45,6 +54,10 @@ export class AudienceSceneComponent {
   readonly tours = input<readonly TourDiscussion[]>([]);
   readonly pieces = input<readonly Piece[]>([]);
   readonly enCours = input(false);
+  /** Duel entre deux titres : mêmes personnages, autre question, autres libellés. */
+  readonly duel = input<ConfigDuel | null>(null);
+  /** Texte affiché pendant la préparation (le duel annonce ses deux procès). */
+  readonly messageAttente = input<string | null>(null);
   /** Le procès complet (verdict, courbe, salle…) pour le rapport d'analyse. */
   readonly proces = input<Proces | null>(null);
   /** Le portefeuille actuel de l'investisseur, pour la barre avant / après du rapport. */
@@ -171,8 +184,18 @@ export class AudienceSceneComponent {
     if (this.audienceTerminee()) return 'Rejouer l’audience';
     return this.lectureAuto() ? 'Mettre la lecture en pause' : 'Reprendre la lecture';
   });
-  readonly personnages = PERSONNAGES;
-  readonly plaidoiries = computed(() => PERSONNAGES.filter((p) => p.role !== 'juge').map((p) => {
+  readonly personnages = computed(() => {
+    const duel = this.duel();
+    return PERSONNAGES.map((p) => p.role === 'juge' || !duel ? p
+      : { ...p, cote: `Avocat de ${duel.camps[p.role].ticker}` });
+  });
+  /** « la Défense » / « le Procureur », ou le titre défendu pendant un duel. */
+  libelleCamp(role: Camp): string {
+    const duel = this.duel();
+    if (duel) return duel.camps[role].ticker;
+    return role === 'avocat_defense' ? 'la Défense' : 'le Procureur';
+  }
+  readonly plaidoiries = computed(() => this.personnages().filter((p) => p.role !== 'juge').map((p) => {
     const texte = this.tours().find((tour) => tour.role === p.role)?.texte ?? '';
     const c = this.chiffres();
     const t = this.proces()?.demande.ticker ?? 'le titre';
@@ -188,8 +211,15 @@ export class AudienceSceneComponent {
   private readonly annonceVerdict = computed<TourDiscussion | undefined>(() => {
     const camp = this.campRetenu();
     if (!camp) return;
+    const duel = this.duel();
     const cote = camp.role === 'avocat_defense' ? 'la défense' : 'l’accusation';
     const verdict = this.proces()?.decision.verdict;
+    const texte = duel
+      ? `Vous avez tranché en faveur de ${duel.camps[camp.role].ticker}, défendu par ${camp.nom}. `
+        + `${duel.annonce} L’audience est levée.`
+      : `Vous avez tranché en faveur de ${cote}, représentée par ${camp.nom}. `
+        + (verdict ? `Le verdict du tribunal est « ${verdict} ». ` : '')
+        + 'L’audience est levée.';
     return {
       ordre: this.tours().length + 1,
       etape: 'ANNONCE_VERDICT',
@@ -197,9 +227,7 @@ export class AudienceSceneComponent {
       role: 'juge',
       avatar: '👨‍⚖️',
       titre: 'Votre verdict',
-      texte: `Vous avez tranché en faveur de ${cote}, représentée par ${camp.nom}. `
-        + (verdict ? `Le verdict du tribunal est « ${verdict} ». ` : '')
-        + 'L’audience est levée.',
+      texte,
       pause_ms: 0,
     };
   });
@@ -261,7 +289,7 @@ export class AudienceSceneComponent {
   private readonly fenetreVerdict = viewChild<ElementRef<HTMLDialogElement>>('fenetreVerdict');
 
   constructor() {
-    const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal');
+    const page = inject(ElementRef<HTMLElement>).nativeElement.closest('rdc-tribunal, rdc-duel');
     inject(DestroyRef).onDestroy(() => {
       clearTimeout(this.minuterieVerdict);
       for (const minuterie of this.minuteriesMarteau) clearTimeout(minuterie);
@@ -270,6 +298,12 @@ export class AudienceSceneComponent {
     afterNextRender(() => this.ancrageSon()?.nativeElement.append(this.lecteur));
     effect((nettoyer) => {
       if (!this.annonceTerminee() || this.reprendreVote()) return;
+      if (this.duel()) {
+        // Duel : pas de tableau de bord à ouvrir, la page du duel fait défiler jusqu'à la décision.
+        const fin = setTimeout(() => this.continuerComparaison.emit(), 1500);
+        nettoyer(() => clearTimeout(fin));
+        return;
+      }
       let minuterie = setTimeout(() => {
         this.ouvertureRapport.set(true);
         minuterie = setTimeout(() => {

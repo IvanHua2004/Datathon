@@ -194,6 +194,69 @@ def debat(profil: Profil, ca: dict, cb: dict, decision: dict, mode: str) -> tupl
     return tours, avertissement
 
 
+def question_du_duel(profil: Profil, ca: dict, cb: dict) -> str:
+    return (f"Pour {profil.nom} : {ca['ticker']} ou {cb['ticker']}, lequel convient le mieux "
+            f"à {pct(ca['taille'], 0)} du portefeuille ?")
+
+
+def discussion(profil: Profil, ca: dict, cb: dict, tours: list[dict]) -> list[dict]:
+    """Le duel raconté comme un procès simple, pour la salle d'audience animée.
+
+    Huissier, greffier, l'avocat de A (Me Vigor, à gauche), l'avocat de B (Me Austère, à droite),
+    contrôle du greffier, puis le juge, qui laisse l'investisseur voter avant de rendre la décision.
+    """
+    plaidoirie_a, plaidoirie_b = tours[0], tours[1]
+    budget = pct(profil.budget_perte, 0)
+    timeline = [
+        {
+            "etape": "HUISSIER_OUVERTURE", "acteur": "L'Huissier d'audience", "role": "huissier", "avatar": "📢",
+            "titre": "Ouverture du duel",
+            "texte": (f"Silence dans la salle ! Le tribunal ouvre un duel. {profil.nom} ({profil.resume}) hésite "
+                      f"entre deux titres pour {pct(ca['taille'], 0)} de son portefeuille : {ca['nomTitre']} "
+                      f"({ca['ticker']}) et {cb['nomTitre']} ({cb['ticker']}). Question posée au tribunal : "
+                      "lequel des deux convient le mieux à son profil ?"),
+            "pause_ms": 2500,
+        },
+        {
+            "etape": "GREFFIER_DEPOT", "acteur": "Le Greffier d'audience", "role": "greffier", "avatar": "📜",
+            "titre": "Les deux dossiers sont scellés",
+            "texte": (f"J'ai scellé deux dossiers, calculés sur le même portefeuille. Avec {ca['ticker']}, la pire "
+                      f"baisse du portefeuille est de {ca['chiffres'][0]['valeur']} ; avec {cb['ticker']}, de "
+                      f"{cb['chiffres'][0]['valeur']}. Le budget de perte déclaré est de {budget}. "
+                      "Chaque chiffre cité à l'audience sera contrôlé."),
+            "pause_ms": 2200,
+        },
+    ]
+    for tour, role, cote, avatar in ((plaidoirie_a, "avocat_defense", ca, "💼"), (plaidoirie_b, "procureur", cb, "🛡️")):
+        nom = "Me Vigor" if role == "avocat_defense" else "Me Austère"
+        timeline.append({
+            "etape": "PLAIDOIRIE_A" if role == "avocat_defense" else "PLAIDOIRIE_B",
+            "acteur": f"{nom}, avocat de {cote['ticker']}", "role": role, "avatar": avatar,
+            "titre": f"Plaidoirie pour {cote['nomTitre']}", "texte": tour["texte"],
+            "non_verifies": tour["non_verifies"], "pause_ms": 3800,
+        })
+    douteux = sorted(set(plaidoirie_a["non_verifies"]) | set(plaidoirie_b["non_verifies"]))
+    timeline.append({
+        "etape": "AUDIT_GREFFIER", "acteur": "Le Greffier d'audience", "role": "greffier", "avatar": "⚖️",
+        "titre": "Contrôle factuel des deux plaidoiries",
+        "texte": (f"Objection ! Ces chiffres ne figurent dans aucun des deux dossiers : {', '.join(douteux)}."
+                  if douteux else "Contrôle du greffier : tous les chiffres cités par les deux avocats "
+                                  "figurent dans les dossiers scellés."),
+        "statut": "alerte" if douteux else "valide", "non_verifies": douteux, "pause_ms": 2000,
+    })
+    timeline.append({
+        "etape": "JUGE_DELIBERE", "acteur": "Le Président du tribunal", "role": "juge", "avatar": "👨‍⚖️",
+        "titre": "Avant la décision",
+        "texte": (f"J'ai entendu les deux avocats. Ma décision suivra la règle fixe du duel : le verdict le moins "
+                  "grave l'emporte, puis la plus petite pire baisse du portefeuille. Mais d'abord, à vous : "
+                  f"qui vous a convaincu, l'avocat de {ca['ticker']} ou celui de {cb['ticker']} ?"),
+        "pause_ms": 3000,
+    })
+    for i, tour in enumerate(timeline, start=1):
+        tour["ordre"] = i
+    return timeline
+
+
 def juger_duel(profil: Profil, a: tuple[str, float], b: tuple[str, float], mode: str = "bedrock") -> dict:
     # Les deux procès se tiennent en même temps : avec Bedrock, le duel dure à peu près un procès.
     with ThreadPoolExecutor(max_workers=2) as ex:
@@ -208,11 +271,14 @@ def juger_duel(profil: Profil, a: tuple[str, float], b: tuple[str, float], mode:
     else:
         titre = f"Pour {profil.nom}, égalité"
     tours, avertissement_debat = debat(profil, ca, cb, {**decision, "titre": titre}, mode)
+    salle = discussion(profil, ca, cb, tours)
     for c in (ca, cb):
         c.pop("_pire")
         c.pop("_mesures")
     return {
         "debat": tours,
+        "discussion": salle,
+        "question": question_du_duel(profil, ca, cb),
         "avertissementDebat": avertissement_debat,
         "profil": profil.cle,
         "nom": profil.nom,

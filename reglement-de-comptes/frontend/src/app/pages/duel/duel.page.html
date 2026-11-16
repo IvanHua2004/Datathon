@@ -1,107 +1,127 @@
-<rdc-entete [etape]="3">
+<div class="ecran-audience">
+<rdc-entete [etape]="3" [persona]="persona()">
   <a class="retour" routerLink="/question" [queryParams]="{ profil: profil() }">← Le greffier</a>
 </rdc-entete>
 
-<main class="scene">
-  <p class="sur-titre">Duel au tribunal</p>
-
-  @if (cotes()[0] && cotes()[1]) {
-    <h1>{{ cotes()[0]!.ticker }} <span aria-hidden="true">⚔</span><span class="visually-hidden">contre</span> {{ cotes()[1]!.ticker }}</h1>
-  }
-
-  @if (erreur(); as e) {
-    <p class="bandeau bandeau--erreur" role="alert">{{ e }}</p>
-  }
-
-  @if (enCours()) {
-    <div class="attente" role="status">
-      <span class="points" aria-hidden="true"><i></i><i></i><i></i></span>
-      <p>Deux procès se tiennent en même temps. Avec Bedrock, comptez environ 30 secondes.</p>
-    </div>
-  }
-
-  @if (duel(); as d) {
-    @if (avertissement(); as av) {
-      <p class="bandeau bandeau--avertissement" role="status">{{ av }}</p>
+<div class="disposition">
+  <header class="question-duel">
+    @if (cotes()[0] && cotes()[1]) {
+      <p class="sur-titre">Duel · {{ cotes()[0]!.ticker }} <span aria-hidden="true">⚔</span><span class="visually-hidden">contre</span> {{ cotes()[1]!.ticker }}</p>
     }
+    <h1>{{ question() }}</h1>
+  </header>
 
-    @if (d.avertissementDebat; as av2) {
-      <p class="bandeau bandeau--avertissement" role="status">{{ av2 }}</p>
+  <main class="audience">
+    @if (erreur(); as e) {
+      <p class="bandeau bandeau--erreur" role="alert">{{ e }}</p>
     }
-
-    <section class="debat" aria-label="Le débat">
-      <h2>Le débat</h2>
-      @for (t of d.debat; track t.ordre) {
-        <div class="tour" [attr.data-role]="t.role">
-          <span class="avatar" aria-hidden="true">{{ t.role === 'juge' ? '⚖' : (t.ticker ?? '?').slice(0, 4) }}</span>
-          <div class="parole">
-            <strong>{{ t.acteur }}</strong>
-            <p>{{ t.texte }}</p>
-            <p class="controle" [class.alerte]="t.non_verifies.length">
-              @if (t.non_verifies.length) {
-                Greffier : chiffres absents des dossiers → {{ t.non_verifies.join(', ') }}
-              } @else if (t.role !== 'juge') {
-                Greffier : tous les chiffres cités figurent dans les dossiers.
-              }
-            </p>
-          </div>
-        </div>
+    @if (duel(); as d) {
+      @if (avertissement(); as av) {
+        <p class="bandeau bandeau--avertissement" role="status">{{ av }}</p>
       }
-    </section>
+      @if (d.avertissementDebat; as av2) {
+        <p class="bandeau bandeau--avertissement" role="status">{{ av2 }}</p>
+      }
+    }
+    <rdc-audience-scene [tours]="duel()?.discussion ?? []" [enCours]="enCours()" [duel]="config()"
+      [messageAttente]="messageAttente()"
+      (voteRendu)="voter($event)" (autreQuestion)="versGreffier()" (continuerComparaison)="montrerDecision()" />
+  </main>
 
-    <section class="decision" [class.egalite]="!d.decision.gagnant" aria-live="polite">
-      <span class="sceau" aria-hidden="true">⚖</span>
-      <div>
-        <h2>{{ d.decision.titre }}</h2>
-        <p>{{ d.decision.raison }}.</p>
-        <p class="regle">Règle fixe du duel : le verdict le moins grave l'emporte ; à verdict égal, la plus petite
-          pire baisse du portefeuille. Ce n'est pas un conseil financier : la décision vous appartient.</p>
-      </div>
-    </section>
-
-    <div class="cotes">
-      @for (c of d.cotes; track c.ticker) {
-        <article class="cote" [class.gagnante]="gagnant(c.ticker)" [attr.data-ton]="tonVerdict(c.verdict)">
-          <header>
-            @if (gagnant(c.ticker)) { <span class="ruban">L'emporte</span> }
-            <h3>{{ c.nomTitre }}</h3>
-            <p>{{ c.ticker }} · {{ pct(c.taille, 0) }} du portefeuille de {{ d.nom }}</p>
-          </header>
-
-          <p class="verdict">{{ c.verdict }}</p>
-
-          <table>
-            <caption class="visually-hidden">Le portefeuille avant et après</caption>
-            <thead><tr><th scope="col">Portefeuille</th><th scope="col">Avant</th><th scope="col">Après</th></tr></thead>
-            <tbody>
-              @for (x of c.chiffres; track x.libelle) {
-                <tr [class.alerte]="x.alerte">
-                  <th scope="row">{{ x.libelle }}</th>
-                  <td>{{ x.avant }}</td>
-                  <td><strong>{{ x.valeur }}</strong></td>
-                </tr>
-              }
-            </tbody>
-          </table>
-
-          @if (c.motifs.length) {
-            <h4>Motifs du juge</h4>
-            <ul class="motifs">
-              @for (m of c.motifs; track $index) { <li>{{ m }}</li> }
-            </ul>
+  <aside class="dossier-colonne" aria-label="Le dossier du duel">
+    <h2 class="onglet-dossier">Le dossier</h2>
+    <div class="dossier">
+      @if (persona(); as p) {
+        <h3>Investisseur fictif · {{ p.nom }}</h3>
+        <p class="profil">{{ p.resume }}</p>
+      }
+      <ul class="titres-duel">
+        @for (c of cotes(); track $index; let i = $index) {
+          @if (c) {
+            <li [attr.data-camp]="i === 0 ? 'avocat_defense' : 'procureur'">
+              <span class="lettre" aria-hidden="true">{{ i === 0 ? 'A' : 'B' }}</span>
+              <span class="ident">
+                <strong>{{ c.ticker }}</strong>
+                <small>{{ duel()?.cotes?.[i]?.nomTitre ?? 'Dossier en préparation' }}</small>
+              </span>
+              <span class="part">{{ pct(c.taille, 0) }}</span>
+              <span class="avocat">{{ i === 0 ? 'Me Vigor' : 'Me Austère' }}</span>
+            </li>
           }
-
-          <details>
-            <summary>Les plaidoiries</summary>
-            <p><strong>La Défense.</strong> {{ c.defense }}</p>
-            <p><strong>Le Procureur.</strong> {{ c.procureur }}</p>
-            <p><strong>Le Juge.</strong> {{ c.juge }}</p>
-          </details>
-
-          <a class="secondaire" routerLink="/tribunal-2" (click)="sonAudience.amorcer()"
-             [queryParams]="{ profil: d.profil, ticker: c.ticker, taille: c.taille }">Voir le procès complet →</a>
-        </article>
+        }
+      </ul>
+      @if (!vote()) {
+        <p class="note">Les verdicts des deux dossiers sont révélés après votre vote.</p>
       }
     </div>
+    <div class="actions-dossier">
+      @if (vote()) {
+        <button type="button" class="voir-decision" (click)="montrerDecision()">Voir la décision du duel ↓</button>
+      } @else {
+        <ng-container [ngTemplateOutlet]="scene()?.boutonVerdict() ?? null" />
+      }
+    </div>
+  </aside>
+</div>
+</div>
+
+@if (duel(); as d) {
+  @if (decisionVisible()) {
+    <section class="resultat" #blocDecision tabindex="-1" aria-labelledby="titre-decision">
+      <div class="decision" [class.egalite]="!d.decision.gagnant">
+        <span class="sceau" aria-hidden="true">⚖</span>
+        <div>
+          <h2 id="titre-decision">{{ d.decision.titre }}</h2>
+          <p>{{ d.decision.raison }}.</p>
+          @if (vote(); as v) {
+            <p class="votre-vote">Votre vote : {{ v === 'avocat_defense' ? d.cotes[0].ticker : d.cotes[1].ticker }}
+              {{ (v === 'avocat_defense' ? d.cotes[0].ticker : d.cotes[1].ticker) === d.decision.gagnant
+                ? '— le tribunal vous rejoint.' : d.decision.gagnant ? '— le tribunal tranche autrement.' : '' }}</p>
+          }
+          <p class="regle">Règle fixe du duel : le verdict le moins grave l'emporte ; à verdict égal, la plus petite
+            pire baisse du portefeuille. Ce n'est pas un conseil financier : la décision vous appartient.</p>
+        </div>
+      </div>
+
+      <div class="cotes">
+        @for (c of d.cotes; track c.ticker) {
+          <article class="cote" [class.gagnante]="gagnant(c.ticker)" [attr.data-ton]="tonVerdict(c.verdict)">
+            <header>
+              @if (gagnant(c.ticker)) { <span class="ruban">L'emporte</span> }
+              <h3>{{ c.nomTitre }}</h3>
+              <p>{{ c.ticker }} · {{ pct(c.taille, 0) }} du portefeuille de {{ d.nom }}</p>
+            </header>
+
+            <p class="verdict">{{ c.verdict }}</p>
+
+            <table>
+              <caption class="visually-hidden">Le portefeuille avant et après</caption>
+              <thead><tr><th scope="col">Portefeuille</th><th scope="col">Avant</th><th scope="col">Après</th></tr></thead>
+              <tbody>
+                @for (x of c.chiffres; track x.libelle) {
+                  <tr [class.alerte]="x.alerte">
+                    <th scope="row">{{ x.libelle }}</th>
+                    <td>{{ x.avant }}</td>
+                    <td><strong>{{ x.valeur }}</strong></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (c.motifs.length) {
+              <h4>Motifs du juge</h4>
+              <ul class="motifs">
+                @for (m of c.motifs; track $index) { <li>{{ m }}</li> }
+              </ul>
+            }
+
+            <a class="secondaire" routerLink="/tribunal-2" (click)="sonAudience.amorcer()"
+               [queryParams]="{ profil: d.profil, ticker: c.ticker, taille: c.taille }">Voir le procès complet de {{ c.ticker }} →</a>
+          </article>
+        }
+      </div>
+
+      <button type="button" class="vers-greffier" (click)="versGreffier()">Poser d'autres questions au greffier →</button>
+    </section>
   }
-</main>
+}

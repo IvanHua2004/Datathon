@@ -49,3 +49,17 @@ def test_juger_duel_complet_mode_gabarit():
     assert len(res["debat"]) == 3  # Avocat A, Avocat B, Le Juge
     # Le greffier n'a trouvé aucun chiffre non vérifié
     assert all(tour["non_verifies"] == [] for tour in res["debat"])
+
+
+def test_duel_raconte_comme_un_proces():
+    p = profils.PROFILS["amira"]
+    res = duel.juger_duel(p, ("QQQ", 0.10), ("NVDA", 0.10), mode="gabarit")
+
+    roles = [t["role"] for t in res["discussion"]]
+    assert roles == ["huissier", "greffier", "avocat_defense", "procureur", "greffier", "juge"]
+    assert [t["ordre"] for t in res["discussion"]] == list(range(1, 7))
+    assert "QQQ" in res["discussion"][2]["acteur"] and "NVDA" in res["discussion"][3]["acteur"]
+    assert res["discussion"][2]["texte"] == res["debat"][0]["texte"]
+    # Le juge laisse voter : il ne nomme pas le gagnant avant le vote.
+    assert res["decision"]["titre"] not in res["discussion"][-1]["texte"]
+    assert "QQQ" in res["question"] and "NVDA" in res["question"]

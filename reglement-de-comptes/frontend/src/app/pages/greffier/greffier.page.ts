@@ -456,6 +456,7 @@ export class GreffierPage {
     if (!p || !this.peutDueler(a)) return;
     const [x, y] = a.choix;
     const part = this.partDuel(a);
+    this.sonAudience.amorcer();
     this.router.navigate(['/duel'], {
       queryParams: { profil: p.cle, a: `${x.ticker}:${part}`, b: `${y.ticker}:${part}` },
     });

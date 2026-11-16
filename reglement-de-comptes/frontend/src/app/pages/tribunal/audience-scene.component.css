@@ -352,7 +352,7 @@
 }
 .illustration-fin img { display: block; height: 90%; width: auto; }
 .titre-porte { margin: 1rem 1rem 0.3rem; color: var(--jaune-fenetre); font-family: Georgia, 'Bookman Old Style', serif; font-size: 1.45rem; font-weight: 700; }
-.texte-porte { margin: 0 1.4rem; color: #fff; font-size: 0.93rem; line-height: 1.45; }
+.texte-porte { margin: 0 1.4rem 1.1rem; color: #fff; font-size: 0.93rem; line-height: 1.45; }
 .action-porte {
   display: flex;
   align-items: center;
@@ -360,7 +360,8 @@
   gap: 0.5rem;
   align-self: stretch;
   min-height: 3.1rem;
-  margin: 1.1rem 1.4rem 1.4rem;
+  /* margin-top auto : les deux boutons s'alignent en bas, quelle que soit la longueur du texte. */
+  margin: auto 1.4rem 1.4rem;
   border-radius: 0.35rem;
   background: #65475b;
   color: #fff;
@@ -503,6 +504,13 @@
 .tuiles-rail dd { margin: 0.2rem 0 0; color: #fff; font-size: 1rem; }
 .tuiles-rail small { display: block; margin-top: 0.1rem; color: var(--texte-fenetre-secondaire); font-size: 0.72rem; }
 .tuiles-rail .alerte strong { color: #ff9d9f; }
+.tuiles-duel { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.tuiles-duel th, .tuiles-duel td { padding: 0.5rem 0.45rem; border-bottom: 1px solid var(--bord-fenetre); text-align: right; }
+.tuiles-duel thead th { color: var(--jaune-fenetre); font-size: 0.8rem; }
+.tuiles-duel tbody th { text-align: left; font-weight: 500; color: var(--texte-fenetre-secondaire); }
+.tuiles-duel td { font-weight: 700; color: #fff; }
+.tuiles-duel td.alerte { color: #ff9d9f; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .scelle-rail {
   display: flex;
   gap: 0.6rem;
