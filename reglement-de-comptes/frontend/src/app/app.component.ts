@@ -4,6 +4,6 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'rdc-root',
   imports: [RouterOutlet],
-  template: `<router-outlet />`,
+  templateUrl: './app.component.html',
 })
 export class AppComponent {}

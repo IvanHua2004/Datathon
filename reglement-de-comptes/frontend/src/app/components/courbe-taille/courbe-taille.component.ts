@@ -10,59 +10,8 @@ const MARGE = { gauche: 64, droite: 24, haut: 24, bas: 56 };
 /** Pire baisse observée du portefeuille selon la part placée dans le titre, face au budget. */
 @Component({
   selector: 'rdc-courbe-taille',
-  template: `
-    <svg [attr.viewBox]="'0 0 ' + largeur + ' ' + hauteur" role="img"
-         [attr.aria-label]="description()">
-      @for (t of graduationsY(); track t.valeur) {
-        <line class="grille" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-              [attr.y1]="t.y" [attr.y2]="t.y"></line>
-        <text class="graduation" [attr.x]="marge.gauche - 10" [attr.y]="t.y + 4" text-anchor="end">{{ t.texte }}</text>
-      }
-      @for (t of graduationsX(); track t.valeur) {
-        <text class="graduation" [attr.x]="t.x" [attr.y]="hauteur - marge.bas + 22" text-anchor="middle">{{ t.texte }}</text>
-      }
-      <line class="axe" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-            [attr.y1]="hauteur - marge.bas" [attr.y2]="hauteur - marge.bas"></line>
-
-      <line class="budget" [attr.x1]="marge.gauche" [attr.x2]="largeur - marge.droite"
-            [attr.y1]="yBudget()" [attr.y2]="yBudget()"></line>
-      <text class="etiquette-budget" [attr.x]="largeur - marge.droite" [attr.y]="yBudget() - 8" text-anchor="end">
-        Budget de perte déclaré : {{ budgetTexte() }}
-      </text>
-
-      <polyline class="ligne" [attr.points]="ligne()"></polyline>
-      @for (p of points(); track p.taille) {
-        <circle class="point" [attr.cx]="p.x" [attr.cy]="p.y" r="6">
-          <title>{{ p.infobulle }}</title>
-        </circle>
-      }
-      @if (pointDemande(); as d) {
-        <circle class="demande" [attr.cx]="d.x" [attr.cy]="d.y" r="13"></circle>
-        <text class="etiquette-demande" [attr.x]="d.x - 16" [attr.y]="d.y + 26" text-anchor="end">Demande</text>
-      }
-
-      <text class="titre-axe" [attr.x]="(marge.gauche + largeur - marge.droite) / 2" [attr.y]="hauteur - 10" text-anchor="middle">
-        Part du portefeuille placée dans le titre (%)
-      </text>
-      <text class="titre-axe" [attr.transform]="'translate(16 ' + (hauteur - marge.bas + marge.haut) / 2 + ') rotate(-90)'" text-anchor="middle">
-        Pire baisse observée (%)
-      </text>
-    </svg>
-  `,
-  styles: `
-    :host { display: block; }
-    svg { width: 100%; height: auto; display: block; font-family: inherit; }
-    .grille { stroke: #e8d9c4; stroke-width: 1; }
-    .axe { stroke: #8a7a84; stroke-width: 1; }
-    .graduation { fill: #5c4a55; font-size: 13px; }
-    .titre-axe { fill: #200e0c; font-size: 13px; font-weight: 600; }
-    .ligne { fill: none; stroke: #773c6f; stroke-width: 2; }
-    .point { fill: #773c6f; stroke: #fff8ec; stroke-width: 2; cursor: default; }
-    .demande { fill: none; stroke: #200e0c; stroke-width: 2; }
-    .etiquette-demande { fill: #200e0c; font-size: 13px; font-weight: 600; }
-    .budget { stroke: #200e0c; stroke-width: 1.5; stroke-dasharray: 6 4; }
-    .etiquette-budget { fill: #200e0c; font-size: 13px; }
-  `,
+  templateUrl: './courbe-taille.component.html',
+  styleUrl: './courbe-taille.component.scss',
 })
 export class CourbeTailleComponent {
   readonly courbe = input.required<PointCourbe[]>();

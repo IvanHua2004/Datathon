@@ -1,0 +1,38 @@
+<article class="carte">
+  <div class="entete-carte">
+    <h2>{{ plaidoirie().role }}</h2>
+    <button type="button" class="bouton-analogie"
+      [class.actif]="affichee() && !!analogie()"
+      [class.chargement]="enCours()"
+      (click)="basculerAnalogie()"
+      title="Obtenir une analogie vulgarisée pour cette plaidoirie">
+      <span>💡</span> {{ enCours() ? 'Vulgarisation…' : (affichee() && !!analogie() ? 'Masquer' : 'Une analogie ?') }}
+    </button>
+  </div>
+  @if (plaidoirie().temoins_convoques.length) {
+    <p class="temoins">Témoins convoqués : {{ plaidoirie().temoins_convoques.join(', ') }}</p>
+  }
+  <p class="texte">{{ plaidoirie().texte }}</p>
+  @if (affichee()) {
+    @if (enCours()) {
+      <div class="encart-analogie en-cours">
+        <em>💡 L'Interprète du Juré cherche une analogie…</em>
+      </div>
+    } @else if (analogie(); as rep) {
+      <div class="encart-analogie">
+        <div class="titre-juré">
+          <strong>💡 {{ rep.titre || "L'analogie du juré" }}</strong>
+          <button type="button" class="fermer" (click)="affichee.set(false)" aria-label="Fermer">×</button>
+        </div>
+        <p class="texte-analogie">{{ rep.analogie }}</p>
+      </div>
+    }
+  }
+  @if (plaidoirie().non_verifies.length) {
+    <p class="greffier greffier--alerte" role="status">
+      Greffier : chiffres absents des pièces → {{ plaidoirie().non_verifies.join(', ') }}
+    </p>
+  } @else {
+    <p class="greffier">Greffier : tous les chiffres cités figurent dans les pièces.</p>
+  }
+</article>

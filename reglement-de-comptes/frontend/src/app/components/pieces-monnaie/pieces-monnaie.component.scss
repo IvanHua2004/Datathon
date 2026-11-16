@@ -1,0 +1,8 @@
+@media (prefers-reduced-motion: reduce) {
+  :host(:not(.pieces-terminer)) { display: none; }
+  :host(.pieces-terminer) .persona-coin {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}

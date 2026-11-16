@@ -11,7 +11,7 @@ import { dollars, pct, tonVerdict } from '../../shared/format';
   selector: 'rdc-rapport-comparatif',
   imports: [RouterLink, EnteteComponent, RapportFinalComponent],
   templateUrl: './rapport-comparatif.page.html',
-  styleUrl: './rapport-comparatif.page.css',
+  styleUrl: './rapport-comparatif.page.scss',
 })
 export class RapportComparatifPage {
   readonly tribunal = inject(ProcesService);

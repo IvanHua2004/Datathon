@@ -1,0 +1,12 @@
+:host { display: block; }
+svg { width: 100%; height: auto; display: block; font-family: inherit; }
+.grille { stroke: #e8d9c4; stroke-width: 1; }
+.axe { stroke: #8a7a84; stroke-width: 1; }
+.graduation { fill: #5c4a55; font-size: 13px; }
+.titre-axe { fill: #200e0c; font-size: 13px; font-weight: 600; }
+.ligne { fill: none; stroke: #773c6f; stroke-width: 2; }
+.point { fill: #773c6f; stroke: #fff8ec; stroke-width: 2; cursor: default; }
+.demande { fill: none; stroke: #200e0c; stroke-width: 2; }
+.etiquette-demande { fill: #200e0c; font-size: 13px; font-weight: 600; }
+.budget { stroke: #200e0c; stroke-width: 1.5; stroke-dasharray: 6 4; }
+.etiquette-budget { fill: #200e0c; font-size: 13px; }

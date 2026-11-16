@@ -18,28 +18,8 @@ export const DUREE_EFFET_PIECES = DUREE_PIECE + Math.max(...PIECES.map((piece) =
 
 @Component({
   selector: 'rdc-pieces-monnaie',
-  styles: `
-    @media (prefers-reduced-motion: reduce) {
-      :host(:not(.pieces-terminer)) { display: none; }
-      :host(.pieces-terminer) .persona-coin {
-        animation: none;
-        opacity: 1;
-        transform: translate(-50%, -50%);
-      }
-    }
-  `,
-  template: `
-    <span class="persona-coins" [style.--coin-duration]="duree + 'ms'" aria-hidden="true">
-      @for (piece of pieces; track $index) {
-        <span class="persona-coin"
-          [style.--coin-x]="piece.x + '%'"
-          [style.--coin-y]="piece.y + '%'"
-          [style.--coin-drift]="piece.drift + 'px'"
-          [style.--coin-spin]="piece.spin + 'deg'"
-          [style.--coin-delay]="piece.delay + 'ms'">$</span>
-      }
-    </span>
-  `,
+  templateUrl: './pieces-monnaie.component.html',
+  styleUrl: './pieces-monnaie.component.scss',
 })
 export class PiecesMonnaieComponent {
   readonly duree = DUREE_PIECE;

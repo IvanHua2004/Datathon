@@ -47,8 +47,8 @@ function clePortrait(tour: TourDiscussion): string {
 @Component({
   selector: 'rdc-audience-scene',
   imports: [RapportAudienceComponent, PiecesMonnaieComponent],
-  styleUrl: './audience-scene.component.css',
   templateUrl: './audience-scene.component.html',
+  styleUrl: './audience-scene.component.scss',
 })
 export class AudienceSceneComponent {
   readonly tours = input<readonly TourDiscussion[]>([]);
