@@ -225,6 +225,7 @@ class Analyse:
     groupes: list[dict] = field(default_factory=list)   # catalogue ou titres à choisir
     selection: str | None = None        # « deux » ou « un_par_groupe » quand il faut choisir
     extraits: list[dict] = field(default_factory=list)  # pièces de l'audience citées par l'archiviste
+    votes: list[dict] = field(default_factory=list)     # votes des débats précédents (statut « votes »)
 
     def en_json(self) -> dict:
         d = asdict(self)
@@ -467,7 +468,7 @@ def lire_contexte(historique: list[str], univers: dict[str, str]) -> Contexte:
     titres: list[str] = []
     part = None
     theme = None
-    for message in reversed(historique[-10:]):
+    for message in reversed(historique):
         for t in trouver_titres(message, univers):
             if t not in titres:
                 titres.append(t)
@@ -541,7 +542,7 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
              taille_en_attente: float | None = None, titre_exemple: str = "SPY",
              resume_profil: str = "", portefeuille: set[str] = frozenset(),
              classes_exclues: set[str] = frozenset(), historique: list[str] | None = None,
-             profil_info: dict | None = None, _profondeur: int = 0) -> Analyse:
+             profil_info: dict | None = None, votes_precedents: str = "", _profondeur: int = 0) -> Analyse:
     """Analyse une réponse au greffier, en tenant compte des questions précédentes.
 
     univers : ticker -> nom. ticker_en_attente / taille_en_attente : ce que le greffier
@@ -614,7 +615,8 @@ def analyser(texte: str, univers: dict[str, str], ticker_en_attente: str | None 
 
     # Dernier recours : les règles n'ont pas compris, Bedrock classe la question et la réécrit.
     if _profondeur == 0 and analyse.motif in ("hors_sujet", "titre_manquant"):
-        classement = conversation.classer_avec_modele(texte, univers, resume_profil, historique or [])
+        classement = conversation.classer_avec_modele(texte, univers, resume_profil, historique or [],
+                                                      votes_precedents)
         if classement and classement["intention"] == "decision" and len(classement["tickers"]) > 1:
             choix = _proposer([(t, "Proposé d'après votre question") for t in classement["tickers"]],
                               classement["part"], univers)

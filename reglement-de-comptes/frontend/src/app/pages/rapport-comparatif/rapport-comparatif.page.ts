@@ -2,18 +2,22 @@ import { Component, computed, effect, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
+import { ProfilReveleComponent } from '../../components/profil-revele/profil-revele.component';
 import { RapportFinalComponent } from '../../components/rapport-final/rapport-final.component';
+import { lireVotes } from '../../shared/memoire';
 import { ProcesService } from '../../services/proces.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
 
 /** Rapport de décision, recalculable depuis les paramètres de l'URL. */
 @Component({
   selector: 'rdc-rapport-comparatif',
-  imports: [RouterLink, EnteteComponent, RapportFinalComponent],
+  imports: [RouterLink, EnteteComponent, RapportFinalComponent, ProfilReveleComponent],
   templateUrl: './rapport-comparatif.page.html',
   styleUrl: './rapport-comparatif.page.scss',
 })
 export class RapportComparatifPage {
+  /** Tous les votes de la session pour ce profil : le bilan « d'après vos choix » les relit. */
+  readonly votes = computed(() => lireVotes(this.profilCle()));
   readonly tribunal = inject(ProcesService);
 
   readonly profilCle = input('', { alias: 'profil' });

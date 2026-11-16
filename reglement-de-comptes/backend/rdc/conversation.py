@@ -196,7 +196,7 @@ INTENTIONS = ("decision", "chiffres", "comparaison", "profil", "definition", "ca
 
 
 def classer_avec_modele(texte: str, univers: dict[str, str], resume_profil: str,
-                        historique: list[str]) -> dict | None:
+                        historique: list[str], votes_precedents: str = "") -> dict | None:
     """Demande à Bedrock de classer une question que les règles n'ont pas comprise.
 
     Renvoie {"intention", "tickers", "part", "terme"} validé, ou None (désactivé, indisponible,
@@ -215,7 +215,7 @@ def classer_avec_modele(texte: str, univers: dict[str, str], resume_profil: str,
             config=Config(connect_timeout=5, read_timeout=25, retries={"max_attempts": 2}),
         )
         liste = "\n".join(f"- {t} : {n}" for t, n in univers.items())
-        avant = "\n".join(f"- {h}" for h in historique[-5:]) or "- (aucun)"
+        avant = "\n".join(f"- {h}" for h in historique) or "- (aucun)"
         consigne = (
             "Tu es le greffier d'un tribunal financier simulé. Classe la question de l'investisseur "
             "fictif. Intentions possibles : decision (placer une part dans un ou plusieurs titres), "
@@ -225,7 +225,8 @@ def classer_avec_modele(texte: str, univers: dict[str, str], resume_profil: str,
             "0,02 et 0,5, ou null si elle n'est pas dite. Tiens compte des questions précédentes, la "
             "plus récente en priorité. Réponds seulement en JSON : "
             '{"intention": "...", "tickers": ["..."], "part": null, "terme": null}\n\n'
-            f"Profil : {resume_profil}\nQuestions précédentes :\n{avant}\nTitres disponibles :\n{liste}"
+            f"Profil : {resume_profil}\nQuestions précédentes :\n{avant}\n"
+            f"Votes des débats précédents :\n{votes_precedents or '- (aucun)'}\nTitres disponibles :\n{liste}"
         )
         reponse = client.converse(
             modelId=os.environ.get("BEDROCK_MODEL_ID") or MODELE_PAR_DEFAUT,

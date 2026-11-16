@@ -588,3 +588,25 @@ button:focus-visible, input:focus-visible { outline: 3px solid #ffc247; outline-
 @media (prefers-reduced-motion: reduce) {
   .micro.ecoute::after, .point-dictee { animation: none; }
 }
+
+/* Récapitulatif des votes des débats précédents (archiviste). */
+.liste-votes {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.6rem 0 0;
+  padding: 0.75rem 0.9rem 0.75rem 2rem;
+  line-height: 1.45;
+}
+.liste-votes li::marker { font-weight: 700; }
+.type-vote {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: #773c6f;
+  color: #fff4e6;
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: 0.1em;
+}
+.liste-votes li[data-type='duel'] .type-vote { background: #a62432; }

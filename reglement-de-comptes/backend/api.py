@@ -33,7 +33,7 @@ if env_path.exists():
             if k not in os.environ:
                 os.environ[k] = v.strip().strip('"').strip("'")
 
-from rdc import audience, dictee, donnees, greffier, questions, temoins
+from rdc import audience, dictee, donnees, greffier, questions, temoins, votes
 from rdc.profils import PROFILS, Profil
 from rdc.agents import generer_analogie
 from rdc.proces import (TAILLES_COURBE, courbe, ouvrir_proces, construire_dossier, regle_verdict,
@@ -59,6 +59,20 @@ class DemandeProces(BaseModel):
     intention_texte: str | None = Field(default=None, description="Volonté de l'investisseur exprimée en texte libre")
 
 
+class VotePrecedent(BaseModel):
+    """Un vote rendu à l'écran dans un débat précédent de la session."""
+    type: Literal["proces", "duel"] = "proces"
+    ticker: str = Field(max_length=20)
+    nomTitre: str = Field(default="", max_length=120)
+    taille: float = Field(ge=0, le=1)
+    vote: str = Field(max_length=20, description="Camp suivi (procès) ou titre choisi (duel)")
+    verdictTribunal: str | None = Field(default=None, max_length=200)
+    accord: bool | None = None
+    adversaire: str | None = Field(default=None, max_length=20, description="Duel : l'autre titre")
+    gagnant: str | None = Field(default=None, max_length=20, description="Duel : le titre retenu par le tribunal")
+    plusRisque: bool | None = Field(default=None, description="Duel : le titre choisi baisse-t-il davantage ?")
+
+
 class Question(BaseModel):
     texte: str = Field(max_length=500, description="La question telle que l'investisseur l'a écrite")
     profil: str = Field(description="Clé du profil : amira, mateo, robert ou personnalise")
@@ -66,8 +80,10 @@ class Question(BaseModel):
     taille: float | None = Field(default=None, description="Part déjà connue d'un échange précédent")
     comparer: list[str] | None = Field(default=None, min_length=2, max_length=2,
                                        description="Deux titres (ou « MOY:<domaine> ») choisis à l'écran")
-    historique: list[str] = Field(default_factory=list, max_length=20,
-                                  description="Questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
+    historique: list[str] = Field(default_factory=list,
+                                  description="Toutes les questions précédentes de l'investisseur, de la plus ancienne à la plus récente")
+    votes: list[VotePrecedent] = Field(default_factory=list,
+                                       description="Votes des débats précédents de la session, du plus ancien au plus récent")
     action: Literal["catalogue", "choisir_deux"] | None = Field(
         default=None, description="Bouton de l'écran : voir tous les titres, ou en choisir deux à comparer")
     audience: dict | None = Field(
@@ -373,6 +389,11 @@ def analyser_question(q: Question, request: Request) -> dict:
                                  "Soumettre ce titre au tribunal") for t in (a, b) if t in univers]
         return questions.Analyse("comparaison", "comparaison", r["message"], agent="archiviste",
                                  fiches=r["fiches"], choix=choix).en_json()
+    les_votes = [v.model_dump() for v in q.votes]
+    if votes.demande_les_votes(q.texte):
+        # « Qu'ai-je voté ? » : l'archiviste récapitule les débats déjà tranchés par l'investisseur.
+        message, lignes = votes.repondre(les_votes, profil.nom)
+        return questions.Analyse("votes", "votes", message, agent="archiviste", votes=lignes).en_json()
     if q.audience and audience.concerne_le_debat(q.texte, q.audience):
         # Question sur le débat qui vient d'être plaidé : l'archiviste répond à partir des pièces.
         r = audience.repondre(q.texte, q.audience)
@@ -385,6 +406,7 @@ def analyser_question(q: Question, request: Request) -> dict:
                                  resume_profil=f"{profil.nom}, {profil.resume} {profil.preferences}",
                                  portefeuille=set(profil.portefeuille), classes_exclues=set(profil.classes_exclues),
                                  historique=[h[:500] for h in q.historique],
+                                 votes_precedents=votes.pour_le_modele(les_votes) if les_votes else "",
                                  profil_info=_dossier_investisseur(profil, _donnees().univers))
     if (q.audience and analyse.statut == "recevable" and analyse.ticker == q.audience.get("ticker")
             and analyse.taille is not None and abs(analyse.taille - float(q.audience.get("taille") or 0)) < 1e-9):

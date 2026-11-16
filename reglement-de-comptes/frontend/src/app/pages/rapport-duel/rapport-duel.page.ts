@@ -4,7 +4,9 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
+import { ProfilReveleComponent } from '../../components/profil-revele/profil-revele.component';
 import { RapportFinalComponent } from '../../components/rapport-final/rapport-final.component';
+import { lireVotes } from '../../shared/memoire';
 import { CoteDuel, Duel } from '../../models/duel.model';
 import { AnalyseComparative } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
@@ -47,11 +49,13 @@ function departager(a: number, b: number, plusGrandGagne: boolean): Meilleur {
  */
 @Component({
   selector: 'rdc-rapport-duel',
-  imports: [RouterLink, EnteteComponent, RapportFinalComponent],
+  imports: [RouterLink, EnteteComponent, RapportFinalComponent, ProfilReveleComponent],
   templateUrl: './rapport-duel.page.html',
   styleUrl: './rapport-duel.page.scss',
 })
 export class RapportDuelPage {
+  /** Tous les votes de la session pour ce profil : le bilan « d'après vos choix » les relit. */
+  readonly votes = computed(() => lireVotes(this.profilCle()));
   private readonly api = inject(ApiService);
   private readonly tribunal = inject(ProcesService);
   readonly sonAudience = inject(SonAudienceService);

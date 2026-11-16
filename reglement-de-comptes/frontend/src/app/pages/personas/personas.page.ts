@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 
 import { EnteteComponent } from '../../components/entete/entete.component';
 import { PiecesMonnaieComponent } from '../../components/pieces-monnaie/pieces-monnaie.component';
-import { cleConversation, cleRetour, effacer } from '../../shared/memoire';
+import { cleConversation, cleRetour, cleVotes, effacer } from '../../shared/memoire';
 import { ConfigurationPersona, NiveauRisque, Profil } from '../../models/proces.model';
 import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
@@ -87,6 +87,7 @@ export class PersonasPage {
   private oublierPersonnalise(): void {
     this.tribunal.personaPersonnalise.set(null);
     effacer(cleConversation('personnalise'));
+    effacer(cleVotes('personnalise'));
     effacer(cleRetour('personnalise'));
   }
 

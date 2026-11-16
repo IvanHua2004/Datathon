@@ -1,0 +1,42 @@
+<section class="profil-revele" [attr.data-ecart]="bilan().ecart" aria-labelledby="titre-profil-revele">
+  <header class="tete">
+    <p class="sur-titre">Votre profil d’après vos choix</p>
+    <span class="fiabilite" [attr.data-fiabilite]="bilan().fiabilite">{{ libelleFiabilite() }}</span>
+  </header>
+  <h2 id="titre-profil-revele">{{ titre() }}</h2>
+  <p class="lecture">{{ lecture() }}</p>
+
+  <!-- L'échelle de risque : où est le persona, où vous placent vos votes. -->
+  <div class="echelle" role="img"
+    [attr.aria-label]="'Profil déclaré : ' + niveaux[bilan().declare].libelle + '. Profil d’après vos choix : ' + niveaux[bilan().revele].libelle + '.'">
+    <ol class="crans" aria-hidden="true">
+      @for (n of niveaux; track n.cle; let i = $index) {
+        <li [class.declare]="i === bilan().declare" [class.revele]="bilan().fiabilite !== 'aucune' && i === bilan().revele">
+          <span class="pastille"></span>
+          <span class="libelle">{{ n.libelle }}</span>
+          @if (i === bilan().declare) { <span class="marque marque--declare">Persona</span> }
+          @if (bilan().fiabilite !== 'aucune' && i === bilan().revele) { <span class="marque marque--revele">Vos choix</span> }
+        </li>
+      }
+    </ol>
+  </div>
+
+  @if (bilan().indices.length) {
+    <details class="indices">
+      <summary>Comment vos {{ bilan().indices.length }} vote{{ bilan().indices.length > 1 ? 's' : '' }} ont été lus</summary>
+      <ul>
+        @for (i of bilan().indices; track $index) {
+          <li [attr.data-signal]="i.signal > 0 ? 'plus' : i.signal < 0 ? 'moins' : 'egal'">
+            <span class="fleche" aria-hidden="true">{{ i.signal > 0 ? '↑' : i.signal < 0 ? '↓' : '=' }}</span>
+            <span class="visually-hidden">{{ i.signal > 0 ? 'Plus de risque :' : i.signal < 0 ? 'Plus prudent :' : 'Aligné :' }}</span>
+            <span><strong>{{ i.vote.type === 'duel' ? 'Duel' : 'Procès' }}</strong> · {{ i.explication }}</span>
+          </li>
+        }
+      </ul>
+      <p class="regle">Règle fixe : défendre un ajout que le tribunal juge contraire ou en tension compte comme plus de risque ;
+        refuser un ajout compatible compte comme plus de prudence ; dans un duel, préférer le titre que le profil ne retient pas
+        compte selon la pire baisse des deux.</p>
+    </details>
+  }
+  <p class="limite">Miroir pédagogique tiré de cette simulation, pas une évaluation officielle de votre profil d’investisseur.</p>
+</section>

@@ -62,6 +62,10 @@
             <p>{{ bilan.detail }}</p>
           </section>
         }
+        @if (profil(); as p) {
+          <rdc-profil-revele [profil]="p" [votes]="votes()" />
+        }
+
         <section class="rapport-tribunal" aria-label="Le rapport d’analyse du tribunal">
           <rdc-rapport-final [profil]="profil()" [ticker]="ticker()" [taille]="tailleValeur()"
             [nomTitre]="actif()?.nom ?? ''" [proces]="procesDuDossier()" [choix]="choixValide()"

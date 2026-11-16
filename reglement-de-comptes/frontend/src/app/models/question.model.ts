@@ -1,8 +1,9 @@
+import type { VoteEnregistre } from '../shared/memoire';
 /** Réponse du greffier à une question (POST /api/questions/analyser). */
 
 export type StatutQuestion =
   | 'recevable' | 'choix' | 'incomplet' | 'refus'
-  | 'fiche' | 'comparaison' | 'catalogue' | 'selection' | 'profil' | 'definition' | 'social' | 'audience';
+  | 'fiche' | 'comparaison' | 'catalogue' | 'selection' | 'profil' | 'definition' | 'social' | 'audience' | 'votes';
 
 /** Une pièce de l'audience citée par l'archiviste (statut « audience »). */
 export interface ExtraitPiece {
@@ -58,6 +59,8 @@ export interface AnalyseQuestion {
   definition: { terme: string; texte: string; exemple: string | null } | null;
   /** Pièces de l'audience citées par l'archiviste (statut « audience »). */
   extraits?: ExtraitPiece[];
+  /** Votes des débats précédents, une ligne lisible chacun (statut « votes »). */
+  votes?: (VoteEnregistre & { ligne: string })[];
 }
 
 export interface DossierInvestisseur {
@@ -118,4 +121,6 @@ export interface DemandeAnalyse {
   historique?: string[];
   /** L'audience plaidée, si l'investisseur revient du tribunal : l'archiviste répond sur le débat. */
   audience?: AudienceDossier;
+  /** Les votes des débats précédents de la session : le greffier s'en souvient. */
+  votes?: VoteEnregistre[];
 }

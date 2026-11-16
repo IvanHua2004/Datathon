@@ -12,7 +12,7 @@ import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { Attente, completer } from '../../shared/autocompletion';
 import { dollars, pct } from '../../shared/format';
-import { AudienceSuspendue, Retour, cleConversation, cleRetour, ecrire, effacer, lire } from '../../shared/memoire';
+import { AudienceSuspendue, Retour, cleConversation, cleRetour, ecrire, effacer, lire, lireVotes } from '../../shared/memoire';
 
 interface Message {
   de: 'greffier' | 'archiviste' | 'moi';
@@ -301,9 +301,9 @@ export class GreffierPage {
   envoyer(texte = this.saisie(), comparer?: [string, string], action?: 'catalogue' | 'choisir_deux'): void {
     const p = this.persona();
     if (!p || this.enCours() || !texte.trim()) return;
-    // Les questions précédentes partent avec la nouvelle : le greffier relit la conversation.
+    // Toutes les questions précédentes partent avec la nouvelle : le greffier relit toute la conversation.
     const historique = this.messages().filter((m) => m.de === 'moi').map((m) => m.texte)
-      .slice(this.debutContexte()).slice(-10);
+      .slice(this.debutContexte());
     this.ajouter({ de: 'moi', texte: texte.trim() });
     this.saisie.set('');
     const champ = this.champ()?.nativeElement;
@@ -317,6 +317,7 @@ export class GreffierPage {
     const audience = this.tribunal.dossierAudience(p.cle);
     this.api.analyserQuestion({
       texte, profil: p.cle, ticker: contexte.ticker, taille: contexte.taille, comparer, action, historique, audience,
+      votes: lireVotes(p.cle),
     }).subscribe({
       next: (a) => {
         this.enCours.set(false);

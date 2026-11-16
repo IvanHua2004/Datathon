@@ -238,6 +238,18 @@
                     }
                   }
                 }
+                @case ('votes') {
+                  @if (a.votes?.length) {
+                    <ol class="fiche liste-votes" aria-label="Vos votes dans les débats précédents">
+                      @for (v of a.votes; track $index) {
+                        <li [attr.data-type]="v.type">
+                          <span class="type-vote">{{ v.type === 'duel' ? 'Duel' : 'Procès' }}</span>
+                          {{ v.ligne }}
+                        </li>
+                      }
+                    </ol>
+                  }
+                }
                 @case ('definition') {
                   @if (a.definition; as def) {
                     <p class="terme">Terme : <strong>{{ def.terme }}</strong></p>

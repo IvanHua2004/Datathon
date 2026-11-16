@@ -30,6 +30,10 @@
       </section>
     }
 
+    @if (profil(); as p) {
+      <rdc-profil-revele [profil]="p" [votes]="votes()" />
+    }
+
     <!-- Les deux dossiers en en-tête de colonnes -->
     <section class="face-a-face" aria-label="Les deux titres comparés">
       @for (cote of ['a', 'b']; track cote) {

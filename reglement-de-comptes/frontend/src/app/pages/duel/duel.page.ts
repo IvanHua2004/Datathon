@@ -9,6 +9,7 @@ import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { cleDuel, memoriserDuel } from '../../shared/duel-memoire';
+import { enregistrerVote } from '../../shared/memoire';
 import { pct } from '../../shared/format';
 import { laisserUnRetour } from '../../shared/memoire';
 import { AudienceSceneComponent, ConfigDuel } from '../tribunal/audience-scene.component';
@@ -139,7 +140,23 @@ export class DuelPage {
   voter(camp: Camp): void {
     this.vote.set(camp);
     const d = this.duel();
-    if (d) this.laisserRetour(d, camp);
+    if (!d) return;
+    this.laisserRetour(d, camp);
+    const [a, b] = d.cotes;
+    const [choisi, autre] = camp === 'avocat_defense' ? [a, b] : [b, a];
+    const pireBaisse = (c: typeof a) => {
+      const brut = c.chiffres.find((x) => x.libelle.startsWith('Pire baisse'))?.valeur ?? '';
+      const n = Number(brut.replace(/[−–]/g, '-').replace(/[^\d,.-]/g, '').replace(',', '.'));
+      return Number.isFinite(n) && brut ? Math.abs(n) : null;
+    };
+    const pc = pireBaisse(choisi);
+    const pa = pireBaisse(autre);
+    // Le greffier et le bilan de profil se souviennent du duel : quel titre, et était-ce le plus risqué ?
+    enregistrerVote(d.profil, {
+      type: 'duel', ticker: a.ticker, nomTitre: a.nomTitre, taille: a.taille, vote: choisi.ticker,
+      verdictTribunal: d.decision.titre, accord: d.decision.gagnant ? d.decision.gagnant === choisi.ticker : null,
+      adversaire: b.ticker, gagnant: d.decision.gagnant, plusRisque: pc !== null && pa !== null ? pc > pa : null,
+    });
   }
 
   /** Après l'annonce du juge : le tableau de bord comparatif des deux titres. */

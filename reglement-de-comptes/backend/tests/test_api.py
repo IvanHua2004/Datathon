@@ -198,3 +198,26 @@ def test_filet_bedrock_reecrit_la_question(monkeypatch):
     monkeypatch.setattr(conversation, "classer_avec_modele",
                         lambda *a, **k: {"intention": "hors_sujet", "tickers": [], "part": None, "terme": None})
     assert _q("raconte une blague")["motif"] == "hors_sujet"
+
+
+def test_greffier_recoit_les_votes_precedents():
+    votes = [
+        {"type": "proces", "ticker": "NVDA", "nomTitre": "NVIDIA", "taille": 0.1, "vote": "avocat_defense",
+         "verdictTribunal": "Contraire au profil", "accord": False},
+        {"type": "duel", "ticker": "NVDA", "taille": 0.1, "vote": "XBB.TO", "adversaire": "XBB.TO",
+         "gagnant": "XBB.TO", "verdictTribunal": "XBB.TO l'emporte"},
+    ]
+    r = client.post("/api/questions/analyser", json={"texte": "Qu'est-ce que j'ai voté ?", "profil": "robert",
+                                                     "votes": votes}).json()
+    assert r["statut"] == "votes" and r["agent"] == "archiviste"
+    assert "2 débats" in r["message"] and "1 fois sur 2" in r["message"]
+    assert "la Défense" in r["votes"][0]["ligne"] and "conclusion inverse" in r["votes"][0]["ligne"]
+    assert "le tribunal vous rejoint" in r["votes"][1]["ligne"]
+
+    vide = client.post("/api/questions/analyser", json={"texte": "mes votes ?", "profil": "robert"}).json()
+    assert vide["statut"] == "votes" and not vide["votes"]
+
+    # Une question normale passe toujours, votes ou pas.
+    normal = client.post("/api/questions/analyser", json={"texte": "Devrais-je placer 10 % dans SPY ?",
+                                                          "profil": "robert", "votes": votes}).json()
+    assert normal["statut"] == "recevable"

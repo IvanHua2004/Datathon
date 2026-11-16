@@ -9,7 +9,7 @@ import { ApiService } from '../../services/api.service';
 import { ProcesService } from '../../services/proces.service';
 import { SonAudienceService } from '../../services/son-audience.service';
 import { dollars, pct, tonVerdict } from '../../shared/format';
-import { laisserUnRetour } from '../../shared/memoire';
+import { enregistrerVote, laisserUnRetour } from '../../shared/memoire';
 import { AudienceSceneComponent } from './audience-scene.component';
 
 /** Le tribunal : choix du dossier, procès, verdict, salle et pièces du greffier. */
@@ -125,6 +125,13 @@ export class TribunalPage {
           + (accord === true ? ' : même conclusion que vous.' : accord === false ? ' : la conclusion inverse.' : '.')
         : `Audience suspendue : ${pct(d.taille, 0)} du portefeuille dans ${d.nomTitre} (${d.ticker}) a été plaidé. `
           + 'Vous n’avez pas encore rendu votre verdict.';
+      if (vote) {
+        // Le greffier et le bilan de profil se souviennent de chaque vote de la session.
+        enregistrerVote(d.profil, {
+          type: 'proces', ticker: d.ticker, nomTitre: d.nomTitre, taille: d.taille,
+          vote, verdictTribunal: pr.decision.verdict, accord,
+        });
+      }
       laisserUnRetour(d.profil, texte, {
         ticker: d.ticker, nomTitre: d.nomTitre, taille: d.taille, question: this.question() ?? '',
         vote, verdictTribunal: vote ? pr.decision.verdict : null, accord,
