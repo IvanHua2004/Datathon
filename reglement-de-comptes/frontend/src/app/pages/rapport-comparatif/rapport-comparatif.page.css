@@ -400,3 +400,29 @@ summary {
   .faits-profil, .mesures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .faits-profil div, .mesures div { padding-inline: 0.25rem; }
 }
+
+/* ----- Fin de parcours : mêmes gestes que le tableau de bord du duel ----- */
+.actions-finales {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--trait-rapport);
+}
+.action-finale {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 3px;
+  background: var(--jaune-rapport);
+  color: #200e0c;
+  font-weight: 700;
+  text-decoration: none;
+}
+.action-finale:hover { background: #fbde85; }
+.action-finale--secondaire { background: transparent; color: var(--jaune-rapport); box-shadow: inset 0 0 0 1.5px var(--jaune-rapport); }
+.action-finale--secondaire:hover { background: rgb(254 201 70 / 12%); }
+.action-finale:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }

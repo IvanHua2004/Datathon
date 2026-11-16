@@ -1,0 +1,224 @@
+:host {
+  display: block;
+  min-height: 100svh;
+  color: #feedd3;
+  --carte-rapport: #3b2836;
+  --fond-chiffres: #21101d;
+  --trait-rapport: #745367;
+  --texte-secondaire: #dfc6d0;
+  --rouge-texte: #ff9293;
+  --jaune-rapport: #fec946;
+  --vert-texte: #a8dfb8;
+  --fond-alerte: #482532;
+  --fond-accord: #263c31;
+  /* Les deux camps, mêmes couleurs que dans la fenêtre de vote. */
+  --couleur-a: #8cb7f0;
+  --couleur-b: #fc4446;
+  --couleur-initial: #b9a6b2;
+  background-color: #281523;
+  background-image: var(--fond-ligne-parcours);
+}
+
+.rapport {
+  width: min(100% - clamp(1.25rem, 3vw, 3rem), 82rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 2vw, 2rem) 0 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.titre { text-align: center; padding: 0.35rem 0 0.4rem; }
+.duel-titres {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  font-weight: 700;
+}
+.contre { margin: 0 0.35rem; color: var(--texte-secondaire); font-weight: 500; font-style: italic; }
+.avertissement, .limite { margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.8; }
+
+.pastille {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--couleur-a);
+  color: #200e0c;
+  font-size: 0.85rem;
+  font-weight: 800;
+  flex: none;
+}
+.pastille[data-cote="b"] { background: var(--couleur-b); color: #fff; }
+
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-width: 0;
+  padding: clamp(0.85rem, 2vw, 1.25rem);
+  border: 1px solid var(--trait-rapport);
+  border-radius: 5px;
+  background: var(--carte-rapport);
+}
+.carte h2, .carte h3, .carte p { margin: 0; }
+.carte h2 { font-size: 1.2rem; }
+.carte h3 { margin-top: 0.3rem; color: var(--jaune-rapport); font-size: 0.95rem; }
+.carte p { line-height: 1.55; }
+.carte ul { margin: 0; padding-left: 1.15rem; line-height: 1.5; }
+.sur-titre { display: flex; align-items: center; gap: 0.45rem; color: var(--texte-secondaire); font-size: 0.85rem; font-weight: 600; }
+
+/* ----- Bandeau : vote et décision ----- */
+.bilan { border-inline-start: 5px solid var(--jaune-rapport); background: #423329; padding-block: clamp(1rem, 2.4vw, 1.5rem); }
+.bilan h2 { font-family: "Bookman Old Style", "URW Bookman", Georgia, serif; font-size: clamp(1.3rem, 2.8vw, 2.1rem); line-height: 1.15; }
+.bilan[data-ton="accord"] { border-inline-start-color: var(--confirm-background, #2f9e5a); background: var(--fond-accord); }
+.bilan[data-ton="accord"] h2 { color: var(--vert-texte); }
+.bilan[data-ton="ecart"] { border-inline-start-color: var(--couleur-b); background: var(--fond-alerte); }
+.bilan[data-ton="ecart"] h2 { color: var(--rouge-texte); }
+.regle { font-size: 0.82rem; opacity: 0.8; }
+
+/* ----- Les deux titres en tête de colonnes ----- */
+.face-a-face { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.titre-duel { border-top: 5px solid var(--couleur-a); }
+.titre-duel[data-cote="b"] { border-top-color: var(--couleur-b); }
+.titre-duel.gagnant { box-shadow: 0 0 0 2px var(--jaune-rapport); }
+.haut-titre { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.ruban {
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--jaune-rapport);
+  color: #200e0c;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+.ruban--vote { background: transparent; color: var(--jaune-rapport); box-shadow: inset 0 0 0 1.5px var(--jaune-rapport); }
+.titre-duel h2 { color: #fff; font-size: clamp(1.1rem, 2vw, 1.45rem); line-height: 1.2; }
+.sous-titre { color: var(--texte-secondaire); font-size: 0.88rem; }
+.verdict {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 4px;
+  background: var(--fond-chiffres);
+  font-weight: 700;
+}
+.verdict span { color: var(--texte-secondaire); font-size: 0.78rem; font-weight: 600; }
+.verdict[data-ton="contraire"] { color: var(--rouge-texte); }
+.verdict[data-ton="tension"] { color: var(--jaune-rapport); }
+.verdict[data-ton="compatible"] { color: var(--vert-texte); }
+.cles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; margin: 0; }
+.cles div { padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--trait-rapport); }
+.cles dt, .faits dt { color: var(--texte-secondaire); font-size: 0.76rem; font-weight: 700; }
+.cles dd { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cles .alerte dd { color: var(--rouge-texte); }
+.score { color: var(--texte-secondaire); font-size: 0.9rem; }
+.score strong { color: var(--jaune-rapport); font-size: 1.1rem; }
+
+.attente { flex-direction: row; align-items: center; }
+.sceau { font-size: 1.6rem; }
+.erreur { border-inline-start: 5px solid var(--couleur-b); background: var(--fond-alerte); }
+
+/* ----- Tableaux ----- */
+.entete-section { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.5rem; }
+.periode { color: var(--texte-secondaire); font-size: 0.85rem; }
+.defilement-tableau { overflow-x: auto; }
+.tableau-duel { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; overflow-wrap: normal; }
+.tableau-duel th, .tableau-duel td { padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--trait-rapport); text-align: right; }
+.tableau-duel thead th { color: var(--jaune-rapport); font-size: 0.85rem; white-space: nowrap; }
+.tableau-duel thead th:first-child { text-align: left; }
+.tableau-duel thead .pastille { width: 1.35rem; height: 1.35rem; font-size: 0.75rem; margin-right: 0.25rem; }
+.tableau-duel tbody th { min-width: 10rem; text-align: left; font-weight: 600; }
+.tableau-duel tbody th small { display: block; margin-top: 0.15rem; color: var(--texte-secondaire); font-size: 0.75rem; font-weight: 400; }
+.tableau-duel td { font-weight: 700; white-space: nowrap; }
+.tableau-duel td.meilleur { background: rgb(168 223 184 / 10%); color: var(--vert-texte); }
+.tableau-duel td.alerte { color: var(--rouge-texte); }
+.marque { margin-left: 0.3rem; }
+.tableau-duel--dossier td:nth-child(2) { color: var(--texte-secondaire); font-weight: 500; }
+
+/* ----- Graphiques en barres ----- */
+.graphiques { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.barres { display: grid; gap: 0.75rem; margin: 0.25rem 0 0; padding: 0 !important; list-style: none; }
+.barres li {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+.etiquette { font-size: 0.88rem; color: var(--texte-secondaire); }
+.piste { position: relative; height: 1.4rem; border-radius: 4px; background: var(--fond-chiffres); }
+.barre {
+  display: block;
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--couleur-initial);
+  transition: width 600ms ease;
+}
+.barres li[data-cote="a"] .barre { background: var(--couleur-a); }
+.barres li[data-cote="b"] .barre { background: var(--couleur-b); }
+.barre.negatif { opacity: 0.6; }
+.barres li strong { min-width: 6.5rem; text-align: right; font-variant-numeric: tabular-nums; }
+.barres--perte .barre.depasse { background-image: repeating-linear-gradient(135deg, rgb(255 255 255 / 28%) 0 4px, transparent 4px 9px); }
+.barres li strong.alerte { color: var(--rouge-texte); }
+.ligne-budget { position: absolute; top: -0.3rem; bottom: -0.3rem; width: 2px; background: var(--jaune-rapport); }
+.legende { display: flex; align-items: center; gap: 0.5rem; color: var(--texte-secondaire); font-size: 0.85rem; }
+.trait-budget { width: 2px; height: 1rem; background: var(--jaune-rapport); }
+@media (prefers-reduced-motion: reduce) { .barre { transition: none; } }
+
+/* ----- Motifs ----- */
+.motifs-duel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.motifs-duel .carte { border-top: 5px solid var(--couleur-a); }
+.motifs-duel .carte[data-cote="b"] { border-top-color: var(--couleur-b); }
+.motifs-duel .action { margin-top: auto; align-self: flex-start; }
+
+/* ----- Profil ----- */
+.profil summary { cursor: pointer; color: var(--jaune-rapport); font-weight: 700; }
+.faits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: 0.6rem; margin: 0.6rem 0; }
+.faits div { padding: 0.5rem 0.65rem; border-bottom: 1px solid var(--trait-rapport); }
+.faits dd { margin: 0.2rem 0 0; font-weight: 700; }
+.positions { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 0 !important; list-style: none; }
+.positions li { display: flex; gap: 0.5rem; padding: 0.3rem 0.6rem; border-radius: 4px; background: var(--fond-chiffres); }
+
+/* ----- Actions ----- */
+.actions-finales {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--trait-rapport);
+}
+.titre-section { margin: 0.35rem 0 0.6rem; font-size: 1.2rem; }
+.rapports-grille { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.action {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.2rem;
+  border-radius: 3px;
+  background: var(--jaune-rapport);
+  color: #200e0c;
+  font-weight: 700;
+  text-decoration: none;
+}
+.action:hover { background: #fbde85; }
+.action--secondaire { background: transparent; color: var(--jaune-rapport); box-shadow: inset 0 0 0 1.5px var(--jaune-rapport); }
+.action--secondaire:hover { background: rgb(254 201 70 / 12%); }
+.action:focus-visible, .profil summary:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+@media (max-width: 48rem) {
+  .face-a-face, .graphiques, .motifs-duel, .rapports-grille { grid-template-columns: minmax(0, 1fr); }
+  .barres li { grid-template-columns: minmax(0, 1fr) auto; }
+  .barres li .piste { grid-column: 1 / -1; grid-row: 2; }
+  .tableau-duel th, .tableau-duel td { padding: 0.55rem 0.45rem; }
+  .tableau-duel { font-size: 0.84rem; }
+  .tableau-duel tbody th { min-width: 6.5rem; }
+  .tableau-duel thead .pastille { display: none; }
+  .tableau-duel tbody th small { display: none; }
+  .marque { margin-left: 0.15rem; }
+}

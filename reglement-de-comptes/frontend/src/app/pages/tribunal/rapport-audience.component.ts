@@ -92,7 +92,7 @@ function pointPour(courbe: readonly PointCourbe[], taille: number): PointCourbe 
             @else if (accord() === false) { Le tribunal arrive à la conclusion inverse : relisez les motifs ci-dessus. }
             @else { Le tribunal ne tranche pas : une information manque. }
           </p>
-        } @else if (!pendantLeVote()) {
+        } @else if (!pendantLeVote() && !horsAudience()) {
           <p class="vote vote--attente">Vous n’avez pas encore rendu votre verdict : « Terminer », puis « Passer au verdict ».</p>
         }
 
@@ -240,6 +240,8 @@ export class RapportAudienceComponent {
   readonly audienceTerminee = input(false);
   /** Affiché à côté du vote : inutile de rappeler comment voter. */
   readonly pendantLeVote = input(false);
+  /** Rapport relu après coup (tableau de bord) : pas d'invitation à voter. */
+  readonly horsAudience = input(false);
   /** Avant le vote de l'investisseur : la décision du tribunal reste scellée. */
   readonly masquerDecision = input(false);
   readonly portefeuille = input<readonly Position[]>([]);
