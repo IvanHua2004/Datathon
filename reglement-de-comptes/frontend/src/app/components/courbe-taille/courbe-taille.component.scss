@@ -1,12 +1,164 @@
-:host { display: block; }
-svg { width: 100%; height: auto; display: block; font-family: inherit; }
-.grille { stroke: #e8d9c4; stroke-width: 1; }
-.axe { stroke: #8a7a84; stroke-width: 1; }
-.graduation { fill: #5c4a55; font-size: 13px; }
-.titre-axe { fill: #200e0c; font-size: 13px; font-weight: 600; }
-.ligne { fill: none; stroke: #773c6f; stroke-width: 2; }
-.point { fill: #773c6f; stroke: #fff8ec; stroke-width: 2; cursor: default; }
-.demande { fill: none; stroke: #200e0c; stroke-width: 2; }
-.etiquette-demande { fill: #200e0c; font-size: 13px; font-weight: 600; }
-.budget { stroke: #200e0c; stroke-width: 1.5; stroke-dasharray: 6 4; }
-.etiquette-budget { fill: #200e0c; font-size: 13px; }
+:host {
+  display: block;
+  width: 100%;
+}
+svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+.fond-carte {
+  fill: #ffffff;
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+.grille {
+  stroke: #f1f5f9;
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.ligne-zero {
+  stroke: #94a3b8;
+  stroke-width: 1.2;
+  stroke-dasharray: 2 2;
+}
+.axe-x {
+  stroke: #cbd5e1;
+  stroke-width: 1.2;
+}
+.tick-x {
+  stroke: #94a3b8;
+  stroke-width: 1;
+}
+.graduation-y {
+  fill: #64748b;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+.graduation-x {
+  fill: #475569;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.titre-axe {
+  fill: #1e293b;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* Zone de danger / dépassement */
+.zone-danger {
+  fill: #fef2f2;
+  opacity: 0.65;
+}
+.texte-zone-danger {
+  fill: #dc2626;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Seuil de budget */
+.budget-ligne {
+  stroke: #dc2626;
+  stroke-width: 1.8;
+  stroke-dasharray: 5 4;
+}
+.badge-budget-bg {
+  fill: #fef2f2;
+  stroke: #f87171;
+  stroke-width: 0.8;
+}
+.badge-budget-txt {
+  fill: #991b1b;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Courbe */
+.courbe-principale {
+  fill: none;
+  stroke: #2563eb;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hitbox-point {
+  fill: transparent;
+  cursor: pointer;
+}
+.point-donnee {
+  fill: #2563eb;
+  stroke: #ffffff;
+  stroke-width: 2;
+  transition: r 120ms ease;
+}
+.groupe-point:hover .point-donnee {
+  r: 7;
+  fill: #1d4ed8;
+}
+.point-donnee.point-depasse {
+  fill: #dc2626;
+}
+
+/* Demande */
+.demande-halo {
+  fill: #eff6ff;
+  stroke: #2563eb;
+  stroke-width: 2.2;
+}
+.demande-halo.halo-danger {
+  fill: #fef2f2;
+  stroke: #dc2626;
+}
+.demande-centre {
+  fill: #2563eb;
+}
+.demande-centre.centre-danger {
+  fill: #dc2626;
+}
+
+/* Badge Demande */
+.badge-demande-bg {
+  fill: #ffffff;
+  stroke: #3b82f6;
+  stroke-width: 1.2;
+}
+.badge-demande-bg.badge-danger {
+  stroke: #ef4444;
+  fill: #fffdfd;
+}
+.badge-demande-titre {
+  fill: #0f172a;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.badge-demande-statut {
+  fill: #16a34a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.badge-demande-statut.statut-danger {
+  fill: #dc2626;
+}
+
+/* Infobulle survol */
+.infobulle-bg {
+  fill: #1e293b;
+}
+.infobulle-t1 {
+  fill: #f8fafc;
+  font-size: 10.5px;
+  font-weight: 500;
+}
+.infobulle-t2 {
+  fill: #4ade80;
+  font-size: 10px;
+  font-weight: 600;
+}
+.infobulle-t2.infobulle-danger {
+  fill: #f87171;
+}
