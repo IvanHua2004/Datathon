@@ -62,6 +62,45 @@ rdc-menu {
   filter: drop-shadow(0 5px 2px rgb(0 0 0 / 45%));
 }
 
+.menu-intro {
+  position: relative;
+  display: grid;
+  gap: 0.55rem;
+  max-width: 36ch;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: #feedd3;
+  font-size: clamp(1rem, 1.55vw, 1.7rem);
+  font-weight: 650;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+  text-shadow: 0 2px 6px #281523;
+}
+
+.menu-intro li:nth-child(2) { --intro-delay: 3.8s; --intro-animation: menu-intro-debat; }
+.menu-intro li:nth-child(3) { --intro-delay: 8.3s; }
+.menu-intro li:nth-child(4) { --intro-delay: 11.9s; --intro-animation: menu-intro-profil; }
+
+@media (min-width: 72rem) and (min-height: 44rem) {
+  .menu-intro {
+    position: absolute;
+    inset: 0;
+    display: block;
+    max-width: none;
+    pointer-events: none;
+  }
+
+  .menu-intro li { position: absolute; }
+  .menu-intro li:nth-child(1) { top: 15%; left: 9%; max-width: 17vw; --intro-tilt: -9deg; }
+  .menu-intro li:nth-child(2) { top: 26%; right: 7%; max-width: 18vw; --intro-tilt: 7deg; }
+  .menu-intro li:nth-child(3) { top: 65%; left: 13%; max-width: 15vw; --intro-tilt: -4deg; }
+  .menu-intro li:nth-child(4) { right: 9%; bottom: 12%; max-width: min(36vw, 42ch); --intro-tilt: -7deg; }
+}
+
+.menu-intro li { rotate: var(--intro-tilt, 0deg); }
+
 .logo img {
   position: absolute;
   height: auto;
@@ -118,6 +157,12 @@ rdc-menu {
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .menu-intro li {
+    /* Every phrase shares the same cycle so the stagger repeats in order. */
+    animation: var(--intro-animation, menu-intro-apparition) 19.5s ease-in-out
+      var(--intro-delay, 200ms) infinite backwards;
+  }
+
   .menu-accents span {
     animation: accent-flash 8s ease-out infinite;
   }
@@ -136,6 +181,24 @@ rdc-menu {
     display: block;
     animation: judge-crossing 9s linear infinite;
   }
+}
+
+@keyframes menu-intro-apparition {
+  0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
+  2.2%, 16% { opacity: 1; transform: none; }
+  18.46%, 100% { opacity: 0; transform: translateY(-0.35rem); }
+}
+
+@keyframes menu-intro-debat {
+  0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
+  2.8%, 20% { opacity: 1; transform: none; }
+  23.07%, 100% { opacity: 0; transform: translateY(-0.35rem); }
+}
+
+@keyframes menu-intro-profil {
+  0% { opacity: 0; transform: translate(-0.45rem, 0.8rem) rotate(-4deg) scale(0.96); }
+  4.3%, 31.2% { opacity: 1; transform: none; }
+  35.89%, 100% { opacity: 0; transform: translateY(-0.35rem); }
 }
 
 @keyframes accent-flash {
